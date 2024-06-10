@@ -22,6 +22,7 @@
 #include "Tom.h"
 #include "Clap.h"
 #include "DigiClap.h"
+#include "Clave8.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -47,6 +48,7 @@ Oh oh;
 Cy cy;
 Cow8 cb;
 FmDrum fm1, fm2;
+Clave8 cl;
 
 // Shared sound sources
 HhSource68 source68;
@@ -313,6 +315,7 @@ int main(void)
     cb.Init("CB", samplerate, 0.001, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
     fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
+    cl.Init("CL", samplerate, 2000, 0.375);
 
     drums[0] = &bd;
     drums[1] = &rs;
@@ -328,7 +331,8 @@ int main(void)
     drums[11] = &fm1;
     drums[12] = &fm2;
     drums[13] = &cb;
-    drumCount = 14;
+    drums[14] = &cl;
+    drumCount = 15;
     currentDrum = 0;
 
     for (u8 i = 0; i < KNOB_COUNT; i++) {
