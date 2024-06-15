@@ -16,7 +16,7 @@ void Tom::Init(std::string slot, float sample_rate, float frequency, ClickSource
 
     osc.Init(sample_rate);
     SetParam(PARAM_FREQUENCY, frequency);
-    osc.SetWaveform(Oscillator::WAVE_POLYBLEP_TRI);
+    osc.SetWaveform(Oscillator::WAVE_TRI);
 
     ampEnv.Init(sample_rate);
     ampEnv.SetMax(1);

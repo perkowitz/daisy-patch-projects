@@ -18,7 +18,9 @@ Tom.cpp \
 ClickSource.cpp \
 Clap.cpp \
 DigiClap.cpp \
-Clave8.cpp
+Clave8.cpp \
+MultiTomSource.cpp \
+MultiTom.cpp
 
 
 OPT = -Os

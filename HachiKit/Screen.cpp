@@ -10,6 +10,8 @@ const std::string Screen::menuItems[] = {   "BD", "RS", "SD", "CP",
                                     "HC", "CY", "CB", "CL" };
 #define MENU_SIZE 16
 
+const u8 screenSweepRate = 6;
+
 void Screen::DrawRect(uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fast8_t y2, bool on, bool fill) {
     if (!screenOn) { return; }
 
@@ -93,7 +95,7 @@ void Screen::Screensave() {
     if (screenOn) { return; }
 
     // horizontal wipe
-    u8 x = (screenCounter / 8) % (WIDTH + 1);
+    u8 x = (screenCounter / screenSweepRate) % (WIDTH + 1);
     display->DrawLine(x, 0, x, HEIGHT, false);
     if (x < WIDTH - 1) {
         display->DrawLine(x + 1, 0, x + 1, HEIGHT, true);
@@ -105,8 +107,8 @@ void Screen::ScreensaveEvent(u8 drum) {
     if (screenOn) { return; }
 
     // show notes with horizontal wipe
-    u8 x = (screenCounter / 8) % (WIDTH + 1);
-    if (x > 6 && x < WIDTH - 2) {
+    u8 x = (screenCounter / screenSweepRate) % (WIDTH + 1);
+    if (x > 5 && x < WIDTH + 1) {
         display->DrawCircle(x - 4, (15-drum) * 4 + 1, 1, true);
     }
 }

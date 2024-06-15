@@ -39,7 +39,7 @@ float Bd8::Process() {
     float psig = pitchEnv.Process();
     osc.SetFreq(parameters[PARAM_FREQUENCY].GetScaledValue() + parameters[PARAM_MOD_AMT].GetScaledValue() * psig);
     // osc.SetFreq(parameters[PARAM_FREQUENCY].GetScaledValue());
-    return 2 * velocity * osc.Process() * ampEnv.Process();
+    return 6 * velocity * osc.Process() * ampEnv.Process();
 }
 
 void Bd8::Trigger(float velocity) {

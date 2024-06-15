@@ -23,6 +23,8 @@
 #include "Clap.h"
 #include "DigiClap.h"
 #include "Clave8.h"
+#include "MultiTomSource.h"
+#include "MultiTom.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -43,8 +45,10 @@ Sd8 sd;
 Clap cp;
 DigiClap sd2;
 Tom lt, mt, ht;
+// MultiTom lt, mt, ht;
 Ch ch;
 Oh oh;
+SdNoise ma;
 Cy cy;
 Cow8 cb;
 FmDrum fm1, fm2;
@@ -53,6 +57,7 @@ Clave8 cl;
 // Shared sound sources
 HhSource68 source68;
 ClickSource clickSource;
+// MultiTomSource multiTomSource;
 
 uint8_t currentDrum = 0;
 uint8_t currentKnobRow = 0;
@@ -207,6 +212,7 @@ void AudioCallback(AudioHandle::InputBuffer  in,
         // Process shared sound sources
         source68.Process();
         clickSource.Process();
+        // multiTomSource.Process();
 
         float sig = 0.0f;
         float limited = 0.0f;
@@ -298,19 +304,25 @@ int main(void)
     // Shared sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
     clickSource.Init("", samplerate, 1500, 191, 116);
+    // multiTomSource.Init("", samplerate, 500, &clickSource);
 
-    bd.Init("BD", samplerate);
+    bd.Init("BD", samplerate, 78, 0.001, 4, 0.001, 0.5, 20);
     rs.Init("RS", samplerate);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
-
     sd2.Init("S2", samplerate, 0.012, 0.8, 3000);
+
     lt.Init("LT", samplerate, 80, &clickSource);
     mt.Init("MT", samplerate, 91, &clickSource);
     ht.Init("HT", samplerate, 106, &clickSource);
+    // lt.Init("LT", samplerate, 80, 0.8, &multiTomSource, 0);
+    // mt.Init("MT", samplerate, 91, 0.8, &multiTomSource, 1);
+    // ht.Init("HT", samplerate, 106, 0.8, &multiTomSource, 2);
+
 
     ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
     oh.Init("OH", samplerate, 0.001, 0.13, 0.05, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
+    ma.Init("MA", samplerate);
     cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
     cb.Init("CB", samplerate, 0.001, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
@@ -325,14 +337,15 @@ int main(void)
     drums[5] = &lt;
     drums[6] = &ch;
     drums[7] = &mt;
-    drums[8] = &oh;
+    drums[8] = &ma;
     drums[9] = &ht;
-    drums[10] = &cy;
+    drums[10] = &oh;
     drums[11] = &fm1;
     drums[12] = &fm2;
-    drums[13] = &cb;
+    drums[13] = &cy;
     drums[14] = &cl;
-    drumCount = 15;
+    drums[15] = &cb;
+    drumCount = 16;
     currentDrum = 0;
 
     for (u8 i = 0; i < KNOB_COUNT; i++) {
@@ -367,7 +380,7 @@ int main(void)
         screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4);
 
         usageCounter++;
-        if (usageCounter > 10000) {    // 10000=about 90 seconds
+        if (usageCounter > 1000) {    // 10000=about 90 seconds
             if (screen.IsScreenOn()) {
                 screen.SetScreenOn(false);
             }
