@@ -30,12 +30,13 @@ void Cow8::Init(std::string slot, float sample_rate, float attack, float decay, 
     hpf.Init(sample_rate);
     hpf.SetRes(0.2);
     hpf.SetDrive(.002);
-    hpf.SetFreq(hpfCutoff);
+    SetParam(PARAM_HPF, hpfCutoff);
 
     lpf.Init(sample_rate);
     lpf.SetRes(0.2);
     lpf.SetDrive(.002);
     lpf.SetFreq(lpfCutoff);
+    SetParam(PARAM_LPF, lpfCutoff);
 
     this->source = source;
 
@@ -91,11 +92,11 @@ float Cow8::UpdateParam(uint8_t param, float raw) {
     if (param < Cow8::PARAM_COUNT) {
         switch (param) {
             case PARAM_ATTACK: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
+                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.001, 5, Parameter::EXPONENTIAL));
                 env.SetTime(ADENV_SEG_ATTACK, scaled);
                 break;
             case PARAM_DECAY: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 15, Parameter::EXPONENTIAL));
+                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.001, 15, Parameter::EXPONENTIAL));
                 env.SetTime(ADENV_SEG_DECAY, scaled);
                 break;
             case PARAM_HPF:
