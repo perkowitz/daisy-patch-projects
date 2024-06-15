@@ -83,15 +83,15 @@ float Oh::UpdateParam(uint8_t param, float raw) {
     if (param < Oh::PARAM_COUNT) {
         switch (param) {
             case PARAM_ATTACK: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
+                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.001, 5, Parameter::EXPONENTIAL));
                 env.SetAttack(scaled);
                 break;
             case PARAM_HOLD: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
+                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.001, 5, Parameter::EXPONENTIAL));
                 env.SetHold(scaled);
                 break;
             case PARAM_DECAY: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
+                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.001, 5, Parameter::EXPONENTIAL));
                 env.SetDecay(scaled);
                 break;
             case PARAM_MORPH:

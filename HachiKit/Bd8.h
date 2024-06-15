@@ -15,7 +15,7 @@ class Bd8: public IDrum {
 
     public:
         // Number of settable parameters for this model.
-        static const uint8_t PARAM_COUNT = 6;
+        static const uint8_t PARAM_COUNT = 7;
         // This is the order params will appear in the UI.
         static const uint8_t PARAM_FREQUENCY = 0;
         static const uint8_t PARAM_MOD_AMT = 1;
@@ -23,6 +23,7 @@ class Bd8: public IDrum {
         static const uint8_t PARAM_PITCH_DECAY = 3;
         static const uint8_t PARAM_AMP_ATTACK = 4;
         static const uint8_t PARAM_PITCH_ATTACK = 5;
+        static const uint8_t PARAM_AMP_CURVE = 6;
         // TODO: add aCurve and pCurve
 
         void Init(std::string slot, float sample_rate);
@@ -41,13 +42,15 @@ class Bd8: public IDrum {
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
     private:
-        std::string paramNames[PARAM_COUNT] = { "Freq", "Mod", "aDcy", "pDcy", "aAtk", "pAtk" };
+        std::string paramNames[PARAM_COUNT] = { "Freq", "Mod", "aDcy", "pDcy", "aAtk", "pAtk", "aCrv" };
         std::string slot;
         Param parameters[PARAM_COUNT];
         Oscillator osc;
         AdEnv ampEnv;
         AdEnv pitchEnv;
         float velocity;
+
+        float SetParam(uint8_t param, float value, bool isRaw);
 
 };
 

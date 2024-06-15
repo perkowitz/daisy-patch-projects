@@ -21,7 +21,6 @@ void Bd8::Init(std::string slot, float sample_rate, float frequency, float ampAt
     ampEnv.Init(sample_rate);
     ampEnv.SetMax(1);
     ampEnv.SetMin(0);
-    ampEnv.SetCurve(-100);
     SetParam(PARAM_AMP_ATTACK, ampAttack);
     SetParam(PARAM_AMP_DECAY, ampDecay);
 
@@ -29,10 +28,10 @@ void Bd8::Init(std::string slot, float sample_rate, float frequency, float ampAt
     pitchEnv.Init(sample_rate);
     pitchEnv.SetMax(1);
     pitchEnv.SetMin(0);
-    pitchEnv.SetCurve(-100);
     SetParam(PARAM_PITCH_ATTACK, pitchAttack);
     SetParam(PARAM_PITCH_DECAY, pitchDecay);
     SetParam(PARAM_MOD_AMT, modAmount);
+    SetParam(PARAM_AMP_CURVE, -30);
 }
 
 float Bd8::Process() {
@@ -66,41 +65,15 @@ std::string Bd8::GetParamString(uint8_t param) {
             case PARAM_PITCH_ATTACK: 
             case PARAM_PITCH_DECAY: 
                 return std::to_string((int)(GetParam(param) * 1000));// + "ms";
+            case PARAM_AMP_CURVE: 
+                return std::to_string((int)(GetParam(param)));
         }
     }
    return "";
  }
 
 float Bd8::UpdateParam(uint8_t param, float raw) {
-    float scaled = raw;
-    if (param < PARAM_COUNT) {
-        switch (param) {
-            case PARAM_FREQUENCY: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 20, 5000, Parameter::EXPONENTIAL));
-                break;
-            case PARAM_AMP_ATTACK: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
-                ampEnv.SetTime(ADENV_SEG_ATTACK, scaled);
-                break;
-            case PARAM_AMP_DECAY: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
-                ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
-                break;
-            case PARAM_PITCH_ATTACK: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
-                pitchEnv.SetTime(ADENV_SEG_ATTACK, scaled);
-                break;
-            case PARAM_PITCH_DECAY: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
-                pitchEnv.SetTime(ADENV_SEG_DECAY, scaled);
-                break;
-            case PARAM_MOD_AMT: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0, 2000, Parameter::EXPONENTIAL));
-                break;
-        }
-    }
-
-    return scaled;    
+    return SetParam(param, raw, true); 
 }
 
 void Bd8::ResetParams() {
@@ -110,32 +83,71 @@ void Bd8::ResetParams() {
 }
 
 void Bd8::SetParam(uint8_t param, float scaled) {
+    SetParam(param, scaled, false);
+}
+
+float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
+    float scaled = value;
     if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
-                parameters[param].SetScaledValue(scaled);
+                if (isRaw) {
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 20, 5000, Parameter::EXPONENTIAL));
+                } else {
+                    parameters[param].SetScaledValue(value);
+                }
                 break;
             case PARAM_AMP_ATTACK: 
-                parameters[param].SetScaledValue(scaled);
+                if (isRaw) {
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 5, Parameter::EXPONENTIAL));
+                } else {
+                    parameters[param].SetScaledValue(value);
+                }
                 ampEnv.SetTime(ADENV_SEG_ATTACK, scaled);
                 break;
             case PARAM_AMP_DECAY: 
-                parameters[param].SetScaledValue(scaled);
+                if (isRaw) {
+                  scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 10, Parameter::EXPONENTIAL));
+                } else {
+                    parameters[param].SetScaledValue(value);
+                }
                 ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
                 break;
             case PARAM_PITCH_ATTACK: 
-                parameters[param].SetScaledValue(scaled);
+                if (isRaw) {
+                 scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 5, Parameter::EXPONENTIAL));
+                } else {
+                    parameters[param].SetScaledValue(value);
+                }
                 pitchEnv.SetTime(ADENV_SEG_ATTACK, scaled);
                 break;
             case PARAM_PITCH_DECAY: 
-                parameters[param].SetScaledValue(scaled);
+                if (isRaw) {
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 10, Parameter::EXPONENTIAL));
+                } else {
+                    parameters[param].SetScaledValue(value);
+                }
                 pitchEnv.SetTime(ADENV_SEG_DECAY, scaled);
                 break;
             case PARAM_MOD_AMT: 
-                parameters[param].SetScaledValue(scaled);
+                if (isRaw) {
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0, 2000, Parameter::EXPONENTIAL));
+                } else {
+                    parameters[param].SetScaledValue(scaled);
+                }
+                break;
+            case PARAM_AMP_CURVE:
+                if (isRaw) {
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, -100, 100, Parameter::LINEAR));
+                } else {
+                    parameters[param].SetScaledValue(scaled);
+                }
+                ampEnv.SetCurve(scaled);
+                pitchEnv.SetCurve(scaled);
                 break;
         }
     }
 
+    return 0.0f;
 }
 

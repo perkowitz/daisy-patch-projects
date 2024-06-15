@@ -7,7 +7,7 @@ const FontDef Screen::FONT = Font_6x8;
 const std::string Screen::menuItems[] = {   "BD", "RS", "SD", "CP", 
                                     "S2", "LT", "CH", "MT",
                                     "MA", "HT", "OH", "LC", 
-                                    "HC", "CY", "CB", "CL" };
+                                    "HC", "CY", "CL", "CB" };
 #define MENU_SIZE 16
 
 const u8 screenSweepRate = 6;
