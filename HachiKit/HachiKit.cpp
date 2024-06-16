@@ -328,7 +328,7 @@ int main(void)
     oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
     ma.Init("MA", samplerate);
     cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
-    cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
+    cb.Init("XX", samplerate, 0.005, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
     fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
     cl.Init("CL", samplerate, 2000, 0.375);
@@ -374,6 +374,10 @@ int main(void)
     screen.DrawMenu(currentDrum);
     DisplayParamMenu();
     hw.display.Update();
+
+    for (u8 drum = 0; drum < drumCount; drum++) {
+        screen.menuItems[drum] = drums[drum]->Slot();
+    }
 
 
     // Start stuff.
