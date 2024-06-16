@@ -6,7 +6,7 @@
 #include "util/CpuLoadMeter.h"
 #include <string>
 #include "Utility.h"
-#include "BitArray.h"
+#include "audio/Mixer16.h"
 #include "Screen.h"
 #include "IDrum.h"
 #include "Bd8.h"
@@ -36,6 +36,8 @@ using namespace daisysp;
 DaisyPatch hw;
 Screen screen(&hw.display);
 CpuLoadMeter meter;
+
+Mixer16 mixer;
 
 IDrum *drums[16];
 uint8_t drumCount = 1;
@@ -214,23 +216,23 @@ void AudioCallback(AudioHandle::InputBuffer  in,
         clickSource.Process();
         // multiTomSource.Process();
 
-        float sig = 0.0f;
-        float limited = 0.0f;
         cycle = (cycle + 1) % 8;
         if (cycle < 9) {
             if (CPU_SINGLE) {
-                sig = drums[currentDrum]->Process();
-                limited = sig;
+                mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
             } else {
+                mixer.ResetSignals();
                 for (uint8_t i = 0; i < drumCount; i++) {
-                    sig += drums[i]->Process();
+                    mixer.UpdateSignal(i, drums[i]->Process());
                 }
-                limited = sig / drumCount;
             }
         }
 
-        out[0][i] = out[1][i] = limited;
-        out[2][i] = out[3][i] = sig;
+        mixer.Process();
+        out[0][i] = mixer.LeftSignal();
+        out[1][i] = mixer.RightSignal();
+        out[2][i] = mixer.Send1Signal();
+        out[3][i] = mixer.Send2Signal();
     }
 
     meter.OnBlockEnd();
@@ -301,6 +303,8 @@ int main(void)
 
     meter.Init(samplerate, 128, 1.0f);
 
+    mixer.Reset();
+
     // Shared sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
     clickSource.Init("", samplerate, 1500, 191, 116);
@@ -347,6 +351,17 @@ int main(void)
     drums[15] = &cb;
     drumCount = 16;
     currentDrum = 0;
+
+    // send the toms out the send1
+    mixer.SetSend1(5, 1);
+    mixer.SetSend1(7, 1);
+    mixer.SetSend1(9, 1);
+
+    // send percussion out send2
+    mixer.SetSend2(11, 1);
+    mixer.SetSend2(12, 1);
+    mixer.SetSend2(14, 1);
+    mixer.SetSend2(15, 1);
 
     for (u8 i = 0; i < KNOB_COUNT; i++) {
         lastKnobValue[i] = 0.0f;
