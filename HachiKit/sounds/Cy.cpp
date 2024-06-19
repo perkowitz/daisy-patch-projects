@@ -46,16 +46,28 @@ float Cy::Process() {
         return 0.0f;
     }
 
-    float sig = source->Signal() * env.Process();
-    hpf.Process(sig);
-    lpf.Process(hpf.High());
-    return velocity * lpf.Low();;
+    float sig = 0.0f;
+    if (bufferValid) {
+        if (bufferIndex < BUFFER_SIZE) {
+            sig = buffer[bufferIndex];
+        }
+    } else {
+        sig = source->Signal() * env.Process();
+        hpf.Process(sig);
+        lpf.Process(hpf.High());
+        sig = lpf.Low();
+        buffer[bufferIndex] = sig;
+    }
+    bufferIndex++;
+
+    return velocity * sig;
 }
 
 void Cy::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
         env.Trigger();
+        bufferIndex = 0;
     }
 }
 

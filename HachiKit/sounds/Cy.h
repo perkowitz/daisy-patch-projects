@@ -29,6 +29,7 @@ class Cy: public IDrum {
         static const float HPF_MIN;
         static const float LPF_MAX;
         static const float LPF_MIN;
+        static const u16 BUFFER_SIZE = 6000;
 
         void Init(std::string slot, float sample_rate);
         void Init(std::string slot, float sample_rate, float attack, float decay, HhSource68 *source, float hpfCutoff, float lpfCutoff);
@@ -54,6 +55,10 @@ class Cy: public IDrum {
         HhSource68 *source = NULL;
         AdEnv env;
         Svf hpf, lpf;
+
+        float buffer[BUFFER_SIZE];
+        bool bufferValid = false;
+        u16 bufferIndex = 0;
 
 };
 

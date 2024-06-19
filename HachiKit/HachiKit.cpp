@@ -78,9 +78,6 @@ u32 usageCounter = 0;
 void DisplayParamMenu() {
 
     screen.DrawRect(0, 9, 127, 36, false, true);
-    // hw.display.DrawLine(0,12,127,12, true);
-    // hw.display.DrawLine(0,33,127,33, true);
-    // hw.display.DrawLine(0,44,127,44, true);
 
     uint8_t param;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
@@ -97,10 +94,6 @@ void DisplayParamMenu() {
             // hw.display.DrawLine(0, rect2.GetY() + 11, 127, rect2.GetY() + 11, true);
         }
     }
-
-    // screen.DrawLine(0,11,127,11, true);
-    // screen.DrawLine(0,36,127,36, true);
-
 }
 
 // Display the current values and parameter names of model params for 4 knobs.
@@ -108,7 +101,6 @@ void DisplayParamMenu() {
 void DisplayKnobValues() {
 
     screen.DrawRect(0, 0, 127, 11, false, true);
-    // screen.DrawLine(0,10,127,10, true);
 
     uint8_t param;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
@@ -118,18 +110,6 @@ void DisplayKnobValues() {
         std::string sc = drums[currentDrum]->GetParamString(param);
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
         // screen.DrawButton(rect, sc, false, true, false);
-
-    //     for (u8 row = 0; row <= drums[currentDrum]->PARAM_COUNT / 4; row++) {
-    //         Rectangle rect2(knob * 32, (row + 1) * 11, 32, 11);
-    //         param = row * KNOB_COUNT + knob;
-    //         sc = drums[currentDrum]->GetParamName(param);
-    //         bool selected = row == currentKnobRow;
-    //         // hw.display.WriteStringAligned(sc.c_str(), Font_6x8, rect2, Alignment::centered, true);
-    //         screen.DrawButton(rect2, sc, selected, selected, !selected);
-    //         // hw.display.SetCursor(rect2.GetX(), rect2.GetY());
-    //         // hw.display.WriteString(sc.c_str(), Font_6x8, true);
-    //         hw.display.DrawLine(0, rect2.GetY() + 11, 127, rect2.GetY() + 11, true);
-    //     }
     }
 }
 
@@ -151,9 +131,9 @@ void ProcessEncoder() {
     if (newDrum != currentDrum) {
         drums[newDrum]->ResetParams();
         currentDrum = newDrum;
-        redraw = true;
         usageCounter = 0;
         screen.SetScreenOn(true);
+        redraw = true;
         hw.display.Fill(false);
     }
 
@@ -375,10 +355,10 @@ int main(void)
     DisplayParamMenu();
     hw.display.Update();
 
+    // fill the menu
     for (u8 drum = 0; drum < drumCount; drum++) {
         screen.menuItems[drum] = drums[drum]->Slot();
     }
-
 
     // Start stuff.
     hw.SetAudioBlockSize(128);
@@ -396,7 +376,7 @@ int main(void)
         DisplayKnobValues();
 
         float avgCpu = meter.GetAvgCpuLoad();
-        screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4);
+        screen.OledMessage(std::to_string((int)(avgCpu * 100)) + "%", 4, 15);
 
         usageCounter++;
         if (usageCounter > 1000) {    // 10000=about 90 seconds
