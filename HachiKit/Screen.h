@@ -12,10 +12,11 @@ using namespace daisysp;
 class Screen {
 
     public:
-        static const uint8_t HEIGHT = 63;
-        static const uint8_t WIDTH = 127;
+        static const u8 HEIGHT = 63;
+        static const u8 WIDTH = 127;
         static const FontDef FONT;
-        static const std::string menuItems[];
+        static const u8 MENU_SIZE = 16;
+        static std::string menuItems[MENU_SIZE];
 
         Screen(OledDisplay<SSD130x4WireSpi128x64Driver> *display) {
             this->display = display;
@@ -54,6 +55,7 @@ class Screen {
         OledDisplay<SSD130x4WireSpi128x64Driver> *display;
         bool screenOn = true;
         u16 screenCounter = 0;
+        const static u8 screenSweepRate = 6;
 
 };
 

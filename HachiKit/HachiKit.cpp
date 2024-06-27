@@ -6,25 +6,25 @@
 #include "util/CpuLoadMeter.h"
 #include <string>
 #include "Utility.h"
-#include "BitArray.h"
+#include "audio/Mixer16.h"
 #include "Screen.h"
 #include "IDrum.h"
-#include "Bd8.h"
-#include "Sd8.h"
-#include "SdNoise.h"
-#include "FmDrum.h"
-#include "HhSource68.h"
-#include "ClickSource.h"
-#include "Ch.h"
-#include "Oh.h"
-#include "Cy.h"
-#include "Cow8.h"
-#include "Tom.h"
-#include "Clap.h"
-#include "DigiClap.h"
-#include "Clave8.h"
-#include "MultiTomSource.h"
-#include "MultiTom.h"
+#include "sounds/Bd8.h"
+#include "sounds/Ch.h"
+#include "sounds/Clap.h"
+#include "sounds/Clave8.h"
+#include "sounds/ClickSource.h"
+#include "sounds/Cow8.h"
+#include "sounds/Cy.h"
+#include "sounds/DigiClap.h"
+#include "sounds/FmDrum.h"
+#include "sounds/HhSource68.h"
+#include "sounds/MultiTomSource.h"
+#include "sounds/MultiTom.h"
+#include "sounds/Oh.h"
+#include "sounds/Sd8.h"
+#include "sounds/SdNoise.h"
+#include "sounds/Tom.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -36,6 +36,8 @@ using namespace daisysp;
 DaisyPatch hw;
 Screen screen(&hw.display);
 CpuLoadMeter meter;
+
+Mixer16 mixer;
 
 IDrum *drums[16];
 uint8_t drumCount = 1;
@@ -76,9 +78,6 @@ u32 usageCounter = 0;
 void DisplayParamMenu() {
 
     screen.DrawRect(0, 9, 127, 36, false, true);
-    // hw.display.DrawLine(0,12,127,12, true);
-    // hw.display.DrawLine(0,33,127,33, true);
-    // hw.display.DrawLine(0,44,127,44, true);
 
     uint8_t param;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
@@ -95,10 +94,6 @@ void DisplayParamMenu() {
             // hw.display.DrawLine(0, rect2.GetY() + 11, 127, rect2.GetY() + 11, true);
         }
     }
-
-    // screen.DrawLine(0,11,127,11, true);
-    // screen.DrawLine(0,36,127,36, true);
-
 }
 
 // Display the current values and parameter names of model params for 4 knobs.
@@ -106,7 +101,6 @@ void DisplayParamMenu() {
 void DisplayKnobValues() {
 
     screen.DrawRect(0, 0, 127, 11, false, true);
-    // screen.DrawLine(0,10,127,10, true);
 
     uint8_t param;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
@@ -116,18 +110,6 @@ void DisplayKnobValues() {
         std::string sc = drums[currentDrum]->GetParamString(param);
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
         // screen.DrawButton(rect, sc, false, true, false);
-
-    //     for (u8 row = 0; row <= drums[currentDrum]->PARAM_COUNT / 4; row++) {
-    //         Rectangle rect2(knob * 32, (row + 1) * 11, 32, 11);
-    //         param = row * KNOB_COUNT + knob;
-    //         sc = drums[currentDrum]->GetParamName(param);
-    //         bool selected = row == currentKnobRow;
-    //         // hw.display.WriteStringAligned(sc.c_str(), Font_6x8, rect2, Alignment::centered, true);
-    //         screen.DrawButton(rect2, sc, selected, selected, !selected);
-    //         // hw.display.SetCursor(rect2.GetX(), rect2.GetY());
-    //         // hw.display.WriteString(sc.c_str(), Font_6x8, true);
-    //         hw.display.DrawLine(0, rect2.GetY() + 11, 127, rect2.GetY() + 11, true);
-    //     }
     }
 }
 
@@ -149,9 +131,9 @@ void ProcessEncoder() {
     if (newDrum != currentDrum) {
         drums[newDrum]->ResetParams();
         currentDrum = newDrum;
-        redraw = true;
         usageCounter = 0;
         screen.SetScreenOn(true);
+        redraw = true;
         hw.display.Fill(false);
     }
 
@@ -214,23 +196,23 @@ void AudioCallback(AudioHandle::InputBuffer  in,
         clickSource.Process();
         // multiTomSource.Process();
 
-        float sig = 0.0f;
-        float limited = 0.0f;
         cycle = (cycle + 1) % 8;
         if (cycle < 9) {
             if (CPU_SINGLE) {
-                sig = drums[currentDrum]->Process();
-                limited = sig;
+                mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
             } else {
+                mixer.ResetSignals();
                 for (uint8_t i = 0; i < drumCount; i++) {
-                    sig += drums[i]->Process();
+                    mixer.UpdateSignal(i, drums[i]->Process());
                 }
-                limited = sig / drumCount;
             }
         }
 
-        out[0][i] = out[1][i] = limited;
-        out[2][i] = out[3][i] = sig;
+        mixer.Process();
+        out[0][i] = mixer.LeftSignal();
+        out[1][i] = mixer.RightSignal();
+        out[2][i] = mixer.Send1Signal();
+        out[3][i] = mixer.Send2Signal();
     }
 
     meter.OnBlockEnd();
@@ -301,6 +283,8 @@ int main(void)
 
     meter.Init(samplerate, 128, 1.0f);
 
+    mixer.Reset();
+
     // Shared sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
     clickSource.Init("", samplerate, 1500, 191, 116);
@@ -324,7 +308,7 @@ int main(void)
     oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
     ma.Init("MA", samplerate);
     cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
-    cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
+    cb.Init("XX", samplerate, 0.005, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
     fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
     cl.Init("CL", samplerate, 2000, 0.375);
@@ -348,6 +332,17 @@ int main(void)
     drumCount = 16;
     currentDrum = 0;
 
+    // send the toms out the send1
+    mixer.SetSend1(5, 1);
+    mixer.SetSend1(7, 1);
+    mixer.SetSend1(9, 1);
+
+    // send percussion out send2
+    mixer.SetSend2(11, 1);
+    mixer.SetSend2(12, 1);
+    mixer.SetSend2(14, 1);
+    mixer.SetSend2(15, 1);
+
     for (u8 i = 0; i < KNOB_COUNT; i++) {
         lastKnobValue[i] = 0.0f;
     }
@@ -360,6 +355,10 @@ int main(void)
     DisplayParamMenu();
     hw.display.Update();
 
+    // fill the menu
+    for (u8 drum = 0; drum < drumCount; drum++) {
+        screen.menuItems[drum] = drums[drum]->Slot();
+    }
 
     // Start stuff.
     hw.SetAudioBlockSize(128);
@@ -377,7 +376,7 @@ int main(void)
         DisplayKnobValues();
 
         float avgCpu = meter.GetAvgCpuLoad();
-        screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4);
+        screen.OledMessage(std::to_string((int)(avgCpu * 100)) + "%", 4, 15);
 
         usageCounter++;
         if (usageCounter > 1000) {    // 10000=about 90 seconds
