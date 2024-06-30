@@ -204,7 +204,7 @@ void AudioCallback(AudioHandle::InputBuffer  in,
             } else {
                 mixer.ResetSignals();
                 for (uint8_t i = 0; i < drumCount; i++) {
-                    mixer.UpdateSignal(i, Processing::GateProcess(Processing::mainGate, drums[i]->Process()));
+                    mixer.UpdateSignal(i, drums[i]->Process());
                 }
             }
         }
@@ -343,8 +343,6 @@ int main(void)
     mixer.SetSend2(12, 1);
     mixer.SetSend2(14, 1);
     mixer.SetSend2(15, 1);
-
-    Processing::mainGate->threshold = 0.1;
 
     for (u8 i = 0; i < KNOB_COUNT; i++) {
         lastKnobValue[i] = 0.0f;

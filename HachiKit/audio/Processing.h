@@ -19,8 +19,8 @@ float GateProcess(Gate *gate, float signal);
 void Gate_Process(Gate *gate, float &signal);
 // void Gate_Process(Gate *gate, float &left, float &right);
 
-Gate _MAIN_GATE;
-Gate *mainGate = &_MAIN_GATE;
+// Gate _MAIN_GATE;
+// Gate *mainGate = &_MAIN_GATE;
 
 
 

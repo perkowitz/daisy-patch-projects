@@ -2,9 +2,10 @@
 
 using namespace daisy;
 using namespace daisysp;
-using namespace Processing;
 
 /***** Gate ***************/
+
+namespace Processing {
 
 float GateProcess(Gate *gate, float signal) {
     if (signal > 0) {
@@ -56,3 +57,5 @@ float HardLimiterProcess(Gate *gate, float signal) {
 
 void HardLimiter_Process(Gate *gate, float &signal) {
 }
+
+} // Processing namespace
