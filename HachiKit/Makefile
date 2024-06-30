@@ -21,7 +21,8 @@ sounds/DigiClap.cpp \
 sounds/Clave8.cpp \
 sounds/MultiTomSource.cpp \
 sounds/MultiTom.cpp \
-audio/Mixer16.cpp
+audio/Mixer16.cpp \
+audio/Processing.cpp
 
 
 OPT = -Os
