@@ -19,6 +19,7 @@ class Clap: public IDrum {
         // This is the order params will appear in the UI.
         static const uint8_t PARAM_SPREAD = 0;
         static const uint8_t PARAM_DECAY = 1;
+        u8 ParamCount() { return PARAM_COUNT; }
 
         static const uint8_t REPEATS = 3;
 

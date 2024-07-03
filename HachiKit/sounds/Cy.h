@@ -24,6 +24,7 @@ class Cy: public IDrum {
         // These are pass-thru params that belong to the sound source and aren't tracked in Ch
         static const uint8_t PARAM_HPF = 2;
         static const uint8_t PARAM_LPF = 3;
+        u8 ParamCount() { return PARAM_COUNT; }
 
         static const float HPF_MAX;
         static const float HPF_MIN;

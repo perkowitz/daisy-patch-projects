@@ -17,6 +17,7 @@ class HhSource68: public IDrum {
         static const uint8_t PARAM_MORPH = 0;
         static const uint8_t PARAM_HPF = 1;
         static const uint8_t PARAM_LPF = 2;
+        u8 ParamCount() { return PARAM_COUNT; }
 
         // how many square waves make up the sound source
         static const uint8_t OSC_COUNT = 6;

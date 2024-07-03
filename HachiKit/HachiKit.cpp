@@ -82,6 +82,11 @@ void DisplayParamMenu() {
 
     screen.DrawRect(0, 9, 127, 36, false, true);
 
+    u8 knobRow = currentKnobRow;
+    if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
+        knobRow = 0;
+    }
+
     uint8_t param;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         // for (u8 row = 0; row <= drums[currentDrum]->PARAM_COUNT / 4; row++) {
@@ -89,7 +94,7 @@ void DisplayParamMenu() {
             Rectangle rect2(knob * 32, (row + 1) * 12, 32, 12);
             param = row * KNOB_COUNT + knob;
             std::string sc = drums[currentDrum]->GetParamName(param);
-            bool selected = row == currentKnobRow;
+            bool selected = row == knobRow;
             // hw.display.WriteStringAligned(sc.c_str(), Font_6x8, rect2, Alignment::centered, true);
             screen.DrawButton(rect2, sc, selected, selected, !selected);
             // hw.display.SetCursor(rect2.GetX(), rect2.GetY());
@@ -107,9 +112,12 @@ void DisplayKnobValues() {
     screen.DrawRect(0, 0, 127, 11, false, true);
 
     uint8_t param;
+    u8 knobRow = currentKnobRow;
+    if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
+        knobRow = 0;
+    }
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
-        // top row: current param values from knobs
-        param = currentKnobRow * KNOB_COUNT + knob;
+        param = knobRow * KNOB_COUNT + knob;
         Rectangle rect(knob * 32, 0, 32, 8);
         std::string sc = drums[currentDrum]->GetParamString(param);
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
@@ -130,7 +138,7 @@ void DrawScreen(bool clearFirst) {
 void ProcessEncoder() {
 
     bool redraw = false;
-    
+
     int inc = hw.encoder.Increment();
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
     if (newMenuIndex != currentMenuIndex) {
@@ -397,7 +405,7 @@ int main(void)
         DisplayKnobValues();
 
         float avgCpu = meter.GetAvgCpuLoad();
-        screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 8);
+        screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
 
         usageCounter++;
         if (usageCounter > 1000) {    // 10000=about 90 seconds

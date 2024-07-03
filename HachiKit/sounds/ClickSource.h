@@ -21,6 +21,7 @@ class ClickSource: public IDrum {
         static const uint8_t PARAM_HPF = 0;
         static const uint8_t PARAM_LPF = 1;
         static const uint8_t PARAM_LPF_MOD = 2;
+        u8 ParamCount() { return PARAM_COUNT; }
 
         void Init(std::string slot, float sample_rate);
         void Init(std::string slot, float sample_rate, float hpfFreq, float lpfFreq, float mod);
