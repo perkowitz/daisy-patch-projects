@@ -61,6 +61,8 @@ HhSource68 source68;
 ClickSource clickSource;
 // MultiTomSource multiTomSource;
 
+u8 currentMenu = 0; 
+u8 currentMenuIndex = 0;
 uint8_t currentDrum = 0;
 uint8_t currentKnobRow = 0;
 u8 maxDrum = 1;
@@ -76,6 +78,7 @@ u32 usageCounter = 0;
 
 // Display the available parameter names.
 void DisplayParamMenu() {
+    if (currentMenu != 0) return;
 
     screen.DrawRect(0, 9, 127, 36, false, true);
 
@@ -99,6 +102,7 @@ void DisplayParamMenu() {
 // Display the current values and parameter names of model params for 4 knobs.
 // Knob number == param number, since model params are listed in UI order.
 void DisplayKnobValues() {
+    if (currentMenu != 0) return;
 
     screen.DrawRect(0, 0, 127, 11, false, true);
 
@@ -117,20 +121,29 @@ void DrawScreen(bool clearFirst) {
     if (clearFirst) {
         hw.display.Fill(false);
     }
+    screen.DrawMenu(currentMenuIndex);
     DisplayParamMenu();
     DisplayKnobValues();
-    screen.DrawMenu(currentDrum);
     hw.display.Update();        
 }
 
 void ProcessEncoder() {
 
     bool redraw = false;
+    
     int inc = hw.encoder.Increment();
-    int newDrum = Utility::LimitInt(currentDrum + inc, 0, drumCount-1);
-    if (newDrum != currentDrum) {
-        drums[newDrum]->ResetParams();
-        currentDrum = newDrum;
+    u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
+    if (newMenuIndex != currentMenuIndex) {
+        if (newMenuIndex < drumCount) {
+            currentMenu = 0;
+            u8 newDrum = newMenuIndex;
+            drums[newDrum]->ResetParams();
+            currentDrum = newDrum;
+        } else {
+            currentMenu = 1;
+        }
+
+        currentMenuIndex = newMenuIndex;
         usageCounter = 0;
         screen.SetScreenOn(true);
         redraw = true;
@@ -138,12 +151,14 @@ void ProcessEncoder() {
     }
 
     if (hw.encoder.RisingEdge()) {
-        currentKnobRow = (currentKnobRow + 1) % 2;
-        redraw = true;
-        drums[currentDrum]->ResetParams();
-        usageCounter = 0;
-        screen.SetScreenOn(true);
-        hw.display.Fill(false);
+        if (currentMenu == 0) {
+            currentKnobRow = (currentKnobRow + 1) % 2;
+            redraw = true;
+            drums[currentDrum]->ResetParams();
+            usageCounter = 0;
+            screen.SetScreenOn(true);
+            hw.display.Fill(false);
+        }
     }
 
     if (redraw) {
@@ -155,18 +170,20 @@ void ProcessEncoder() {
 // Process the current knob values and update model params accordingly.
 // Knob number == param number, since model params are listed in UI order.
 void ProcessKnobs() {
+    if (currentMenu != 0) return;
 
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         float sig = hw.controls[knob].Value();
-        uint8_t param = currentKnobRow * KNOB_COUNT + knob;
-        drums[currentDrum]->UpdateParam(param, sig);
-        if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
-            usageCounter = 0;
-            screen.SetScreenOn(true);
-            lastKnobValue[knob] = sig;
-            DrawScreen(true);
+        if (currentMenu ==  0) {
+            uint8_t param = currentKnobRow * KNOB_COUNT + knob;
+            drums[currentDrum]->UpdateParam(param, sig);
+            if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
+                usageCounter = 0;
+                screen.SetScreenOn(true);
+                lastKnobValue[knob] = sig;
+                DrawScreen(true);
+            }
         }
-
     }
 }
 
@@ -308,7 +325,7 @@ int main(void)
     oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
     ma.Init("MA", samplerate);
     cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
-    cb.Init("XX", samplerate, 0.005, 0.5, &source68, 1700, 2400);
+    cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
     fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
     cl.Init("CL", samplerate, 2000, 0.375);
@@ -331,6 +348,7 @@ int main(void)
     drums[15] = &cb;
     drumCount = 16;
     currentDrum = 0;
+    currentMenuIndex = 0;
 
     // send the toms out the send1
     mixer.SetSend1(5, 1);
@@ -351,13 +369,16 @@ int main(void)
     hw.display.Fill(false);
     // screen.OledMessage("Hachikit 0.1", 5);
     // Utility::DrawDrums(&hw.display, 5);
-    screen.DrawMenu(currentDrum);
+    screen.DrawMenu(currentMenuIndex);
     DisplayParamMenu();
     hw.display.Update();
 
     // fill the menu
     for (u8 drum = 0; drum < drumCount; drum++) {
         screen.menuItems[drum] = drums[drum]->Slot();
+    }
+    for (u8 i = drumCount; i < Screen::MENU_SIZE; i++) {
+        screen.menuItems[i] = "mx";
     }
 
     // Start stuff.
@@ -368,15 +389,15 @@ int main(void)
     for(;;)
     {
         hw.midi.Listen();
-        // Handle MIDI Events
         while(hw.midi.HasEvents())
         {
             HandleMidiMessage(hw.midi.PopEvent());
         }
+
         DisplayKnobValues();
 
         float avgCpu = meter.GetAvgCpuLoad();
-        screen.OledMessage(std::to_string((int)(avgCpu * 100)) + "%", 4, 15);
+        screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 8);
 
         usageCounter++;
         if (usageCounter > 1000) {    // 10000=about 90 seconds
