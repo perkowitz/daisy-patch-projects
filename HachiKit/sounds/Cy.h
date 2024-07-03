@@ -30,7 +30,7 @@ class Cy: public IDrum {
         static const float HPF_MIN;
         static const float LPF_MAX;
         static const float LPF_MIN;
-        static const u16 BUFFER_SIZE = 6000;
+        static const u16 BUFFER_SIZE = 100;
 
         void Init(std::string slot, float sample_rate);
         void Init(std::string slot, float sample_rate, float attack, float decay, HhSource68 *source, float hpfCutoff, float lpfCutoff);
