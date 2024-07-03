@@ -73,6 +73,10 @@ u8 cycleLength = 8;
 float savedSignal = 0.0f;
 u32 usageCounter = 0;
 
+u8 clockRange = 8;
+u8 clockThreshold = 8;
+float mainGain = 1;
+
 
 
 
@@ -178,7 +182,6 @@ void ProcessEncoder() {
 // Process the current knob values and update model params accordingly.
 // Knob number == param number, since model params are listed in UI order.
 void ProcessKnobs() {
-    if (currentMenu != 0) return;
 
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         float sig = hw.controls[knob].Value();
@@ -190,6 +193,24 @@ void ProcessKnobs() {
                 screen.SetScreenOn(true);
                 lastKnobValue[knob] = sig;
                 DrawScreen(true);
+            }
+        } else {
+            switch (knob) {
+                case 0:
+                    mainGain = sig < 0.5 ? sig * 2 : sig * 4 - 1;
+                    if (mainGain < 0.1) {
+                        mainGain = 0;
+                    }
+                    break;
+                case 1:
+                    if (sig <= 0.1) {
+                        clockThreshold = clockRange / 4;
+                    } else if (sig <= 0.3) {
+                        clockThreshold = clockRange / 2;
+                    } else {
+                        clockThreshold = (int)(((sig - 0.3) / 7 * 6 + 0.5) * clockRange);
+                    }
+                    break;
             }
         }
     }
@@ -216,13 +237,13 @@ void AudioCallback(AudioHandle::InputBuffer  in,
 
     for(size_t i = 0; i < size; i++) {
 
-        // Process shared sound sources
-        source68.Process();
-        clickSource.Process();
-        // multiTomSource.Process();
+        cycle = (cycle + 1) % clockRange;
+        if (cycle < clockThreshold) {
+            // Process shared sound sources
+            source68.Process();
+            clickSource.Process();
+            // multiTomSource.Process();
 
-        cycle = (cycle + 1) % 8;
-        if (cycle < 9) {
             if (CPU_SINGLE) {
                 mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
             } else {
@@ -234,8 +255,8 @@ void AudioCallback(AudioHandle::InputBuffer  in,
         }
 
         mixer.Process();
-        out[0][i] = mixer.LeftSignal();
-        out[1][i] = mixer.RightSignal();
+        out[0][i] = mainGain * mixer.LeftSignal();
+        out[1][i] = mainGain * mixer.RightSignal();
         out[2][i] = mixer.Send1Signal();
         out[3][i] = mixer.Send2Signal();
     }
@@ -386,7 +407,16 @@ int main(void)
         screen.menuItems[drum] = drums[drum]->Slot();
     }
     for (u8 i = drumCount; i < Screen::MENU_SIZE; i++) {
-        screen.menuItems[i] = "mx";
+        screen.menuItems[i] = "";
+    }
+    if (Screen::MENU_SIZE >= drumCount + 1) {
+        screen.menuItems[drumCount] = "Fx";
+    }
+    if (Screen::MENU_SIZE >= drumCount + 5) {
+        screen.menuItems[drumCount+1] = "A";
+        screen.menuItems[drumCount+2] = "B";
+        screen.menuItems[drumCount+3] = "C";
+        screen.menuItems[drumCount+4] = "D";
     }
 
     // Start stuff.
