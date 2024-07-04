@@ -55,9 +55,9 @@ void Screen::DrawButton(Rectangle rect, std::string str, bool border, bool fill,
     if (!screenOn) { return; }
 
     DrawRectFilled(rect, border, fill);
-    // display->WriteStringAligned(str.c_str(), FONT, rect, Alignment::centered, text);
-    display->SetCursor(rect.GetX() + 2, rect.GetY() + 2);
-    display->WriteString(str.c_str(), FONT, text);
+    display->WriteStringAligned(str.c_str(), FONT, rect, Alignment::centered, text);
+    // display->SetCursor(rect.GetX() + 2, rect.GetY() + 2);
+    // display->WriteString(str.c_str(), FONT, text);
 }
 
 void Screen::DrawMenu(uint8_t selected) {
