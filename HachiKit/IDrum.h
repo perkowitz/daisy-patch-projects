@@ -6,18 +6,19 @@ using namespace daisysp;
 
 #include "daisy_patch.h"
 #include "daisysp.h"
+#include "Utility.h"
 #include <string>
 
 
 class IDrum {
 
     public:
-        // Number of settable parameters for this model.
-        static const uint8_t PARAM_COUNT = 0;
 
         virtual ~IDrum() {
             
         }
+
+        virtual u8 ParamCount() = 0;
 
         /** Initialize model with default parameters.
          * \param sample_rate audio sample rate.

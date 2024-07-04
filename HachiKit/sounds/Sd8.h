@@ -23,6 +23,7 @@ class Sd8: public IDrum {
         static const uint8_t PARAM_MIX = 3;
         static const uint8_t PARAM_OSC_ATTACK = 4;
         static const uint8_t PARAM_NOISE_ATTACK = 5;
+        u8 ParamCount() { return PARAM_COUNT; }
 
         void Init(std::string slot, float sample_rate);
         void Init(std::string slot, float sample_rate, float oscFrequency, float oscAttack, float oscDecay, float noiseAttack, float noiseDecay, float mix);

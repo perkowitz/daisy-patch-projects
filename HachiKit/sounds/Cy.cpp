@@ -47,18 +47,18 @@ float Cy::Process() {
     }
 
     float sig = 0.0f;
-    if (bufferValid) {
-        if (bufferIndex < BUFFER_SIZE) {
-            sig = buffer[bufferIndex];
-        }
-    } else {
+    // if (bufferValid) {
+    //     if (bufferIndex < BUFFER_SIZE) {
+    //         sig = buffer[bufferIndex];
+    //     }
+    // } else {
         sig = source->Signal() * env.Process();
         hpf.Process(sig);
         lpf.Process(hpf.High());
         sig = lpf.Low();
-        buffer[bufferIndex] = sig;
-    }
-    bufferIndex++;
+        // buffer[bufferIndex] = sig;
+    // }
+    // bufferIndex++;
 
     return velocity * sig;
 }
