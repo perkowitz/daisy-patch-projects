@@ -80,7 +80,7 @@ void DigiClap::SetParam(uint8_t param, float scaled) {
 
 float DigiClap::SetParam(uint8_t param, float value, bool isRaw) {
     float scaled = value;
-    if (param < DigiClap::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_SPREAD:
                 if (isRaw) {

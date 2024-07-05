@@ -101,7 +101,7 @@ std::string Tom::GetParamString(uint8_t param) {
 
 float Tom::UpdateParam(uint8_t param, float raw) {
     float scaled = raw;
-    if (param < Tom::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 20, 1000, Parameter::EXPONENTIAL));
