@@ -3,26 +3,28 @@ TARGET = HachiKit
 
 # Sources
 CPP_SOURCES += HachiKit.cpp \
+ParamSet.cpp \
 Screen.cpp \
+audio/AhdEnv.cpp \
+audio/Mixer.cpp \
+audio/Mixer16.cpp \
+audio/Processing.cpp \
 sounds/Bd8.cpp \
-sounds/Sd8.cpp \
-sounds/SdNoise.cpp \
+sounds/Ch.cpp \
+sounds/Clap.cpp \
+sounds/Clave8.cpp \
+sounds/ClickSource.cpp \
+sounds/Cow8.cpp \
+sounds/Cy.cpp \
+sounds/DigiClap.cpp \
 sounds/FmDrum.cpp \
 sounds/HhSource68.cpp \
-sounds/Ch.cpp \
-audio/AhdEnv.cpp \
-sounds/Oh.cpp \
-sounds/Cy.cpp \
-sounds/Cow8.cpp \
-sounds/Tom.cpp \
-sounds/ClickSource.cpp \
-sounds/Clap.cpp \
-sounds/DigiClap.cpp \
-sounds/Clave8.cpp \
-sounds/MultiTomSource.cpp \
 sounds/MultiTom.cpp \
-audio/Mixer16.cpp \
-audio/Processing.cpp
+sounds/MultiTomSource.cpp \
+sounds/Oh.cpp \
+sounds/Sd8.cpp \
+sounds/SdNoise.cpp \
+sounds/Tom.cpp 
 
 
 OPT = -Os

@@ -29,7 +29,7 @@ void Mixer16::Process() {
     send2Signal = Utility::LimitFloat(send2Gain * send2Signal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
 }
 
-Channel* Mixer16::GetChannel(u8 channel) {
+SimpleChannel* Mixer16::GetChannel(u8 channel) {
     if (channel >= CHANNELS) return nullptr;
 
     return &channels[channel];

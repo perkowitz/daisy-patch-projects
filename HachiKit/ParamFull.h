@@ -7,8 +7,8 @@
  * scaling, so must be managed externally.
  * 
 */
-#ifndef PARAM_H
-#define PARAM_H
+#ifndef PARAMFULL_H
+#define PARAMFULL_H
 
 #include "daisy_patch.h"
 #include "daisysp.h"
@@ -17,34 +17,35 @@
 using namespace daisy;
 using namespace daisysp;
 
-class Param {
+class ParamFull {
 
     public:
 
-        Param() {
-            name = "";
+        ParamFull() {
+            this->name = "";
             Reset();
         }
 
-        Param(std::string name) {
+        ParamFull(std::string name) {
             this->name = name;
             Reset();
         }
 
-        /**
-         * GetScaledValue returns the stored scaled value.
-        */
-        float GetScaledValue() {
-            return scaled;
-        }
-
-        /**
-         * SetScaledValue stores the value and overrides the jitter and jump checking.
-        */
-        void SetScaledValue(float scaled) {
-            this->scaled = scaled;
+        ParamFull(std::string name, float initValue, float scaleLo, float scaleHi, Parameter::Curve scaleCurve, u16 displayScale) {
+            Init(name, initValue, scaleLo, scaleHi, scaleCurve, displayScale);
             Reset();
         }
+
+        void Init(std::string name, float initValue, float scaleLo, float scaleHi, Parameter::Curve scaleCurve, u16 displayScale) {
+            this->name = name;
+            this->scaled = initValue;
+            this->scaleLo = scaleLo;
+            this->scaleHi = scaleHi;
+            this->scaleCurve = scaleCurve;
+        }
+
+        std::string Name() { return name; }
+        float Value() { return scaled; }
 
         /**
          * Reset sets the Param back to a state where it is waiting for control.
@@ -55,12 +56,20 @@ class Param {
         }
 
         /**
-         * Update checks the raw value for jitter and prevents jump in value.
-         * Should be called with both the raw value and the computed scaled value.
-         * 
-         * Returns the scaled value.
+         * SetScaledValue stores the value directly and overrides the jitter and jump checking.
         */
-        float Update(float raw, float scaled) {
+        void SetScaledValue(float scaled) {
+            this->scaled = scaled;
+            Reset();
+        }
+
+        /**
+         * Update checks the raw value for jitter and prevents jump in value.
+         * 
+         * Returns true if the value changed.
+        */
+        bool Update(float raw) {
+            float scaled = Utility::ScaleFloat(raw, scaleLo, scaleHi, scaleCurve);
             if (!active) {
                 if (scaled <= this->scaled || (raw <= 0.01 && raw >= 0.0f)) lower = true;
                 if (scaled >= this->scaled || raw >= 0.99) higher = true;
@@ -69,20 +78,31 @@ class Param {
             if (active && std::abs(raw - this->raw) > delta) {
                 this->raw = raw;
                 this->scaled = scaled;
+                return true;
             }
-            return this->scaled;
+            return false;
+        }
+
+        std::string Display() {
+            return std::to_string((int)(scaled * displayScale));
         }
 
     private:
         std::string name;
-        float delta = 0.001f;
+        float delta = 0.001f;  // TODO: make static?
         float raw = 0.0f;
         float scaled = 0.0f;
         bool active = false;
         bool lower = false;
         bool higher = false;
+        float scaleLo = 0;
+        float scaleHi = 1;
+        u16 displayScale = 1;
+        Parameter::Curve scaleCurve = Parameter::LINEAR;
 
 };
 
+typedef ParamFull* ParamPtr;
 
 #endif
+

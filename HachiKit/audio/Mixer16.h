@@ -5,7 +5,7 @@
 #include "daisysp.h"
 #include "../utility.h"
 
-struct Channel {
+struct SimpleChannel {
     float signal;
     float level; 
     float pan;
@@ -22,7 +22,7 @@ class Mixer16 {
         void ResetSignals();
         void Process();
 
-        Channel* GetChannel(u8 channel);
+        SimpleChannel* GetChannel(u8 channel);
         void UpdateSignal(u8 channel, float signal);
         void SetLevel(u8 channel, float level);
         void SetPan(u8 channel, float pan);
@@ -41,7 +41,7 @@ class Mixer16 {
     private:
         static const uint8_t OUTPUT_LIMIT = 2;
 
-        Channel channels[CHANNELS];
+        SimpleChannel channels[CHANNELS];
         float leftSignal = 0.0f;
         float rightSignal = 0.0f;
         float send1Signal = 0.0f;

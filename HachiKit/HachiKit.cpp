@@ -6,6 +6,7 @@
 #include "util/CpuLoadMeter.h"
 #include <string>
 #include "Utility.h"
+#include "audio/Mixer.h"
 #include "audio/Mixer16.h"
 #include "audio/Processing.h"
 #include "Screen.h"
@@ -38,7 +39,8 @@ DaisyPatch hw;
 Screen screen(&hw.display);
 CpuLoadMeter meter;
 
-Mixer16 mixer;
+Mixer mixer;
+Mixer16 mixer16;
 
 IDrum *drums[16];
 uint8_t drumCount = 1;
@@ -62,6 +64,8 @@ HhSource68 source68;
 ClickSource clickSource;
 // MultiTomSource multiTomSource;
 
+Svf mainFilter;
+
 u8 currentMenu = 0; 
 u8 currentMenuIndex = 0;
 uint8_t currentDrum = 0;
@@ -77,6 +81,7 @@ u32 usageCounter = 0;
 u8 clockRange = 8;
 u8 clockThreshold = 8;
 float mainGain = 1;
+
 
 
 
@@ -212,6 +217,11 @@ void ProcessKnobs() {
                         clockThreshold = (int)(((sig - 0.3) / 7 * 6 + 0.5) * clockRange);
                     }
                     break;
+                case 2:
+                    mainFilter.SetFreq(sig * 20000 + 20);
+                    break;
+                case 3:
+                    mainFilter.SetRes(sig);
             }
         }
     }
@@ -246,17 +256,21 @@ void AudioCallback(AudioHandle::InputBuffer  in,
             // multiTomSource.Process();
 
             if (CPU_SINGLE) {
+                // mixer16.UpdateSignal(currentDrum, drums[currentDrum]->Process());
                 mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
             } else {
+                // mixer16.ResetSignals();
                 mixer.ResetSignals();
                 for (uint8_t i = 0; i < drumCount; i++) {
+                    // mixer16.UpdateSignal(i, drums[i]->Process());
                     mixer.UpdateSignal(i, drums[i]->Process());
                 }
             }
         }
 
         mixer.Process();
-        out[0][i] = mainGain * mixer.LeftSignal();
+        mainFilter.Process(mixer.LeftSignal());
+        out[0][i] = mainGain * mainFilter.Low();
         out[1][i] = mainGain * mixer.RightSignal();
         out[2][i] = mixer.Send1Signal();
         out[3][i] = mixer.Send2Signal();
@@ -330,12 +344,18 @@ int main(void)
 
     meter.Init(samplerate, 128, 1.0f);
 
+    mixer16.Reset();
     mixer.Reset();
 
     // Shared sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
     clickSource.Init("", samplerate, 1500, 191, 116);
     // multiTomSource.Init("", samplerate, 500, &clickSource);
+
+    mainFilter.Init(samplerate);
+    mainFilter.SetRes(0.2);
+    mainFilter.SetDrive(.002);
+    mainFilter.SetFreq(20000);
 
     bd.Init("BD", samplerate, 78, 0.001, 4, 0.001, 0.5, 20);
     rs.Init("RS", samplerate);
@@ -377,19 +397,19 @@ int main(void)
     drums[14] = &cl;
     drums[15] = &cb;
     drumCount = 16;
-    currentDrum = 0;
+    currentDrum = 16;
     currentMenuIndex = 0;
 
     // send the toms out the send1
-    mixer.SetSend1(5, 1);
-    mixer.SetSend1(7, 1);
-    mixer.SetSend1(9, 1);
+    // mixer16.SetSend1(5, 1);
+    // mixer16.SetSend1(7, 1);
+    // mixer16.SetSend1(9, 1);
 
     // send percussion out send2
-    mixer.SetSend2(11, 1);
-    mixer.SetSend2(12, 1);
-    mixer.SetSend2(14, 1);
-    mixer.SetSend2(15, 1);
+    // mixer16.SetSend2(11, 1);
+    // mixer16.SetSend2(12, 1);
+    // mixer16.SetSend2(14, 1);
+    // mixer16.SetSend2(15, 1);
 
     for (u8 i = 0; i < KNOB_COUNT; i++) {
         lastKnobValue[i] = 0.0f;
