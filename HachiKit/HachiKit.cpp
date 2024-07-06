@@ -6,7 +6,7 @@
 #include "util/CpuLoadMeter.h"
 #include <string>
 #include "Utility.h"
-#include "audio/Mixer.h"
+// #include "audio/Mixer.h"
 #include "audio/Mixer16.h"
 #include "audio/Processing.h"
 #include "Screen.h"
@@ -39,7 +39,7 @@ DaisyPatch hw;
 Screen screen(&hw.display);
 CpuLoadMeter meter;
 
-Mixer mixer;
+// Mixer mixer;
 Mixer16 mixer16;
 
 IDrum *drums[16];
@@ -256,24 +256,30 @@ void AudioCallback(AudioHandle::InputBuffer  in,
             // multiTomSource.Process();
 
             if (CPU_SINGLE) {
-                // mixer16.UpdateSignal(currentDrum, drums[currentDrum]->Process());
-                mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
+                mixer16.UpdateSignal(currentDrum, drums[currentDrum]->Process());
+                // mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
             } else {
-                // mixer16.ResetSignals();
-                mixer.ResetSignals();
+                mixer16.ResetSignals();
+                // mixer.ResetSignals();
                 for (uint8_t i = 0; i < drumCount; i++) {
-                    // mixer16.UpdateSignal(i, drums[i]->Process());
-                    mixer.UpdateSignal(i, drums[i]->Process());
+                    mixer16.UpdateSignal(i, drums[i]->Process());
+                    // mixer.UpdateSignal(i, drums[i]->Process());
                 }
             }
         }
 
-        mixer.Process();
-        mainFilter.Process(mixer.LeftSignal());
+        mixer16.Process();
+        mainFilter.Process(mixer16.LeftSignal());
         out[0][i] = mainGain * mainFilter.Low();
-        out[1][i] = mainGain * mixer.RightSignal();
-        out[2][i] = mixer.Send1Signal();
-        out[3][i] = mixer.Send2Signal();
+        out[1][i] = mainGain * mixer16.RightSignal();
+        out[2][i] = mixer16.Send1Signal();
+        out[3][i] = mixer16.Send2Signal();
+        // mixer.Process();
+        // mainFilter.Process(mixer.LeftSignal());
+        // out[0][i] = mainGain * mainFilter.Low();
+        // out[1][i] = mainGain * mixer.RightSignal();
+        // out[2][i] = mixer.Send1Signal();
+        // out[3][i] = mixer.Send2Signal();
     }
 
     meter.OnBlockEnd();
@@ -345,7 +351,7 @@ int main(void)
     meter.Init(samplerate, 128, 1.0f);
 
     mixer16.Reset();
-    mixer.Reset();
+    // mixer.Reset();
 
     // Shared sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
