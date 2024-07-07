@@ -40,7 +40,7 @@ class Oh: public IDrum {
         void ResetParams();
         std::string GetParamString(uint8_t param);
 
-        std::string Name() { return "Blank"; }
+        std::string Name() { return "Oh"; }
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 

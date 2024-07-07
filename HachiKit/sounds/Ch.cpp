@@ -80,7 +80,7 @@ std::string Ch::GetParamString(uint8_t param) {
 
 float Ch::UpdateParam(uint8_t param, float raw) {
     float scaled = raw;
-    if (param < Ch::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_ATTACK: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));

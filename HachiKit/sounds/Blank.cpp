@@ -48,7 +48,7 @@ std::string Blank::GetParamString(uint8_t param) {
 
 float Blank::UpdateParam(uint8_t param, float raw) {
     float scaled = raw;
-    if (param < Blank::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 20, 5000, Parameter::EXPONENTIAL));

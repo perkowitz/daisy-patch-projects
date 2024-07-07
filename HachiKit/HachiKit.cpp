@@ -6,7 +6,8 @@
 #include "util/CpuLoadMeter.h"
 #include <string>
 #include "Utility.h"
-#include "audio/Mixer16.h"
+#include "audio/Mixer.h"
+#include "audio/Processing.h"
 #include "Screen.h"
 #include "IDrum.h"
 #include "sounds/Bd8.h"
@@ -32,12 +33,15 @@ using namespace daisysp;
 #define MINIMUM_NOTE 36
 #define KNOB_COUNT 4
 #define CPU_SINGLE false
+#define MENU_ROWS 2
+#define MENU_SOUNDS 0
+#define MENU_MIXER 1
 
 DaisyPatch hw;
 Screen screen(&hw.display);
 CpuLoadMeter meter;
 
-Mixer16 mixer;
+Mixer mixer;
 
 IDrum *drums[16];
 uint8_t drumCount = 1;
@@ -65,6 +69,7 @@ u8 currentMenu = 0;
 u8 currentMenuIndex = 0;
 uint8_t currentDrum = 0;
 uint8_t currentKnobRow = 0;
+u8 currentMixerSection = 0;
 u8 maxDrum = 1;
 float lastKnobValue[KNOB_COUNT];
 
@@ -80,27 +85,40 @@ float mainGain = 1;
 
 
 
+
 // Display the available parameter names.
 void DisplayParamMenu() {
-    if (currentMenu != 0) return;
 
     screen.DrawRect(0, 9, 127, 36, false, true);
 
+    // TODO make this work for mixer channels
     u8 knobRow = currentKnobRow;
-    if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
-        knobRow = 0;
-    }
+    // if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
+    //     knobRow = 0;
+    // }
 
-    uint8_t param;
+    std::string sc = "";
+    bool selected = false;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         // for (u8 row = 0; row <= drums[currentDrum]->PARAM_COUNT / 4; row++) {
-        for (u8 row = 0; row < 2; row++) {
+        for (u8 row = 0; row < MENU_ROWS; row++) {
             Rectangle rect2(knob * 32, (row + 1) * 12, 32, 12);
-            param = row * KNOB_COUNT + knob;
-            std::string sc = drums[currentDrum]->GetParamName(param);
-            bool selected = row == knobRow;
-            // hw.display.WriteStringAligned(sc.c_str(), Font_6x8, rect2, Alignment::centered, true);
+            if (currentMenu == MENU_SOUNDS) {
+                u8 param = row * KNOB_COUNT + knob;
+                sc = drums[currentDrum]->GetParamName(param);
+                selected = row == knobRow;
+            } else if (currentMenu == MENU_MIXER) {
+                u8 channel = currentMixerSection * 4 + knob;
+                if (row == 0) {
+                    selected = false;
+                    sc = drums[channel]->Slot();  // show channel names on first row
+                } else if (row == 1) {
+                    sc = mixer.GetChannelParamName(channel, knob);
+                    selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
+                }
+            }
             screen.DrawButton(rect2, sc, selected, selected, !selected);
+            // hw.display.WriteStringAligned(sc.c_str(), Font_6x8, rect2, Alignment::centered, true);
             // hw.display.SetCursor(rect2.GetX(), rect2.GetY());
             // hw.display.WriteString(sc.c_str(), Font_6x8, true);
             // hw.display.DrawLine(0, rect2.GetY() + 11, 127, rect2.GetY() + 11, true);
@@ -111,19 +129,26 @@ void DisplayParamMenu() {
 // Display the current values and parameter names of model params for 4 knobs.
 // Knob number == param number, since model params are listed in UI order.
 void DisplayKnobValues() {
-    if (currentMenu != 0) return;
 
     screen.DrawRect(0, 0, 127, 11, false, true);
 
-    uint8_t param;
     u8 knobRow = currentKnobRow;
-    if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
-        knobRow = 0;
-    }
+    // make this work for mixer rows
+    // if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
+    //     knobRow = 0;
+    // }
+
+    u8 index;
+    std::string sc = "";
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
-        param = knobRow * KNOB_COUNT + knob;
         Rectangle rect(knob * 32, 0, 32, 8);
-        std::string sc = drums[currentDrum]->GetParamString(param);
+        if (currentMenu == MENU_SOUNDS) {
+            index = knobRow * KNOB_COUNT + knob;
+            sc = drums[currentDrum]->GetParamString(index);
+        } else if (currentMenu == MENU_MIXER) {
+            index = currentMixerSection * 4 + knob;
+            sc = mixer.GetChannelParamDisplay(index, knobRow);
+        }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
         // screen.DrawButton(rect, sc, false, true, false);
     }
@@ -147,12 +172,16 @@ void ProcessEncoder() {
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
     if (newMenuIndex != currentMenuIndex) {
         if (newMenuIndex < drumCount) {
-            currentMenu = 0;
+            currentMenu = MENU_SOUNDS;
             u8 newDrum = newMenuIndex;
             drums[newDrum]->ResetParams();
             currentDrum = newDrum;
         } else {
-            currentMenu = 1;
+            currentMenu = MENU_MIXER;
+            currentMixerSection = newMenuIndex - drumCount;
+            for (u8 i = 0; i < 4; i++) {
+                mixer.ResetChannelParams(currentMixerSection * 4 + i);
+            }
         }
 
         currentMenuIndex = newMenuIndex;
@@ -163,10 +192,17 @@ void ProcessEncoder() {
     }
 
     if (hw.encoder.RisingEdge()) {
-        if (currentMenu == 0) {
-            currentKnobRow = (currentKnobRow + 1) % 2;
+        if (currentMenu == MENU_SOUNDS) {
+            currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
             redraw = true;
             drums[currentDrum]->ResetParams();
+            usageCounter = 0;
+            screen.SetScreenOn(true);
+            hw.display.Fill(false);
+        } else if (currentMenu == MENU_MIXER) {
+            currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
+            redraw = true;
+            // reset params for mixer row?
             usageCounter = 0;
             screen.SetScreenOn(true);
             hw.display.Fill(false);
@@ -186,31 +222,30 @@ void ProcessKnobs() {
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  0) {
-            uint8_t param = currentKnobRow * KNOB_COUNT + knob;
+            u8 param = currentKnobRow * KNOB_COUNT + knob;
             drums[currentDrum]->UpdateParam(param, sig);
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
                 usageCounter = 0;
-                screen.SetScreenOn(true);
                 lastKnobValue[knob] = sig;
-                DrawScreen(true);
+                if (!screen.IsScreenOn()) {
+                    screen.SetScreenOn(true);
+                    DrawScreen(true);
+                } else {
+                    DisplayKnobValues();
+                }
             }
         } else {
-            switch (knob) {
-                case 0:
-                    mainGain = sig < 0.5 ? sig * 2 : sig * 4 - 1;
-                    if (mainGain < 0.1) {
-                        mainGain = 0;
-                    }
-                    break;
-                case 1:
-                    if (sig <= 0.1) {
-                        clockThreshold = clockRange / 4;
-                    } else if (sig <= 0.3) {
-                        clockThreshold = clockRange / 2;
-                    } else {
-                        clockThreshold = (int)(((sig - 0.3) / 7 * 6 + 0.5) * clockRange);
-                    }
-                    break;
+            u8 channel = currentMixerSection * 4 + knob;
+            bool changed = mixer.UpdateChannelParam(channel, currentKnobRow, sig);
+            if (changed) {           // TODO combine for both menus at end of function
+                usageCounter = 0;
+                lastKnobValue[knob] = sig;
+                if (!screen.IsScreenOn()) {
+                    screen.SetScreenOn(true);
+                    DrawScreen(true);
+                } else {
+                    DisplayKnobValues();
+                }
             }
         }
     }
@@ -336,7 +371,7 @@ int main(void)
     clickSource.Init("", samplerate, 1500, 191, 116);
     // multiTomSource.Init("", samplerate, 500, &clickSource);
 
-    bd.Init("BD", samplerate, 78, 0.001, 4, 0.001, 0.5, 20);
+    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
     rs.Init("RS", samplerate);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
@@ -380,15 +415,16 @@ int main(void)
     currentMenuIndex = 0;
 
     // send the toms out the send1
-    mixer.SetSend1(5, 1);
-    mixer.SetSend1(7, 1);
-    mixer.SetSend1(9, 1);
+    mixer.SetChannelParam(2, Channel::PARAM_SEND1, 0.5);
+    mixer.SetChannelParam(5, Channel::PARAM_SEND1, 0.5);
+    mixer.SetChannelParam(7, Channel::PARAM_SEND1, 0.5);
+    mixer.SetChannelParam(9, Channel::PARAM_SEND1, 0.5);
 
     // send percussion out send2
-    mixer.SetSend2(11, 1);
-    mixer.SetSend2(12, 1);
-    mixer.SetSend2(14, 1);
-    mixer.SetSend2(15, 1);
+    mixer.SetChannelParam(11, Channel::PARAM_SEND2, 1);
+    mixer.SetChannelParam(12, Channel::PARAM_SEND2, 1);
+    mixer.SetChannelParam(14, Channel::PARAM_SEND2, 1);
+    mixer.SetChannelParam(15, Channel::PARAM_SEND2, 1);
 
     for (u8 i = 0; i < KNOB_COUNT; i++) {
         lastKnobValue[i] = 0.0f;
@@ -409,14 +445,11 @@ int main(void)
     for (u8 i = drumCount; i < Screen::MENU_SIZE; i++) {
         screen.menuItems[i] = "";
     }
-    if (Screen::MENU_SIZE >= drumCount + 1) {
-        screen.menuItems[drumCount] = "Fx";
-    }
-    if (Screen::MENU_SIZE >= drumCount + 5) {
-        screen.menuItems[drumCount+1] = "A";
-        screen.menuItems[drumCount+2] = "B";
-        screen.menuItems[drumCount+3] = "C";
-        screen.menuItems[drumCount+4] = "D";
+    if (Screen::MENU_SIZE >= drumCount + 4) {
+        screen.menuItems[drumCount] = "A";
+        screen.menuItems[drumCount+1] = "B";
+        screen.menuItems[drumCount+2] = "C";
+        screen.menuItems[drumCount+3] = "D";
     }
 
     // Start stuff.

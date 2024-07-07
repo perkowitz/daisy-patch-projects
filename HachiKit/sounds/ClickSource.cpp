@@ -70,7 +70,7 @@ std::string ClickSource::GetParamString(uint8_t param) {
 
 float ClickSource::UpdateParam(uint8_t param, float raw) {
     float scaled = raw;
-    if (param < ClickSource::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_LPF_MOD:
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0, 2000, Parameter::EXPONENTIAL));

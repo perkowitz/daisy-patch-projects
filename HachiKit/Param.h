@@ -22,6 +22,12 @@ class Param {
     public:
 
         Param() {
+            name = "";
+            Reset();
+        }
+
+        Param(std::string name) {
+            this->name = name;
             Reset();
         }
 
@@ -68,6 +74,7 @@ class Param {
         }
 
     private:
+        std::string name;
         float delta = 0.001f;
         float raw = 0.0f;
         float scaled = 0.0f;

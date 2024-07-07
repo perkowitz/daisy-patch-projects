@@ -1,42 +1,36 @@
-#ifndef MIXER16_H
-#define MIXER16_H
+#ifndef MIXER_H
+#define MIXER_H
 
 #include "daisy_patch.h"
 #include "daisysp.h"
-#include "../utility.h"
+#include "../Utility.h"
+#include "Channel.h"
 
-struct Channel {
-    float signal;
-    float level; 
-    float pan;
-    float send1;
-    float send2;
-};
-
-class Mixer16 {
+class Mixer {
 
     public:
-        static const uint8_t CHANNELS = 16;
+        static const u8 CHANNELS = 16;
 
         void Reset();
         void ResetSignals();
         void Process();
 
-        Channel* GetChannel(u8 channel);
         void UpdateSignal(u8 channel, float signal);
-        void SetLevel(u8 channel, float level);
-        void SetPan(u8 channel, float pan);
-        void SetSend1(u8 channel, float level);
-        void SetSend2(u8 channel, float level);
+        bool UpdateChannelParam(u8 channel, u8 param, float raw);
+        void SetChannelParam(u8 channel, u8 param, float scaled);
+        void ResetChannelParams(u8 channel);
+        std::string GetChannelParamDisplay(u8 channel, u8 param);
+        std::string GetChannelParamName(u8 channel, u8 param);
 
         float LeftSignal() { return leftSignal; }
         float RightSignal() { return rightSignal; }
         float Send1Signal() { return send1Signal; }
         float Send2Signal() { return send2Signal; }
 
-        void SetOutputGain(float gain) { this->outputGain = gain; }
-        void SetSend1Gain(float gain) { this->send1Gain = gain; }
-        void SetSend2Gain(float gain) { this->send2Gain = gain; }
+        // TODO: use params
+        // void SetOutputGain(float gain) { this->outputGain = gain; }
+        // void SetSend1Gain(float gain) { this->send1Gain = gain; }
+        // void SetSend2Gain(float gain) { this->send2Gain = gain; }
 
     private:
         static const uint8_t OUTPUT_LIMIT = 2;

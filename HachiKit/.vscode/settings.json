@@ -90,6 +90,9 @@
         "semaphore": "cpp",
         "span": "cpp",
         "stack": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "__verbose_abort": "cpp",
+        "execution": "cpp",
+        "codecvt": "cpp"
     }
 }

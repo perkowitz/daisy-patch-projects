@@ -76,7 +76,7 @@ void Clap::SetParam(uint8_t param, float scaled) {
 
 float Clap::SetParam(uint8_t param, float value, bool isRaw) {
     float scaled = value;
-    if (param < Clap::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_SPREAD:
                 if (isRaw) {

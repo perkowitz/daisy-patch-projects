@@ -89,7 +89,7 @@ std::string Cow8::GetParamString(uint8_t param) {
 
 float Cow8::UpdateParam(uint8_t param, float raw) {
     float scaled = raw;
-    if (param < Cow8::PARAM_COUNT) {
+    if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_ATTACK: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.001, 5, Parameter::EXPONENTIAL));
