@@ -469,6 +469,7 @@ int main(void)
 
         float avgCpu = meter.GetAvgCpuLoad();
         screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
+        screen.ShowCpu(avgCpu);
 
         usageCounter++;
         if (usageCounter > 1000) {    // 10000=about 90 seconds
