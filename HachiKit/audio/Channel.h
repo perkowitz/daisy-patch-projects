@@ -21,16 +21,16 @@ class Channel {
         static const u8 PARAM_COUNT = 4;
         // This is the order params will appear in the UI.
         static const uint8_t PARAM_LEVEL = 0;
-        static const uint8_t PARAM_PAN = 1;
-        static const uint8_t PARAM_SEND1 = 2;
-        static const uint8_t PARAM_SEND2 = 3;
+        static const uint8_t PARAM_SEND1 = 1;
+        static const uint8_t PARAM_SEND2 = 2;
+        static const uint8_t PARAM_PAN = 3;
         u8 ParamCount() { return PARAM_COUNT; }
 
         Channel() {
-            params[0].Init("Lvl", 1, 0, 1, Parameter::EXPONENTIAL, 100);
-            params[1].Init("Pan", 0, -1, 1, Parameter::LINEAR, 1);
-            params[2].Init("A", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-            params[3].Init("B", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+            params[0].Init("Lvl", 1, 0, 3, Parameter::EXPONENTIAL, 100);
+            params[1].Init("A", 1, 0, 2, Parameter::EXPONENTIAL, 100);
+            params[2].Init("", 0, 0, 2, Parameter::EXPONENTIAL, 100);   // send B
+            params[3].Init("", 0, -1, 1, Parameter::LINEAR, 10);        // Pan
             paramSet.Init(PARAM_COUNT, params);
         }
 

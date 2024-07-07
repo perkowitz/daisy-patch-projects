@@ -6,7 +6,7 @@ CPP_SOURCES += HachiKit.cpp \
 ParamSet.cpp \
 Screen.cpp \
 audio/AhdEnv.cpp \
-audio/Mixer16.cpp \
+audio/Mixer.cpp \
 audio/Processing.cpp \
 sounds/Bd8.cpp \
 sounds/Ch.cpp \

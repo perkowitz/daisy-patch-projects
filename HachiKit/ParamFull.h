@@ -17,6 +17,11 @@
 using namespace daisy;
 using namespace daisysp;
 
+#define RAW_MIN 0
+#define RAW_MAX 1
+#define RAW_ENDPOINT_DELTA 0.01
+#define MARGIN_FACTOR 0.05
+
 class ParamFull {
 
     public:
@@ -41,7 +46,9 @@ class ParamFull {
             this->scaled = initValue;
             this->scaleLo = scaleLo;
             this->scaleHi = scaleHi;
+            this->margin = (scaleHi - scaleLo) * MARGIN_FACTOR;
             this->scaleCurve = scaleCurve;
+            this->displayScale = displayScale;
         }
 
         std::string Name() { return name; }
@@ -69,13 +76,16 @@ class ParamFull {
          * Returns true if the value changed.
         */
         bool Update(float raw) {
-            float scaled = Utility::ScaleFloat(raw, scaleLo, scaleHi, scaleCurve);
+            if (std::abs(raw - this->raw) <= delta) return false;
+            if (raw < 0.01) raw = 0;  // TODO do this in the scaling function
+            if (raw > 0.99) raw = 1;
+
+            float scaled = Utility::ScaleFloat(raw, scaleLo - margin, scaleHi + 2 * margin, scaleLo, scaleHi, scaleCurve);
             if (!active) {
                 if (scaled <= this->scaled || (raw <= 0.01 && raw >= 0.0f)) lower = true;
                 if (scaled >= this->scaled || raw >= 0.99) higher = true;
                 active = (lower && higher);
-            }
-            if (active && std::abs(raw - this->raw) > delta) {
+            } else if (active) {
                 this->raw = raw;
                 this->scaled = scaled;
                 return true;
@@ -98,6 +108,7 @@ class ParamFull {
         float scaleLo = 0;
         float scaleHi = 1;
         u16 displayScale = 1;
+        float margin = MARGIN_FACTOR;
         Parameter::Curve scaleCurve = Parameter::LINEAR;
 
 };

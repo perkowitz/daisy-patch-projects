@@ -34,7 +34,20 @@ class Utility {
             return std::min(max, std::max(min, value));
         }
 
+        /**
+         * ScaleFloat
+         * Scale a 0-1 value to a range, using a curve.
+        */
         static float ScaleFloat(float value, float min, float max, Parameter::Curve curve) {
+            return ScaleFloat(value, min, max, min, max, curve);
+        }
+
+
+        /**
+         * ScaleFloat
+         * Scale a 0-1 value to a range, using a curve. Allows range to exceed min/max limits to allow for a margin.
+        */
+        static float ScaleFloat(float value, float min, float max, float minLimit, float maxLimit, Parameter::Curve curve) {
 
             float scaled = value;
             switch(curve)
@@ -53,7 +66,7 @@ class Utility {
                     break;
                 default: break;
             }
-            return std::min(max, std::max(min, scaled));
+            return std::min(maxLimit, std::max(minLimit, scaled));
         }
 
         /** Convert a float to a string, since the DaisySP skips this functionality for compactness.

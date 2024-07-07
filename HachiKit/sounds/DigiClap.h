@@ -35,7 +35,7 @@ class DigiClap: public IDrum {
         void SetParam(uint8_t param, float value);
         void ResetParams();
 
-        std::string Name() { return "Blank"; }
+        std::string Name() { return "DigiClap"; }
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 

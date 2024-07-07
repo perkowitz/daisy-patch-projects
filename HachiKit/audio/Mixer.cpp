@@ -40,25 +40,31 @@ void Mixer::UpdateSignal(u8 channel, float signal) {
 }
 
 bool Mixer::UpdateChannelParam(u8 channel, u8 param, float raw) {
-    if (channel < CHANNELS) return false;
+    if (channel >= CHANNELS) return false;
 
     return channels[channel].GetParamSet()->UpdateParam(param, raw);
 }
 
 void Mixer::SetChannelParam(u8 channel, u8 param, float scaled) {
-    if (channel < CHANNELS) return;
+    if (channel >= CHANNELS) return;
 
     channels[channel].GetParamSet()->SetParam(param, scaled);
 }
 
+void Mixer::ResetChannelParams(u8 channel) {
+    if (channel >= CHANNELS) return;
+
+    channels[channel].GetParamSet()->ResetParams();
+}
+
 std::string Mixer::GetChannelParamDisplay(u8 channel, u8 param) {
-    if (channel < CHANNELS) return "";
+    if (channel >= CHANNELS) return "";
 
     return channels[channel].GetParamSet()->GetParamDisplay(param);
 }
 
 std::string Mixer::GetChannelParamName(u8 channel, u8 param) {
-    if (channel < CHANNELS) return "";
+    if (channel >= CHANNELS) return "";
 
     return channels[channel].GetParamSet()->GetParamName(param);
 }
