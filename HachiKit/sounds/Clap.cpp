@@ -24,6 +24,8 @@ void Clap::Init(std::string slot, float sample_rate, float spread, float decay) 
 }
 
 float Clap::Process() {
+    if (!active) return 0.0f; 
+
     if (!env.IsRunning()) {
         repeat++;
         if (repeat == REPEATS) {
@@ -33,6 +35,7 @@ float Clap::Process() {
             env.Trigger();
         }
     }
+    active = env.IsRunning(); 
     return velocity * noise.Process() * env.Process();
 }
 
@@ -40,6 +43,7 @@ void Clap::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
         repeat = 0;
+        active = true;
         env.SetTime(ADENV_SEG_DECAY, GetParam(PARAM_SPREAD));
         env.Trigger();
     }

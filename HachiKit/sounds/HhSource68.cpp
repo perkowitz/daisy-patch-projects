@@ -51,6 +51,8 @@ void HhSource68::Init(std::string slot, float sample_rate, float morph) {
 }
 
 float HhSource68::Process() {
+    // HhSource68 is always active
+
     float sig = cowSignal = lowCowSignal = 0.0f;
     for (int osc = 0; osc < OSC_COUNT; osc++) {
         float oscSignal = oscs[osc]->Process();

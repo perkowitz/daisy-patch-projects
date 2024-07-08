@@ -25,6 +25,7 @@ class Blank: public IDrum {
         void Init(std::string slot, float sample_rate, float frequency, float attack, float decay);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         std::string GetParamString(uint8_t param);
@@ -39,6 +40,7 @@ class Blank: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "Atk", "Dcy" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         // audio objects

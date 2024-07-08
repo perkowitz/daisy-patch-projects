@@ -32,6 +32,7 @@ class Tom: public IDrum {
         void Init(std::string slot, float sample_rate, float frequency, ClickSource *clickSource);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         float UpdateParam(uint8_t param, float value);
@@ -46,6 +47,7 @@ class Tom: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "aDcy", "pMod", "fMod", "Hpf", "Lpf" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         Oscillator osc;

@@ -20,12 +20,16 @@ void SdNoise::Init(std::string slot, float sample_rate, float attack, float deca
 }
 
 float SdNoise::Process() {
+    if (!active) return 0.0f; 
+
+    active = ampEnv.IsRunning();
     return velocity * noise.Process() * ampEnv.Process();
 }
 
 void SdNoise::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         ampEnv.Trigger();
     }
 }

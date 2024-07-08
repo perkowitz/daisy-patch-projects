@@ -30,10 +30,13 @@ void Ch::Init(std::string slot, float sample_rate, float attack, float decay, Hh
 }
 
 float Ch::Process() {
+    if (!active) return 0.0f; 
+
     if (source == NULL) {
         return 0.0f;
     }
 
+    active = env.IsRunning();
     float sig = source->Signal() * env.Process();
     return velocity * sig;
 }
@@ -41,6 +44,7 @@ float Ch::Process() {
 void Ch::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         env.Trigger();
     }
 }

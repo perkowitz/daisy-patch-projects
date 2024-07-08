@@ -32,6 +32,9 @@ void Clave8::Init(std::string slot, float sample_rate, float frequency, float am
 }
 
 float Clave8::Process() {
+    if (!active) return 0.0f; 
+
+    active = ampEnv.IsRunning();
     bpf.Process(osc.Process());
     return velocity * bpf.Band() * ampEnv.Process() * 3;
 }
@@ -40,6 +43,7 @@ void Clave8::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
         osc.Reset();
+        active = true;
         ampEnv.Trigger();
     }
 }

@@ -33,6 +33,7 @@ class Oh: public IDrum {
         void Init(std::string slot, float sample_rate, float attack, float hold, float decay, HhSource68 *source, float morph, float hpf, float lpf);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         float UpdateParam(uint8_t param, float value);
@@ -47,6 +48,7 @@ class Oh: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Hold", "Dcy", "Lpf", "Mrph", "Hpf" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         HhSource68 *source = NULL;

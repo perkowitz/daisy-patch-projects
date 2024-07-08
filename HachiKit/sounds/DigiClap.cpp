@@ -26,6 +26,8 @@ void DigiClap::Init(std::string slot, float sample_rate, float spread, float dec
 }
 
 float DigiClap::Process() {
+    if (!active) return 0.0f; 
+
     if (!env.IsRunning()) {
         repeat++;
         if (repeat == REPEATS) {
@@ -35,6 +37,7 @@ float DigiClap::Process() {
             env.Trigger();
         }
     }
+    active = env.IsRunning();
     return velocity * clockedNoise.Process() * env.Process();
 }
 
@@ -43,6 +46,7 @@ void DigiClap::Trigger(float velocity) {
     if (this->velocity > 0) {
         repeat = 0;
         env.SetTime(ADENV_SEG_DECAY, GetParam(PARAM_SPREAD));
+        active = true;
         env.Trigger();
     }
 }

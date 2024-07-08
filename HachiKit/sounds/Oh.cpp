@@ -28,17 +28,21 @@ void Oh::Init(std::string slot, float sample_rate, float attack, float hold, flo
 }
 
 float Oh::Process() {
+    if (!active) return 0.0f; 
+
     if (source == NULL) {
         return 0.0f;
     }
 
     float sig = source->Signal() * env.Process();
+    active = env.IsRunning();
     return velocity * sig;
 }
 
 void Oh::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         env.Trigger();
     }
 }

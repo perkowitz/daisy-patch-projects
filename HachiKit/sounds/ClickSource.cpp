@@ -35,6 +35,8 @@ void ClickSource::Init(std::string slot, float sample_rate, float hpfFreq, float
 }
 
 float ClickSource::Process() {
+    if (!active) return 0.0f; 
+
     // noise goes through a hpf, then through an lpf modulated by the lpf env.
     // lpf env also controls amp of noise
     float lpfEnvSignal = lpfEnv.Process();
@@ -42,12 +44,14 @@ float ClickSource::Process() {
     hpf.Process(noise.Process());
     lpf.Process(hpf.High());
     signal = lpf.Low() * lpfEnvSignal;
+    active = lpfEnv.IsRunning(); // lpfEnv is also the amp env for the click
     return signal;
 }
 
 void ClickSource::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         lpfEnv.Trigger();
     }
 }

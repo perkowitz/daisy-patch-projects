@@ -170,6 +170,7 @@ void ProcessEncoder() {
 
     int inc = hw.encoder.Increment();
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
+    // u8 newMenuIndex = (currentMenuIndex + inc) % Screen::MENU_SIZE;
     if (newMenuIndex != currentMenuIndex) {
         if (newMenuIndex < drumCount) {
             currentMenu = MENU_SOUNDS;
@@ -185,8 +186,6 @@ void ProcessEncoder() {
         }
 
         currentMenuIndex = newMenuIndex;
-        usageCounter = 0;
-        screen.SetScreenOn(true);
         redraw = true;
         hw.display.Fill(false);
     }
@@ -275,8 +274,11 @@ void AudioCallback(AudioHandle::InputBuffer  in,
         cycle = (cycle + 1) % clockRange;
         if (cycle < clockThreshold) {
             // Process shared sound sources
-            source68.Process();
-            clickSource.Process();
+            if (ch.IsActive() || oh.IsActive() || cy.IsActive()) {
+                // is always active, so we skip it when the sounds that use it aren't active
+                source68.Process();
+            }
+            clickSource.Process();  // has its own env, so isn't always active
             // multiTomSource.Process();
 
             if (CPU_SINGLE) {
@@ -472,7 +474,7 @@ int main(void)
         screen.ShowCpu(avgCpu);
 
         usageCounter++;
-        if (usageCounter > 1000) {    // 10000=about 90 seconds
+        if (usageCounter > 10000) {    // 10000=about 90 seconds
             if (screen.IsScreenOn()) {
                 screen.SetScreenOn(false);
             }

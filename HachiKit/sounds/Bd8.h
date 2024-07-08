@@ -31,6 +31,7 @@ class Bd8: public IDrum {
         void Init(std::string slot, float sample_rate, float frequency, float ampAttack, float ampDecay, float pitchAttack, float pitchDecay, float modAmount);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         std::string GetParamString(uint8_t param);
@@ -45,6 +46,8 @@ class Bd8: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "Mod", "aDcy", "pDcy", "aAtk", "pAtk", "aCrv" };
         std::string slot;
+        bool active = false;
+        u32 cycleCount = 0;
         Param parameters[PARAM_COUNT];
         Oscillator osc;
         AdEnv ampEnv;

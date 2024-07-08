@@ -35,6 +35,12 @@ class IDrum {
         */
         virtual void Trigger(float velocity) = 0;
 
+        /**
+         * IsActive
+         * Whether the drum is currently making sound or has finished.
+        */
+        virtual bool IsActive() = 0;
+
         /** Get the current value of a parameter.
          * \param param index of the desired parameter (must be < PARAM_COUNT).
         */

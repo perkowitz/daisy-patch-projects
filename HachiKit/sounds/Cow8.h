@@ -35,6 +35,7 @@ class Cow8: public IDrum {
         void Init(std::string slot, float sample_rate, float attack, float decay, HhSource68 *source, float hpfCutoff, float lpfCutoff);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         float UpdateParam(uint8_t param, float value);
@@ -49,6 +50,7 @@ class Cow8: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Hpf", "Lpf" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         // ISource *source = NULL;
