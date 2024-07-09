@@ -35,9 +35,6 @@ void Bd8::Init(std::string slot, float sample_rate, float frequency, float ampAt
 }
 
 float Bd8::Process() {
-    if (!active && cycleCount > 100) return 0.0f; 
-
-    cycleCount++;
     float psig = pitchEnv.Process();
     osc.SetFreq(parameters[PARAM_FREQUENCY].GetScaledValue() + parameters[PARAM_MOD_AMT].GetScaledValue() * psig);
     active = ampEnv.IsRunning();
@@ -48,7 +45,6 @@ void Bd8::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
         osc.Reset();
-        cycleCount = 0;
         active = true;
         ampEnv.Trigger();
         pitchEnv.Trigger();

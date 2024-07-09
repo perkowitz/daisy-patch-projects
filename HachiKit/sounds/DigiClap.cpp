@@ -26,8 +26,6 @@ void DigiClap::Init(std::string slot, float sample_rate, float spread, float dec
 }
 
 float DigiClap::Process() {
-    if (!active) return 0.0f; 
-
     if (!env.IsRunning()) {
         repeat++;
         if (repeat == REPEATS) {

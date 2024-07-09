@@ -43,8 +43,6 @@ void Cow8::Init(std::string slot, float sample_rate, float attack, float decay, 
 }
 
 float Cow8::Process() {
-    if (!active) return 0.0f; 
-
     if (source == NULL) {
         return 0.0f;
     }

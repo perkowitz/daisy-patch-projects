@@ -35,8 +35,6 @@ void ClickSource::Init(std::string slot, float sample_rate, float hpfFreq, float
 }
 
 float ClickSource::Process() {
-    if (!active) return 0.0f; 
-
     // noise goes through a hpf, then through an lpf modulated by the lpf env.
     // lpf env also controls amp of noise
     float lpfEnvSignal = lpfEnv.Process();

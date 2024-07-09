@@ -20,8 +20,6 @@ void SdNoise::Init(std::string slot, float sample_rate, float attack, float deca
 }
 
 float SdNoise::Process() {
-    if (!active) return 0.0f; 
-
     active = ampEnv.IsRunning();
     return velocity * noise.Process() * ampEnv.Process();
 }
@@ -88,7 +86,7 @@ void SdNoise::SetParam(uint8_t param, float scaled) {
                 break;
             case PARAM_DECAY: 
                 parameters[param].SetScaledValue(scaled);
-                ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
+               ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
                 break;
             case PARAM_CURVE: 
                 parameters[param].SetScaledValue(scaled);

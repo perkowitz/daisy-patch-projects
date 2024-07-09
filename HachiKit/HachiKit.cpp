@@ -8,8 +8,10 @@
 #include "Utility.h"
 #include "audio/Mixer.h"
 #include "audio/Processing.h"
-#include "Screen.h"
+#include "DrumWrapper.h"
 #include "IDrum.h"
+#include "Kits.h"
+#include "Screen.h"
 #include "sounds/Bd8.h"
 #include "sounds/Ch.h"
 #include "sounds/Clap.h"
@@ -43,27 +45,29 @@ CpuLoadMeter meter;
 
 Mixer mixer;
 
-IDrum *drums[16];
-uint8_t drumCount = 1;
-Bd8 bd;
-SdNoise rs;
-Sd8 sd;
-Clap cp;
-DigiClap sd2;
-Tom lt, mt, ht;
-// MultiTom lt, mt, ht;
-Ch ch;
-Oh oh;
-SdNoise ma;
-Cy cy;
-Cow8 cb;
-FmDrum fm1, fm2;
-Clave8 cl;
+// IDrum *drums[16];
+// u8 drumCount = 0;
 
-// Shared sound sources
-HhSource68 source68;
-ClickSource clickSource;
-// MultiTomSource multiTomSource;
+// Bd8 bd;
+// DrumWrapper bdWrapper;
+// SdNoise rs;
+// Sd8 sd;
+// Clap cp;
+// DigiClap sd2;
+// Tom lt, mt, ht;
+// // MultiTom lt, mt, ht;
+// Ch ch;
+// Oh oh;
+// SdNoise ma;
+// Cy cy;
+// Cow8 cb;
+// FmDrum fm1, fm2;
+// Clave8 cl;
+
+// // Shared sound sources
+// HhSource68 source68;
+// ClickSource clickSource;
+// // MultiTomSource multiTomSource;
 
 u8 currentMenu = 0; 
 u8 currentMenuIndex = 0;
@@ -358,61 +362,62 @@ void HandleMidiMessage(MidiEvent m)
 // Main -- Init, and Midi Handling
 int main(void)
 {
-    // Init
+    // Init the hardware
     float samplerate;
     hw.Init(true);     // "true" boosts processor speed from 400mhz to 480mhz
     hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_32KHZ);  // 8,16,32,48; higher rate requires more CPU
     samplerate = hw.AudioSampleRate();
-
     meter.Init(samplerate, 128, 1.0f);
 
+    // // Shared sound sources
+    // source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
+    // clickSource.Init("", samplerate, 1500, 191, 116);
+    // // multiTomSource.Init("", samplerate, 500, &clickSource);
+
+    // bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
+    // bdWrapper.Init(&bd);
+    // rs.Init("RS", samplerate);
+    // sd.Init("SD", samplerate);
+    // cp.Init("CP", samplerate, 0.012, 0.8);
+    // sd2.Init("S2", samplerate, 0.012, 0.8, 3000);
+
+    // lt.Init("LT", samplerate, 80, &clickSource);
+    // mt.Init("MT", samplerate, 91, &clickSource);
+    // ht.Init("HT", samplerate, 106, &clickSource);
+    // // lt.Init("LT", samplerate, 80, 0.8, &multiTomSource, 0);
+    // // mt.Init("MT", samplerate, 91, 0.8, &multiTomSource, 1);
+    // // ht.Init("HT", samplerate, 106, 0.8, &multiTomSource, 2);
+
+
+    // ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
+    // oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
+    // ma.Init("MA", samplerate);
+    // cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
+    // cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
+    // fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
+    // fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
+    // cl.Init("CL", samplerate, 2000, 0.375);
+
+    // drums[0] = &bdWrapper;
+    // drums[1] = &rs;
+    // drums[2] = &sd;
+    // drums[3] = &cp;
+    // drums[4] = &sd2;
+    // drums[5] = &lt;
+    // drums[6] = &ch;
+    // drums[7] = &mt;
+    // drums[8] = &ma;
+    // drums[9] = &ht;
+    // drums[10] = &oh;
+    // drums[11] = &fm1;
+    // drums[12] = &fm2;
+    // drums[13] = &cy;
+    // drums[14] = &cl;
+    // drums[15] = &cb;
+
+    // Set up the kit and mixer
+    InitKit(samplerate);
     mixer.Reset();
-
-    // Shared sound sources
-    source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
-    clickSource.Init("", samplerate, 1500, 191, 116);
-    // multiTomSource.Init("", samplerate, 500, &clickSource);
-
-    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
-    rs.Init("RS", samplerate);
-    sd.Init("SD", samplerate);
-    cp.Init("CP", samplerate, 0.012, 0.8);
-    sd2.Init("S2", samplerate, 0.012, 0.8, 3000);
-
-    lt.Init("LT", samplerate, 80, &clickSource);
-    mt.Init("MT", samplerate, 91, &clickSource);
-    ht.Init("HT", samplerate, 106, &clickSource);
-    // lt.Init("LT", samplerate, 80, 0.8, &multiTomSource, 0);
-    // mt.Init("MT", samplerate, 91, 0.8, &multiTomSource, 1);
-    // ht.Init("HT", samplerate, 106, 0.8, &multiTomSource, 2);
-
-
-    ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    ma.Init("MA", samplerate);
-    cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
-    cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
-    fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
-    fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
-    cl.Init("CL", samplerate, 2000, 0.375);
-
-    drums[0] = &bd;
-    drums[1] = &rs;
-    drums[2] = &sd;
-    drums[3] = &cp;
-    drums[4] = &sd2;
-    drums[5] = &lt;
-    drums[6] = &ch;
-    drums[7] = &mt;
-    drums[8] = &ma;
-    drums[9] = &ht;
-    drums[10] = &oh;
-    drums[11] = &fm1;
-    drums[12] = &fm2;
-    drums[13] = &cy;
-    drums[14] = &cl;
-    drums[15] = &cb;
-    drumCount = 16;
     currentDrum = 0;
     currentMenuIndex = 0;
 
@@ -428,18 +433,6 @@ int main(void)
     mixer.SetChannelParam(14, Channel::PARAM_SEND2, 1);
     mixer.SetChannelParam(15, Channel::PARAM_SEND2, 1);
 
-    for (u8 i = 0; i < KNOB_COUNT; i++) {
-        lastKnobValue[i] = 0.0f;
-    }
-
-    //display
-    hw.display.Fill(false);
-    // screen.OledMessage("Hachikit 0.1", 5);
-    // Utility::DrawDrums(&hw.display, 5);
-    screen.DrawMenu(currentMenuIndex);
-    DisplayParamMenu();
-    hw.display.Update();
-
     // fill the menu
     for (u8 drum = 0; drum < drumCount; drum++) {
         screen.menuItems[drum] = drums[drum]->Slot();
@@ -453,6 +446,23 @@ int main(void)
         screen.menuItems[drumCount+2] = "C";
         screen.menuItems[drumCount+3] = "D";
     }
+
+    // initialize the knob tracking
+    for (u8 i = 0; i < KNOB_COUNT; i++) {
+        lastKnobValue[i] = 0.0f;
+    }
+
+
+    //display
+    // hw.display.Fill(false);
+    // screen.OledMessage("Hachikit 0.1", 5);
+    // Utility::DrawDrums(&hw.display, 5);
+    // screen.DrawMenu(currentMenuIndex);
+    // DisplayParamMenu();
+    // hw.display.Update();
+
+
+    DrawScreen(true);
 
     // Start stuff.
     hw.SetAudioBlockSize(128);

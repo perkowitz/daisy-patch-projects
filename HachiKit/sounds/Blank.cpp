@@ -19,8 +19,6 @@ void Blank::Init(std::string slot, float sample_rate, float frequency, float att
 }
 
 float Blank::Process() {
-    if (!active) return 0.0f; 
-
     // set active based on whether main amp env is running
     return 0.0f;
 }

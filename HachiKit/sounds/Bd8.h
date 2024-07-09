@@ -47,7 +47,6 @@ class Bd8: public IDrum {
         std::string paramNames[PARAM_COUNT] = { "Freq", "Mod", "aDcy", "pDcy", "aAtk", "pAtk", "aCrv" };
         std::string slot;
         bool active = false;
-        u32 cycleCount = 0;
         Param parameters[PARAM_COUNT];
         Oscillator osc;
         AdEnv ampEnv;

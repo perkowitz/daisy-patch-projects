@@ -35,7 +35,6 @@ void Tom::Init(std::string slot, float sample_rate, float frequency, ClickSource
 }
 
 float Tom::Process() {
-    if (!active) return 0.0f; 
 
     float clickSignal = clickSource == NULL ? 0.0f :  clickSource->Signal();
     

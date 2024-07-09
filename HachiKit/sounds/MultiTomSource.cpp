@@ -36,7 +36,6 @@ void MultiTomSource::Init(std::string slot, float sample_rate, float decay, Clic
 }
 
 float MultiTomSource::Process() {
-    if (!active) return 0.0f; 
 
     float clickSignal = clickSource == NULL ? 0.0f : clickSource->Signal();
     

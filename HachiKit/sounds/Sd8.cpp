@@ -42,8 +42,6 @@ void Sd8::Init(std::string slot, float sample_rate, float oscFrequency, float os
 }
 
 float Sd8::Process() {
-    if (!active) return 0.0f; 
-
     float sig = (1 - parameters[PARAM_MIX].GetScaledValue()) * osc.Process() * oscEnv.Process();
     sig += parameters[PARAM_MIX].GetScaledValue() * noise.Process() * noiseEnv.Process();
     active = oscEnv.IsRunning() || noiseEnv.IsRunning();

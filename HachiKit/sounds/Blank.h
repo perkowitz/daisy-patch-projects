@@ -20,6 +20,7 @@ class Blank: public IDrum {
         static const uint8_t PARAM_FREQUENCY = 0;
         static const uint8_t PARAM_ATTACK = 1;
         static const uint8_t PARAM_DECAY = 2;
+        u8 ParamCount() { return PARAM_COUNT; }
 
         void Init(std::string slot, float sample_rate);
         void Init(std::string slot, float sample_rate, float frequency, float attack, float decay);

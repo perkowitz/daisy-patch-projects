@@ -24,8 +24,6 @@ void Clap::Init(std::string slot, float sample_rate, float spread, float decay) 
 }
 
 float Clap::Process() {
-    if (!active) return 0.0f; 
-
     if (!env.IsRunning()) {
         repeat++;
         if (repeat == REPEATS) {
