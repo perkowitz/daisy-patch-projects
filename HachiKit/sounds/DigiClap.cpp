@@ -5,16 +5,16 @@ using namespace daisy;
 using namespace daisysp;
 
 void DigiClap::Init(std::string slot, float sample_rate) {
-    Init(slot, sample_rate, 0.012f, 1.0f, 3000.0f);
+    Init(slot, sample_rate, 0.012f, 1.0f, 3000.0f, 0);
 }
 
-void DigiClap::Init(std::string slot, float sample_rate, float spread, float decay, float frequency) {
+void DigiClap::Init(std::string slot, float sample_rate, float spread, float decay, float frequency, float mod) {
 
     this->slot = slot;
 
     clockedNoise.Init(sample_rate);
     SetParam(PARAM_FREQUENCY, frequency);
-    clockedNoise.SetFreq(frequency);
+    SetParam(PARAM_MOD, mod);
 
     env.Init(sample_rate);
     env.SetMax(1);
@@ -35,8 +35,14 @@ float DigiClap::Process() {
             env.Trigger();
         }
     }
-    active = env.IsRunning();
-    return velocity * clockedNoise.Process() * env.Process();
+    if (repeat <= REPEATS) {
+        active = true;
+    } else {
+        active = env.IsRunning(); 
+    }
+    float envSig = env.Process();
+    clockedNoise.SetFreq(GetParam(PARAM_FREQUENCY) + GetParam(PARAM_MOD) * envSig);
+    return velocity * clockedNoise.Process() * envSig;
 }
 
 void DigiClap::Trigger(float velocity) {
@@ -60,6 +66,8 @@ std::string DigiClap::GetParamString(uint8_t param) {
             case PARAM_DECAY: 
                 return std::to_string((int)(GetParam(param) * 1000));// + "ms";
             case PARAM_FREQUENCY: 
+                return std::to_string((int)(GetParam(param)));
+            case PARAM_MOD: 
                 return std::to_string((int)(GetParam(param)));
         }
     }
@@ -104,7 +112,13 @@ float DigiClap::SetParam(uint8_t param, float value, bool isRaw) {
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
-                clockedNoise.SetFreq(scaled);
+                return scaled;
+            case PARAM_MOD: 
+                if (isRaw) {
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, -15000, 15000, Parameter::LINEAR));
+                } else {
+                    parameters[param].SetScaledValue(value);
+                }
                 return scaled;
         }
     }

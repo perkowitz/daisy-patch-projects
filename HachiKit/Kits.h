@@ -75,7 +75,7 @@ void InitKit(float samplerate) {
     rs.Init("RS", samplerate);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
-    sd2.Init("S2", samplerate, 0.012, 0.8, 3000);
+    sd2.Init("S2", samplerate, 0.012, 0.8, 3000, 0);
 
     lt.Init("LT", samplerate, 80, &clickSource);
     mt.Init("MT", samplerate, 91, &clickSource);
