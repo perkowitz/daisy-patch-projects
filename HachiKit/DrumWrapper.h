@@ -11,6 +11,8 @@ using namespace daisy;
 using namespace daisysp;
 
 #define CYCLECOUNT_THRESHOLD 1000
+#define BUFFER_SIZE 6000
+#define BUFFER_FADEOUT 100
 
 class DrumWrapper: public IDrum {
 
@@ -33,9 +35,17 @@ class DrumWrapper: public IDrum {
         std::string Slot() { return drum->Slot(); }
         std::string GetParamName(uint8_t param) { return drum->GetParamName(param); }
 
+        void setBufferEnabled(bool bufferEnabled) { this->bufferEnabled = bufferEnabled; }
+
     private:
         IDrum *drum;
         u32 cycleCount = 0;
+
+        float buffer[BUFFER_SIZE];
+        u16 bufferIndex = 0;
+        u16 bufferFilledIndex = 0;
+        bool bufferDone = false;
+        bool bufferEnabled = true;
 
 };
 

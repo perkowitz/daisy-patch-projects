@@ -71,7 +71,6 @@ void InitKit(float samplerate) {
 
     // Init all drum sounds
     bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
-    bdWrapper.Init(&bd);
     rs.Init("RS", samplerate);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
@@ -95,7 +94,7 @@ void InitKit(float samplerate) {
     cl.Init("CL", samplerate, 2000, 0.375);
 
     // Assign sounds to kit
-    drums[0] = &bdWrapper;
+    drums[0] = &bd;
     drums[1] = &rs;
     drums[2] = &sd;
     drums[3] = &cp;
@@ -116,6 +115,11 @@ void InitKit(float samplerate) {
         drumWrappers[i].Init(drums[i]);
         drums[i] = &drumWrappers[i];
     }
+    
+    // buffers don't work well with claps; cymbal is just too long
+    drumWrappers[3].setBufferEnabled(false);
+    drumWrappers[4].setBufferEnabled(false);
+    drumWrappers[13].setBufferEnabled(false);
 }
 
 #endif // kit==0

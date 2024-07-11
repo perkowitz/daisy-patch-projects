@@ -171,8 +171,12 @@ void DrawScreen(bool clearFirst) {
 void ProcessEncoder() {
 
     bool redraw = false;
+    bool screenOn = false;
 
     int inc = hw.encoder.Increment();
+    if (inc != 0) {
+        screenOn = true;
+    }
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
     // u8 newMenuIndex = (currentMenuIndex + inc) % Screen::MENU_SIZE;
     if (newMenuIndex != currentMenuIndex) {
@@ -199,21 +203,22 @@ void ProcessEncoder() {
             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
             redraw = true;
             drums[currentDrum]->ResetParams();
-            usageCounter = 0;
-            screen.SetScreenOn(true);
-            hw.display.Fill(false);
+            screenOn = true;
         } else if (currentMenu == MENU_MIXER) {
             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
             redraw = true;
             // reset params for mixer row?
-            usageCounter = 0;
-            screen.SetScreenOn(true);
-            hw.display.Fill(false);
+            screenOn = true;
         }
     }
 
+    if (screenOn) {
+        usageCounter = 0;
+        screen.SetScreenOn(true);
+        hw.display.Fill(false);
+    }
     if (redraw) {
-        DrawScreen(false);
+        DrawScreen(true);
         hw.display.Update();        
     }
 }
@@ -365,7 +370,7 @@ int main(void)
     // Init the hardware
     float samplerate;
     hw.Init(true);     // "true" boosts processor speed from 400mhz to 480mhz
-    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_32KHZ);  // 8,16,32,48; higher rate requires more CPU
+    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);  // 8,16,32,48; higher rate requires more CPU
     samplerate = hw.AudioSampleRate();
     meter.Init(samplerate, 128, 1.0f);
 
@@ -484,7 +489,7 @@ int main(void)
         screen.ShowCpu(avgCpu);
 
         usageCounter++;
-        if (usageCounter > 10000) {    // 10000=about 90 seconds
+        if (usageCounter > 3000) {    // 10000=about 90 seconds
             if (screen.IsScreenOn()) {
                 screen.SetScreenOn(false);
             }

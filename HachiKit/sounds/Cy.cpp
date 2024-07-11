@@ -69,7 +69,7 @@ void Cy::Trigger(float velocity) {
     if (this->velocity > 0) {
         active = true;
         env.Trigger();
-        bufferIndex = 0;
+        // bufferIndex = 0;
     }
 }
 
