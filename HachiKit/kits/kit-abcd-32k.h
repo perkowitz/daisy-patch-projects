@@ -2,11 +2,33 @@
 #ifndef DRUMKIT_H
 #define DRUMKIT_H
 
+#include "../sounds/Bd8.h"
+#include "../sounds/Ch.h"
+#include "../sounds/Clap.h"
+#include "../sounds/Clave8.h"
+#include "../sounds/ClickSource.h"
+#include "../sounds/Cow8.h"
+#include "../sounds/Cy.h"
+#include "../sounds/DigiClap.h"
+#include "../sounds/FmDrum.h"
+#include "../sounds/HhSource68.h"
+#include "../sounds/MultiTomSource.h"
+#include "../sounds/MultiTom.h"
+#include "../sounds/Oh.h"
+#include "../sounds/Sd8.h"
+#include "../sounds/SdNoise.h"
+#include "../sounds/Tom.h"
+
+
+SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::SampleRate::SAI_32KHZ;
 
 IDrum *drums[16];
+IDrum *sources[2];
 u8 drumCount = 16;
+u8 sourceCount = 2;
 DrumWrapper drumWrappers[16];
 
+// sounds
 Bd8 bd;
 DrumWrapper bdWrapper;
 SdNoise rs;
@@ -28,12 +50,15 @@ HhSource68 source68;
 ClickSource clickSource;
 // MultiTomSource multiTomSource;
 
+
 void InitKit(float samplerate) {
 
     // Init any sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
     clickSource.Init("", samplerate, 1500, 191, 116);
     // multiTomSource.Init("", samplerate, 500, &clickSource);
+    sources[0] = &source68;
+    sources[1] = &clickSource;
 
     // Init all drum sounds
     bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);

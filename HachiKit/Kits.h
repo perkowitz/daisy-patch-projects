@@ -5,9 +5,11 @@
  * Uses compiler directives to avoid extra overhead.
  * Must include these declarations:
  *   IDrum *drums[N];
+ *   IDrum *sources[M];
  *   u8 drumCount = N;
+ *   u8 sourceCount = M;
  *   void InitKit(float samplerate) {}
- * 
+ *   SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::<rate>;
 */
 #ifndef KITS_H
 #define KITS_H
@@ -16,22 +18,7 @@
 #include "daisysp.h"
 #include "IDrum.h"
 #include "Utility.h"
-#include "sounds/Bd8.h"
-#include "sounds/Ch.h"
-#include "sounds/Clap.h"
-#include "sounds/Clave8.h"
-#include "sounds/ClickSource.h"
-#include "sounds/Cow8.h"
-#include "sounds/Cy.h"
-#include "sounds/DigiClap.h"
-#include "sounds/FmDrum.h"
-#include "sounds/HhSource68.h"
-#include "sounds/MultiTomSource.h"
-#include "sounds/MultiTom.h"
-#include "sounds/Oh.h"
-#include "sounds/Sd8.h"
-#include "sounds/SdNoise.h"
-#include "sounds/Tom.h"
+
 
 // #define SELECTED_KIT 0
 
@@ -39,7 +26,7 @@
 // #include "kits/kit-abcd.h"
 // #endif
 
-#include "kits/kit-abcd.h"
+#include "kits/kit-abcd-32k.h"
 // #include "kits/testing.h"
 
 #endif
