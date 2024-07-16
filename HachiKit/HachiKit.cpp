@@ -12,22 +12,7 @@
 #include "IDrum.h"
 #include "Kits.h"
 #include "Screen.h"
-#include "sounds/Bd8.h"
-#include "sounds/Ch.h"
-#include "sounds/Clap.h"
-#include "sounds/Clave8.h"
-#include "sounds/ClickSource.h"
-#include "sounds/Cow8.h"
-#include "sounds/Cy.h"
-#include "sounds/DigiClap.h"
-#include "sounds/FmDrum.h"
-#include "sounds/HhSource68.h"
-#include "sounds/MultiTomSource.h"
-#include "sounds/MultiTom.h"
-#include "sounds/Oh.h"
-#include "sounds/Sd8.h"
-#include "sounds/SdNoise.h"
-#include "sounds/Tom.h"
+
 
 using namespace daisy;
 using namespace daisysp;
@@ -214,8 +199,10 @@ void ProcessEncoder() {
 
     if (screenOn) {
         usageCounter = 0;
-        screen.SetScreenOn(true);
-        hw.display.Fill(false);
+        if (!screen.IsScreenOn()) {
+            screen.SetScreenOn(true);
+            hw.display.Fill(false);
+        }
     }
     if (redraw) {
         DrawScreen(true);
@@ -231,7 +218,7 @@ void ProcessKnobs() {
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  0) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
-            drums[currentDrum]->UpdateParam(param, sig);
+            drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
                 usageCounter = 0;
                 lastKnobValue[knob] = sig;
@@ -370,7 +357,7 @@ int main(void)
     // Init the hardware
     float samplerate;
     hw.Init(true);     // "true" boosts processor speed from 400mhz to 480mhz
-    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);  // 8,16,32,48; higher rate requires more CPU
+    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_32KHZ);  // 8,16,32,48; higher rate requires more CPU
     samplerate = hw.AudioSampleRate();
     meter.Init(samplerate, 128, 1.0f);
 

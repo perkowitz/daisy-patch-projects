@@ -39,6 +39,7 @@
 // #include "kits/kit-abcd.h"
 // #endif
 
-#include "kits/testing.h"
+#include "kits/kit-abcd.h"
+// #include "kits/testing.h"
 
 #endif

@@ -1,3 +1,7 @@
+// all kit .h files should include this so only one can get loaded
+#ifndef DRUMKIT_H
+#define DRUMKIT_H
+
 
 IDrum *drums[16];
 u8 drumCount = 16;
@@ -79,7 +83,9 @@ void InitKit(float samplerate) {
     }
     
     // buffers don't work well with claps; cymbal is just too long
-    drumWrappers[3].setBufferEnabled(false);
-    drumWrappers[4].setBufferEnabled(false);
-    drumWrappers[13].setBufferEnabled(false);
+    // drumWrappers[3].setBufferEnabled(false);
+    // drumWrappers[4].setBufferEnabled(false);
+    // drumWrappers[13].setBufferEnabled(false);
 }
+
+#endif
