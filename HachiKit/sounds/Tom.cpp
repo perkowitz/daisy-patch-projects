@@ -48,16 +48,18 @@ float Tom::Process() {
     // // // apply velocity scaling more strong to noise than osc
     // // float signal = noiseSignal * velocity + oscSignal * (0.4 + velocity * 0.6);
     // // return signal;
+    active = ampEnv.IsRunning() || clickSource->IsActive();
     return (clickSignal + oscSignal) * velocity; 
 }
 
 void Tom::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        osc.Reset();
+        active = true;
         clickSource->Trigger(velocity);
         ampEnv.Trigger();
         pitchEnv.Trigger();
-        osc.Reset();
     }
 }
 

@@ -46,6 +46,7 @@ class HhSource68: public IDrum {
 
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return true; }
         float Signal();
         float Cowbell(bool isLow);
 
@@ -66,6 +67,7 @@ class HhSource68: public IDrum {
 
         std::string paramNames[PARAM_COUNT] = { "Mrph", "HPF", "LPF" };
         std::string slot;
+        // bool active = false;  // HhSource68 is always active
         Param parameters[PARAM_COUNT];
 
         float signal = 0.0f;

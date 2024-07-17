@@ -34,6 +34,7 @@ float Ch::Process() {
         return 0.0f;
     }
 
+    active = env.IsRunning();
     float sig = source->Signal() * env.Process();
     return velocity * sig;
 }
@@ -41,6 +42,7 @@ float Ch::Process() {
 void Ch::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         env.Trigger();
     }
 }

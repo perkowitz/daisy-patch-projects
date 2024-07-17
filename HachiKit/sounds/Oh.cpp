@@ -33,12 +33,14 @@ float Oh::Process() {
     }
 
     float sig = source->Signal() * env.Process();
+    active = env.IsRunning();
     return velocity * sig;
 }
 
 void Oh::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         env.Trigger();
     }
 }

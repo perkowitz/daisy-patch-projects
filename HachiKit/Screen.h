@@ -51,6 +51,8 @@ class Screen {
         void OledMessage(std::string message, int row);
         void OledMessage(std::string message, int row, int column);
 
+        void ShowCpu(float usage);
+
     private:
         OledDisplay<SSD130x4WireSpi128x64Driver> *display;
         bool screenOn = true;

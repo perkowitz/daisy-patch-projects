@@ -19,12 +19,14 @@ void Blank::Init(std::string slot, float sample_rate, float frequency, float att
 }
 
 float Blank::Process() {
+    // set active based on whether main amp env is running
     return 0.0f;
 }
 
 void Blank::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         // trigger envelopes
     }
 }

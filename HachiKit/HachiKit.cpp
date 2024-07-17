@@ -8,24 +8,11 @@
 #include "Utility.h"
 #include "audio/Mixer.h"
 #include "audio/Processing.h"
-#include "Screen.h"
+#include "DrumWrapper.h"
 #include "IDrum.h"
-#include "sounds/Bd8.h"
-#include "sounds/Ch.h"
-#include "sounds/Clap.h"
-#include "sounds/Clave8.h"
-#include "sounds/ClickSource.h"
-#include "sounds/Cow8.h"
-#include "sounds/Cy.h"
-#include "sounds/DigiClap.h"
-#include "sounds/FmDrum.h"
-#include "sounds/HhSource68.h"
-#include "sounds/MultiTomSource.h"
-#include "sounds/MultiTom.h"
-#include "sounds/Oh.h"
-#include "sounds/Sd8.h"
-#include "sounds/SdNoise.h"
-#include "sounds/Tom.h"
+#include "Kits.h"
+#include "Screen.h"
+
 
 using namespace daisy;
 using namespace daisysp;
@@ -42,28 +29,6 @@ Screen screen(&hw.display);
 CpuLoadMeter meter;
 
 Mixer mixer;
-
-IDrum *drums[16];
-uint8_t drumCount = 1;
-Bd8 bd;
-SdNoise rs;
-Sd8 sd;
-Clap cp;
-DigiClap sd2;
-Tom lt, mt, ht;
-// MultiTom lt, mt, ht;
-Ch ch;
-Oh oh;
-SdNoise ma;
-Cy cy;
-Cow8 cb;
-FmDrum fm1, fm2;
-Clave8 cl;
-
-// Shared sound sources
-HhSource68 source68;
-ClickSource clickSource;
-// MultiTomSource multiTomSource;
 
 u8 currentMenu = 0; 
 u8 currentMenuIndex = 0;
@@ -167,9 +132,14 @@ void DrawScreen(bool clearFirst) {
 void ProcessEncoder() {
 
     bool redraw = false;
+    bool screenOn = false;
 
     int inc = hw.encoder.Increment();
+    if (inc != 0) {
+        screenOn = true;
+    }
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
+    // u8 newMenuIndex = (currentMenuIndex + inc) % Screen::MENU_SIZE;
     if (newMenuIndex != currentMenuIndex) {
         if (newMenuIndex < drumCount) {
             currentMenu = MENU_SOUNDS;
@@ -185,8 +155,6 @@ void ProcessEncoder() {
         }
 
         currentMenuIndex = newMenuIndex;
-        usageCounter = 0;
-        screen.SetScreenOn(true);
         redraw = true;
         hw.display.Fill(false);
     }
@@ -196,21 +164,24 @@ void ProcessEncoder() {
             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
             redraw = true;
             drums[currentDrum]->ResetParams();
-            usageCounter = 0;
-            screen.SetScreenOn(true);
-            hw.display.Fill(false);
+            screenOn = true;
         } else if (currentMenu == MENU_MIXER) {
             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
             redraw = true;
             // reset params for mixer row?
-            usageCounter = 0;
+            screenOn = true;
+        }
+    }
+
+    if (screenOn) {
+        usageCounter = 0;
+        if (!screen.IsScreenOn()) {
             screen.SetScreenOn(true);
             hw.display.Fill(false);
         }
     }
-
     if (redraw) {
-        DrawScreen(false);
+        DrawScreen(true);
         hw.display.Update();        
     }
 }
@@ -223,7 +194,7 @@ void ProcessKnobs() {
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  0) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
-            drums[currentDrum]->UpdateParam(param, sig);
+            drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
                 usageCounter = 0;
                 lastKnobValue[knob] = sig;
@@ -275,9 +246,13 @@ void AudioCallback(AudioHandle::InputBuffer  in,
         cycle = (cycle + 1) % clockRange;
         if (cycle < clockThreshold) {
             // Process shared sound sources
-            source68.Process();
-            clickSource.Process();
-            // multiTomSource.Process();
+            for (u8 i = 0; i < sourceCount; i++) {
+                sources[i]->Process();
+            }
+            // if (ch.IsActive() || oh.IsActive() || cy.IsActive()) {
+            //     // is always active, so we skip it when the sounds that use it aren't active
+            //     source68.Process();
+            // }
 
             if (CPU_SINGLE) {
                 mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
@@ -356,61 +331,16 @@ void HandleMidiMessage(MidiEvent m)
 // Main -- Init, and Midi Handling
 int main(void)
 {
-    // Init
+    // Init the hardware
     float samplerate;
     hw.Init(true);     // "true" boosts processor speed from 400mhz to 480mhz
-    hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_32KHZ);  // 8,16,32,48; higher rate requires more CPU
+    hw.SetAudioSampleRate(audioSampleRate);  // 8,16,32,48; higher rate requires more CPU
     samplerate = hw.AudioSampleRate();
-
     meter.Init(samplerate, 128, 1.0f);
 
+    // Set up the kit and mixer
+    InitKit(samplerate);
     mixer.Reset();
-
-    // Shared sound sources
-    source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
-    clickSource.Init("", samplerate, 1500, 191, 116);
-    // multiTomSource.Init("", samplerate, 500, &clickSource);
-
-    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
-    rs.Init("RS", samplerate);
-    sd.Init("SD", samplerate);
-    cp.Init("CP", samplerate, 0.012, 0.8);
-    sd2.Init("S2", samplerate, 0.012, 0.8, 3000);
-
-    lt.Init("LT", samplerate, 80, &clickSource);
-    mt.Init("MT", samplerate, 91, &clickSource);
-    ht.Init("HT", samplerate, 106, &clickSource);
-    // lt.Init("LT", samplerate, 80, 0.8, &multiTomSource, 0);
-    // mt.Init("MT", samplerate, 91, 0.8, &multiTomSource, 1);
-    // ht.Init("HT", samplerate, 106, 0.8, &multiTomSource, 2);
-
-
-    ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    ma.Init("MA", samplerate);
-    cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
-    cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
-    fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
-    fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
-    cl.Init("CL", samplerate, 2000, 0.375);
-
-    drums[0] = &bd;
-    drums[1] = &rs;
-    drums[2] = &sd;
-    drums[3] = &cp;
-    drums[4] = &sd2;
-    drums[5] = &lt;
-    drums[6] = &ch;
-    drums[7] = &mt;
-    drums[8] = &ma;
-    drums[9] = &ht;
-    drums[10] = &oh;
-    drums[11] = &fm1;
-    drums[12] = &fm2;
-    drums[13] = &cy;
-    drums[14] = &cl;
-    drums[15] = &cb;
-    drumCount = 16;
     currentDrum = 0;
     currentMenuIndex = 0;
 
@@ -426,18 +356,6 @@ int main(void)
     mixer.SetChannelParam(14, Channel::PARAM_SEND2, 1);
     mixer.SetChannelParam(15, Channel::PARAM_SEND2, 1);
 
-    for (u8 i = 0; i < KNOB_COUNT; i++) {
-        lastKnobValue[i] = 0.0f;
-    }
-
-    //display
-    hw.display.Fill(false);
-    // screen.OledMessage("Hachikit 0.1", 5);
-    // Utility::DrawDrums(&hw.display, 5);
-    screen.DrawMenu(currentMenuIndex);
-    DisplayParamMenu();
-    hw.display.Update();
-
     // fill the menu
     for (u8 drum = 0; drum < drumCount; drum++) {
         screen.menuItems[drum] = drums[drum]->Slot();
@@ -451,6 +369,13 @@ int main(void)
         screen.menuItems[drumCount+2] = "C";
         screen.menuItems[drumCount+3] = "D";
     }
+
+    // initialize the knob tracking
+    for (u8 i = 0; i < KNOB_COUNT; i++) {
+        lastKnobValue[i] = 0.0f;
+    }
+
+    DrawScreen(true);
 
     // Start stuff.
     hw.SetAudioBlockSize(128);
@@ -469,9 +394,10 @@ int main(void)
 
         float avgCpu = meter.GetAvgCpuLoad();
         screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
+        screen.ShowCpu(avgCpu);
 
         usageCounter++;
-        if (usageCounter > 1000) {    // 10000=about 90 seconds
+        if (usageCounter > 3000) {    // 10000=about 90 seconds
             if (screen.IsScreenOn()) {
                 screen.SetScreenOn(false);
             }

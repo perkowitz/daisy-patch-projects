@@ -26,6 +26,7 @@ class SdNoise: public IDrum {
         void Init(std::string slot, float sample_rate, float attack, float decay, float curve);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         float UpdateParam(uint8_t param, float value);
@@ -40,6 +41,7 @@ class SdNoise: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Crv" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         WhiteNoise noise;

@@ -127,3 +127,15 @@ void Screen::OledMessage(std::string message, int row, int column) {
     display->Update();
 }
 
+void Screen::ShowCpu(float usage) {
+    if (!screenOn) { return; }
+
+    u8 menuHeight = FONT.FontWidth + 4;
+    u8 scaled = (int)(usage * WIDTH);
+    u8 qtr = WIDTH / 4;
+    display->DrawRect(0, HEIGHT - menuHeight - 3, WIDTH, HEIGHT - menuHeight - 1, false, true);
+    display->DrawRect(0, HEIGHT - menuHeight - 3, scaled, HEIGHT - menuHeight - 1, true, true);
+    display->DrawLine(qtr, HEIGHT - menuHeight - 4, qtr, HEIGHT - menuHeight -1, true);
+    display->DrawLine(2 * qtr, HEIGHT - menuHeight - 4, 2 * qtr, HEIGHT - menuHeight -1, true);
+    display->DrawLine(3 * qtr, HEIGHT - menuHeight - 4, 3 * qtr, HEIGHT - menuHeight -1, true);
+}

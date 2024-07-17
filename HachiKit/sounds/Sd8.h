@@ -29,6 +29,7 @@ class Sd8: public IDrum {
         void Init(std::string slot, float sample_rate, float oscFrequency, float oscAttack, float oscDecay, float noiseAttack, float noiseDecay, float mix);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         float UpdateParam(uint8_t param, float value);
@@ -43,6 +44,7 @@ class Sd8: public IDrum {
     private:
         static const std::string paramNames[PARAM_COUNT];
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         Oscillator osc;

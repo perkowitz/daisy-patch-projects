@@ -50,12 +50,14 @@ float Cow8::Process() {
     float sig = source->Cowbell(false) * env.Process();
     hpf.Process(sig);
     lpf.Process(hpf.High());
+    active = env.IsRunning();
     return velocity * lpf.Low();;
 }
 
 void Cow8::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         env.Trigger();
     }
 }

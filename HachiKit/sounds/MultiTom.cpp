@@ -18,6 +18,7 @@ void MultiTom::Init(std::string slot, float sample_rate, float frequency, float 
 }
 
 float MultiTom::Process() {
+    active = multiTomSource->IsActive();
     return multiTomSource->Signal();
 }
 

@@ -27,6 +27,7 @@ void FmDrum::Init(std::string slot, float sample_rate, float frequency, float ra
 }
 
 float FmDrum::Process() {
+    active = ampEnv.IsRunning();
     return velocity * fm.Process() * ampEnv.Process();
 }
 
@@ -34,6 +35,7 @@ void FmDrum::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
         fm.Reset();
+        active = true;
         ampEnv.Trigger();
     }
 }

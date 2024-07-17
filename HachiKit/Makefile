@@ -4,6 +4,7 @@ TARGET = HachiKit
 # Sources
 CPP_SOURCES += HachiKit.cpp \
 ParamSet.cpp \
+DrumWrapper.cpp \
 Screen.cpp \
 audio/AhdEnv.cpp \
 audio/Mixer.cpp \

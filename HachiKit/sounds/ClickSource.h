@@ -27,6 +27,7 @@ class ClickSource: public IDrum {
         void Init(std::string slot, float sample_rate, float hpfFreq, float lpfFreq, float mod);
         float Process();
         void Trigger(float velocity);
+        bool IsActive() { return active; }
         float Signal() { return signal; }
 
         float GetParam(uint8_t param);
@@ -42,6 +43,7 @@ class ClickSource: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Hpf", "Lpf", "fMod" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
         float velocity;
         float signal;

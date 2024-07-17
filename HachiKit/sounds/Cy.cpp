@@ -60,14 +60,16 @@ float Cy::Process() {
     // }
     // bufferIndex++;
 
+    active = env.IsRunning();
     return velocity * sig;
 }
 
 void Cy::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         env.Trigger();
-        bufferIndex = 0;
+        // bufferIndex = 0;
     }
 }
 

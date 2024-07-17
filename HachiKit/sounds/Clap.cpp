@@ -28,18 +28,24 @@ float Clap::Process() {
         repeat++;
         if (repeat == REPEATS) {
             env.SetTime(ADENV_SEG_DECAY, GetParam(PARAM_DECAY));
-        }
+        } 
         if (repeat <= REPEATS) {
             env.Trigger();
         }
     }
-    return velocity * noise.Process() * env.Process();
+    if (repeat <= REPEATS) {
+        active = true;
+    } else {
+        active = env.IsRunning(); 
+    }
+    return 3 * velocity * noise.Process() * env.Process();
 }
 
 void Clap::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
         repeat = 0;
+        active = true;
         env.SetTime(ADENV_SEG_DECAY, GetParam(PARAM_SPREAD));
         env.Trigger();
     }

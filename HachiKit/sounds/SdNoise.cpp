@@ -20,12 +20,14 @@ void SdNoise::Init(std::string slot, float sample_rate, float attack, float deca
 }
 
 float SdNoise::Process() {
+    active = ampEnv.IsRunning();
     return velocity * noise.Process() * ampEnv.Process();
 }
 
 void SdNoise::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         ampEnv.Trigger();
     }
 }
@@ -84,7 +86,7 @@ void SdNoise::SetParam(uint8_t param, float scaled) {
                 break;
             case PARAM_DECAY: 
                 parameters[param].SetScaledValue(scaled);
-                ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
+               ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
                 break;
             case PARAM_CURVE: 
                 parameters[param].SetScaledValue(scaled);

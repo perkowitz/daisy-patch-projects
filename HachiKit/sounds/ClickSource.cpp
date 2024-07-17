@@ -42,12 +42,14 @@ float ClickSource::Process() {
     hpf.Process(noise.Process());
     lpf.Process(hpf.High());
     signal = lpf.Low() * lpfEnvSignal;
+    active = lpfEnv.IsRunning(); // lpfEnv is also the amp env for the click
     return signal;
 }
 
 void ClickSource::Trigger(float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity > 0) {
+        active = true;
         lpfEnv.Trigger();
     }
 }

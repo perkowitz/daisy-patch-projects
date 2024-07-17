@@ -28,6 +28,7 @@ class MultiTomSource: public IDrum {
         float Signal() { return signal; }
         void Trigger(float velocity);
         void Trigger(float velocity, u8 index, float frequency);
+        bool IsActive() { return active; }
 
         float GetParam(uint8_t param);
         float UpdateParam(uint8_t param, float value);
@@ -42,6 +43,7 @@ class MultiTomSource: public IDrum {
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq" };
         std::string slot;
+        bool active = false;
         Param parameters[PARAM_COUNT];
 
         float velocity;
