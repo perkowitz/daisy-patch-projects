@@ -26,7 +26,9 @@
 // #include "kits/kit-abcd.h"
 // #endif
 
-#include "kits/kit-abcd-32k.h"
 // #include "kits/testing.h"
+// #include "kits/kit-abcd-32k.h"
+#include "kits/kit-ab-32k.h"
+// #include "kits/kit-cd-32k.h"
 
 #endif
