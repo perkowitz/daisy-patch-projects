@@ -7,6 +7,7 @@ ParamSet.cpp \
 DrumWrapper.cpp \
 Screen.cpp \
 audio/AhdEnv.cpp \
+audio/AhdEnv2.cpp \
 audio/Mixer.cpp \
 audio/Processing.cpp \
 sounds/Bd8.cpp \
