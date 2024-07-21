@@ -38,4 +38,5 @@ SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
 
 cleanlite:
-	-rm -fR $(BUILD_DIR)/HachiKit*
+	-rm -fR $(BUILD_DIR)/${TARGET}*
+

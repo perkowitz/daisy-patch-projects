@@ -30,7 +30,6 @@ DrumWrapper drumWrappers[16];
 
 // sounds
 Bd8 bd;
-DrumWrapper bdWrapper;
 SdNoise rs;
 Sd8 sd;
 Clap cp;
