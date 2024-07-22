@@ -14,7 +14,7 @@ void SdNoise::Init(std::string slot, float sample_rate, float attack, float deca
     noise.Init();
 
     env.Init(sample_rate);
-    env.SetStageTime(AhdEnv2::STAGE_HOLD, 0);
+    env.SetStageTime(AhdEnv::STAGE_HOLD, 0);
     SetParam(PARAM_ATTACK, attack);
     SetParam(PARAM_DECAY, decay);
     SetParam(PARAM_CURVE, curve);
@@ -56,11 +56,11 @@ float SdNoise::UpdateParam(uint8_t param, float raw) {
         switch (param) {
             case PARAM_ATTACK: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0, 5, Parameter::EXPONENTIAL));
-                env.SetStageTime(AhdEnv2::STAGE_ATTACK, scaled);
+                env.SetStageTime(AhdEnv::STAGE_ATTACK, scaled);
                 break;
             case PARAM_DECAY: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0, 5, Parameter::EXPONENTIAL));
-                env.SetStageTime(AhdEnv2::STAGE_DECAY, scaled);
+                env.SetStageTime(AhdEnv::STAGE_DECAY, scaled);
                 break;
             case PARAM_CURVE: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0, 10, Parameter::LINEAR));
@@ -83,11 +83,11 @@ void SdNoise::SetParam(uint8_t param, float scaled) {
         switch (param) {
             case PARAM_ATTACK: 
                 parameters[param].SetScaledValue(scaled);
-                env.SetStageTime(AhdEnv2::STAGE_ATTACK, scaled);
+                env.SetStageTime(AhdEnv::STAGE_ATTACK, scaled);
                 break;
             case PARAM_DECAY: 
                 parameters[param].SetScaledValue(scaled);
-                env.SetStageTime(AhdEnv2::STAGE_DECAY, scaled);
+                env.SetStageTime(AhdEnv::STAGE_DECAY, scaled);
                 break;
             case PARAM_CURVE: 
                 parameters[param].SetScaledValue(scaled);

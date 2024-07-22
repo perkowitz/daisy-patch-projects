@@ -7,6 +7,7 @@
 #include "../IDrum.h"
 #include "../Utility.h"
 #include "../Param.h"
+// #include "../audio/AhdEnv.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -51,6 +52,8 @@ class Bd8: public IDrum {
         Oscillator osc;
         AdEnv ampEnv;
         AdEnv pitchEnv;
+        // AhdEnv2 ampEnv;
+        // AhdEnv2 pitchEnv;
         float velocity;
 
         float SetParam(uint8_t param, float value, bool isRaw);

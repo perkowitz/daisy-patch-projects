@@ -47,7 +47,7 @@ class Screen {
         bool IsScreenOn() { return screenOn; }
         void Screensave();
         void ScreensaveEvent(u8 drum);
-        void DrawHachiLogo(u8 x);
+        // void DrawHachiLogo(u8 x);
 
         void OledMessage(std::string message, int row);
         void OledMessage(std::string message, int row, int column);
@@ -58,7 +58,6 @@ class Screen {
         OledDisplay<SSD130x4WireSpi128x64Driver> *display;
         bool screenOn = true;
         u16 screenCounter = 0;
-        u16 screenSaveEvents = 0;
         const static u8 screenSweepRate = 6;
 
 };

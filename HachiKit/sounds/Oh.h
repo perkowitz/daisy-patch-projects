@@ -9,7 +9,7 @@
 #include "../Utility.h"
 #include "../Param.h"
 #include "HhSource68.h"
-#include "../audio/AhdEnv.h"
+#include "../audio/AhdEnv1.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -52,7 +52,7 @@ class Oh: public IDrum {
         Param parameters[PARAM_COUNT];
         float velocity;
         HhSource68 *source = NULL;
-        AhdEnv env;
+        AhdEnv1 env;
 
 };
 
