@@ -27,7 +27,7 @@ using namespace daisysp;
 DaisyPatch hw;
 Screen screen(&hw.display);
 CpuLoadMeter meter;
-
+// MidiUsbHandler usbMidi;
 Mixer mixer;
 
 u8 currentMenu = 0; 
@@ -192,7 +192,7 @@ void ProcessKnobs() {
 
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         float sig = hw.controls[knob].Value();
-        if (currentMenu ==  0) {
+        if (currentMenu ==  MENU_SOUNDS) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
             drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
@@ -205,7 +205,7 @@ void ProcessKnobs() {
                     DisplayKnobValues();
                 }
             }
-        } else {
+        } else if (currentMenu == MENU_MIXER) {
             u8 channel = currentMixerSection * 4 + knob;
             bool changed = mixer.UpdateChannelParam(channel, currentKnobRow, sig);
             if (changed) {           // TODO combine for both menus at end of function
@@ -293,7 +293,7 @@ void HandleMidiMessage(MidiEvent m)
             // } else {
             //     osc.SetAmp(0.0f);
             // }
-            // screen.OledMessage("Midi: " + std::to_string(p.note) + ", " + std::to_string(p.velocity) + "     ", 3);
+            // screen.OledMessage("M: " + std::to_string(p.note) + ", " + std::to_string(p.velocity) + "     ", 3);
 
             NoteOnEvent p = m.AsNoteOn();
             float velocity = p.velocity / 127.0f;
@@ -377,9 +377,14 @@ int main(void)
 
     DrawScreen(true);
 
+    // MidiUsbHandler::Config midi_cfg;
+    // midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
+    // usbMidi.Init(midi_cfg);
+
     // Start stuff.
     hw.SetAudioBlockSize(128);
     hw.midi.StartReceive();
+    // usbMidi.StartReceive();
     hw.StartAdc();
     hw.StartAudio(AudioCallback);
     for(;;)
@@ -390,6 +395,12 @@ int main(void)
             HandleMidiMessage(hw.midi.PopEvent());
         }
 
+        // usbMidi.Listen();
+        // while(usbMidi.HasEvents())
+        // {
+        //     HandleMidiMessage(usbMidi.PopEvent());
+        // }
+
         DisplayKnobValues();
 
         float avgCpu = meter.GetAvgCpuLoad();
@@ -397,7 +408,7 @@ int main(void)
         screen.ShowCpu(avgCpu);
 
         usageCounter++;
-        if (usageCounter > 3000) {    // 10000=about 90 seconds
+        if (usageCounter > 10000) {    // 10000=about 90 seconds
             if (screen.IsScreenOn()) {
                 screen.SetScreenOn(false);
             }

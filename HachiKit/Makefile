@@ -27,6 +27,9 @@ sounds/Sd8.cpp \
 sounds/SdNoise.cpp \
 sounds/Tom.cpp 
 
+# uncomment one of these to put code in SRAM or QSPI; use 'make program-boot' to update
+#APP_TYPE=BOOT_SRAM
+#APP_TYPE=BOOT_QSPI
 
 OPT = -Os
 
