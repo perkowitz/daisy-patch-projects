@@ -60,7 +60,7 @@ void InitKit(float samplerate) {
     sources[1] = &clickSource;
 
     // Init all drum sounds
-    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
+    bd.Init("BD", samplerate, 64, 0.001, 4, 1.001, 0.15, 125);
     rs.Init("RS", samplerate, 0.2, 0.5, 4);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);

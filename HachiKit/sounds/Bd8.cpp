@@ -5,7 +5,7 @@ using namespace daisy;
 using namespace daisysp;
 
 void Bd8::Init(std::string slot, float sample_rate) {
-    Init(slot, sample_rate, 78, 0.001, 4.0, 0.001, 0.1, 0.95);
+    Init(slot, sample_rate, 78, 1.01, 4.0, 1.01, 0.1, 0.95);
 }
 
 void Bd8::Init(std::string slot, float sample_rate, float frequency, float ampAttack, float ampDecay, float pitchAttack, float pitchDecay, float modAmount) {
@@ -19,19 +19,18 @@ void Bd8::Init(std::string slot, float sample_rate, float frequency, float ampAt
 
     // ampEnv settings
     ampEnv.Init(sample_rate);
-    ampEnv.SetMax(1);
-    ampEnv.SetMin(0);
+    ampEnv.SetStageTime(AhdEnv::STAGE_HOLD, 0);
     SetParam(PARAM_AMP_ATTACK, ampAttack);
     SetParam(PARAM_AMP_DECAY, ampDecay);
 
     // pitchEnv settings
     pitchEnv.Init(sample_rate);
-    pitchEnv.SetMax(1);
-    pitchEnv.SetMin(0);
+    pitchEnv.SetStageTime(AhdEnv::STAGE_HOLD, 0);
     SetParam(PARAM_PITCH_ATTACK, pitchAttack);
     SetParam(PARAM_PITCH_DECAY, pitchDecay);
+
     SetParam(PARAM_MOD_AMT, modAmount);
-    SetParam(PARAM_AMP_CURVE, -30);
+    SetParam(PARAM_AMP_CURVE, 4);
 }
 
 float Bd8::Process() {
@@ -100,11 +99,12 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
                 break;
             case PARAM_AMP_ATTACK: 
                 if (isRaw) {
-                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 5, Parameter::EXPONENTIAL));
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0, 5, Parameter::EXPONENTIAL));
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
-                ampEnv.SetTime(ADENV_SEG_ATTACK, scaled);
+                // ampEnv.SetTime(ADENV_SEG_ATTACK, scaled);
+                ampEnv.SetStageTime(AhdEnv::STAGE_ATTACK, scaled);
                 break;
             case PARAM_AMP_DECAY: 
                 if (isRaw) {
@@ -112,15 +112,17 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
-                ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
+                // ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
+                ampEnv.SetStageTime(AhdEnv::STAGE_DECAY, scaled);
                 break;
             case PARAM_PITCH_ATTACK: 
                 if (isRaw) {
-                 scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 5, Parameter::EXPONENTIAL));
+                 scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0, 5, Parameter::EXPONENTIAL));
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
-                pitchEnv.SetTime(ADENV_SEG_ATTACK, scaled);
+                // pitchEnv.SetTime(ADENV_SEG_ATTACK, scaled);
+                pitchEnv.SetStageTime(AhdEnv::STAGE_ATTACK, scaled);
                 break;
             case PARAM_PITCH_DECAY: 
                 if (isRaw) {
@@ -128,7 +130,8 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
-                pitchEnv.SetTime(ADENV_SEG_DECAY, scaled);
+                // pitchEnv.SetTime(ADENV_SEG_DECAY, scaled);
+                pitchEnv.SetStageTime(AhdEnv::STAGE_DECAY, scaled);
                 break;
             case PARAM_MOD_AMT: 
                 if (isRaw) {
@@ -139,7 +142,7 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
                 break;
             case PARAM_AMP_CURVE:
                 if (isRaw) {
-                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, -100, 100, Parameter::LINEAR));
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0, 10, Parameter::LINEAR));
                 } else {
                     parameters[param].SetScaledValue(scaled);
                 }
