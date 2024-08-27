@@ -6,6 +6,7 @@
 #include <string>
 #include "../IDrum.h"
 #include "../Param.h"
+#include "../audio/AhdEnv.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -45,7 +46,7 @@ class SdNoise: public IDrum {
         Param parameters[PARAM_COUNT];
         float velocity;
         WhiteNoise noise;
-        AdEnv ampEnv;
+        AhdEnv env;
 
 };
 

@@ -47,6 +47,7 @@ class Screen {
         bool IsScreenOn() { return screenOn; }
         void Screensave();
         void ScreensaveEvent(u8 drum);
+        // void DrawHachiLogo(u8 x);
 
         void OledMessage(std::string message, int row);
         void OledMessage(std::string message, int row, int column);

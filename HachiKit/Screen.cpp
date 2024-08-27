@@ -96,6 +96,7 @@ void Screen::Screensave() {
     if (x < WIDTH - 1) {
         display->DrawLine(x + 1, 0, x + 1, HEIGHT, true);
     }
+
     screenCounter++;
 }
 
@@ -108,6 +109,26 @@ void Screen::ScreensaveEvent(u8 drum) {
         display->DrawCircle(x - 4, (15-drum) * 4 + 1, 1, true);
     }
 }
+
+// void Screen::DrawHachiLogo(u8 startX) {
+//     u8 w = 8;
+//     u8 w2 = 5;
+
+//     for (u8 row = 0; row < 8; row++) {
+//         if (row != 2 && row != 6) {
+//             for (u8 i = 0; i < 2; i++) {
+//                 u8 x = startX + i * w;
+//                 Rectangle r(x, row * w, w2, w2);
+//                 display->DrawRect(r.GetX(), r.GetY(), r.GetRight(), r.GetBottom(), true, false);
+//                 // display->DrawPixel(r.GetX(), r.GetY(), false);
+//                 // display->DrawPixel(r.GetX(), r.GetBottom(), false);
+//                 // display->DrawPixel(r.GetRight(), r.GetY(), false);
+//                 // display->DrawPixel(r.GetRight(), r.GetBottom(), false);
+//             }
+//         }
+//     }
+// }
+
 
 void Screen::OledMessage(std::string message, int row) {
     if (!screenOn) { return; }

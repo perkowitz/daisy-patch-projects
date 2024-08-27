@@ -3,6 +3,7 @@
 
 #include "daisy_patch.h"
 #include "daisysp.h"
+#include "../Utility.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -10,18 +11,25 @@ using namespace daisysp;
 class AhdEnv {
 
     public:
-        void Init(float sample_rate);
+        static const u8 STAGE_COUNT = 3;
+        static const u8 STAGE_ATTACK = 0;
+        static const u8 STAGE_HOLD = 1;
+        static const u8 STAGE_DECAY = 2;
+
+        void Init(float sampleRate);
         float Process();
         void Trigger();
-        void SetAttack(float time);
-        void SetHold(float time);
-        void SetDecay(float time);
-        void SetCurve(float scalar);
-        bool IsRunning() const;
+        void SetStageTime(u8 stage, float seconds);
+        void SetCurve(u8 curve) { this->curve = std::min(10, (int)curve); }
+        bool IsRunning() { return stage < STAGE_COUNT; }
 
     private:
-        AdEnv ad;
-        Adsr adsr;
+        float sampleRate = 48000;
+        long stageTimes[STAGE_COUNT] = { 0, 100, 1000 };
+        u8 curve = 0;
+        long counter = 0;
+        u8 stage = STAGE_COUNT;
+        float signal;
 };
 
 

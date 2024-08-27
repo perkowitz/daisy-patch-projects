@@ -60,8 +60,8 @@ void InitKit(float samplerate) {
     sources[1] = &clickSource;
 
     // Init all drum sounds
-    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
-    rs.Init("RS", samplerate);
+    bd.Init("BD", samplerate, 64, 0.001, 4, 1.001, 0.15, 125);
+    rs.Init("RS", samplerate, 0.2, 0.5, 4);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
     sd2.Init("S2", samplerate, 0.012, 0.8, 3000, 0);
@@ -76,7 +76,7 @@ void InitKit(float samplerate) {
 
     ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
     oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    ma.Init("MA", samplerate);
+    ma.Init("MA", samplerate, 0, 0.2, 8);
     cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
     cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);

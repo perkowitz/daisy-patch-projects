@@ -4,37 +4,49 @@
 using namespace daisy;
 using namespace daisysp;
 
-void AhdEnv::Init(float sample_rate) {
-    ad.Init(sample_rate);
-    adsr.Init(sample_rate);
-    adsr.SetTime(ADSR_SEG_DECAY, 0.001);
-    adsr.SetSustainLevel(0.5);
+void AhdEnv::Init(float sampleRate) {
+    this->sampleRate = sampleRate;
 }
 
 float AhdEnv::Process() {
-    // The AD envelope is used to count off the gate time of the ADSR, providing the hold time.
-    ad.Process();
-    return adsr.Process(ad.IsRunning());
+
+    while (stage < STAGE_COUNT && counter >= stageTimes[stage]) {
+        stage++;
+        counter = 0;
+    }
+
+    switch (stage) {
+        case STAGE_ATTACK:
+            signal = (float)counter / (float)stageTimes[STAGE_ATTACK];
+            break;
+        case STAGE_HOLD:
+            signal = 1;
+            break;
+        case STAGE_DECAY:
+            signal = 1 - (float)counter / (float)stageTimes[STAGE_DECAY];
+            break;
+        default:
+            signal = 0;
+    }
+
+    counter++;
+
+    if (curve > 0) {
+        for (u8 i = 0; i < curve; i++) {
+            signal *= signal;
+        }
+    }
+
+    return signal;
 }
 
 void AhdEnv::Trigger() {
-    ad.Trigger();
-    adsr.Retrigger(true);
+    stage = STAGE_ATTACK;
+    counter = 0;
 }
 
-void AhdEnv::SetAttack(float time) {
-    ad.SetTime(ADENV_SEG_ATTACK, time);
-    adsr.SetTime(ADSR_SEG_ATTACK, time);
-}
-
-void AhdEnv::SetHold(float time) {
-    ad.SetTime(ADENV_SEG_DECAY, time);
-}
-
-void AhdEnv::SetDecay(float time) {
-    adsr.SetTime(ADSR_SEG_RELEASE, time);
-}
-
-bool AhdEnv::IsRunning() const {
-    return adsr.IsRunning();
+void AhdEnv::SetStageTime(u8 stage, float seconds) {
+    if (stage < STAGE_COUNT) {
+        stageTimes[stage] = (float)sampleRate * seconds;
+    }
 }

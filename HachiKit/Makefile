@@ -6,6 +6,7 @@ CPP_SOURCES += HachiKit.cpp \
 ParamSet.cpp \
 DrumWrapper.cpp \
 Screen.cpp \
+audio/AhdEnv1.cpp \
 audio/AhdEnv.cpp \
 audio/Mixer.cpp \
 audio/Processing.cpp \
@@ -26,6 +27,9 @@ sounds/Sd8.cpp \
 sounds/SdNoise.cpp \
 sounds/Tom.cpp 
 
+# uncomment one of these to put code in SRAM or QSPI; use 'make program-boot' to update
+#APP_TYPE=BOOT_SRAM
+#APP_TYPE=BOOT_QSPI
 
 OPT = -Os
 
