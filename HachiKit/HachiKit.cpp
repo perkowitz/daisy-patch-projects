@@ -274,10 +274,41 @@ void AudioCallback(AudioHandle::InputBuffer  in,
     meter.OnBlockEnd();
 }
 
+void MidiSend(MidiEvent m) {
+
+    u8 data3[3];
+    u8 length = 0;
+    switch (m.type) {
+        case NoteOn: {
+            length = 3;
+            data3[0] = (m.channel & 0x0F) + 0x90;
+            break;
+        }
+        case NoteOff: {
+            data3[0] = (m.channel & 0x0F) + 0x80;
+            break;
+        }
+        case ControlChange: {
+            data3[0] = (m.channel & 0x0F) + 0xb0;
+            break;
+        }
+    }
+
+    if (length == 3) {
+        data3[1] = m.data[0];
+        data3[2] = m.data[1];
+        hw.midi.SendMessage(data3, 3);
+    }
+
+}
+
 
 // Typical Switch case for Message Type.
 void HandleMidiMessage(MidiEvent m)
 {
+
+    // will pass it through if it can
+    MidiSend(m);
 
     switch(m.type)
     {
@@ -293,9 +324,9 @@ void HandleMidiMessage(MidiEvent m)
             // } else {
             //     osc.SetAmp(0.0f);
             // }
-            // screen.OledMessage("M: " + std::to_string(p.note) + ", " + std::to_string(p.velocity) + "     ", 3);
 
             NoteOnEvent p = m.AsNoteOn();
+            // screen.OledMessage("M: " + std::to_string(p.note) + ", " + std::to_string(p.velocity) + "     ", 3);
             float velocity = p.velocity / 127.0f;
             if (p.velocity > 0) {
                 if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + drumCount) {
