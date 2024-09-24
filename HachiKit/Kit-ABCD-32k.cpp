@@ -1,40 +1,23 @@
-#include <chrono>
-#include <thread>
-
-#include "daisy_patch.h"
-#include "daisysp.h"
-#include "util/CpuLoadMeter.h"
-#include <string>
-#include "Utility.h"
-#include "audio/Mixer.h"
-#include "audio/Processing.h"
-#include "DrumWrapper.h"
-#include "IDrum.h"
-#include "Kits.h"
-#include "Screen.h"
-#include "Main.h"
-
+#include "Runner.h"
+#include "sounds/Bd8.h"
+#include "sounds/Ch.h"
+#include "sounds/Clap.h"
+#include "sounds/Clave8.h"
+#include "sounds/ClickSource.h"
+#include "sounds/Cow8.h"
+#include "sounds/Cy.h"
+#include "sounds/DigiClap.h"
+#include "sounds/FmDrum.h"
+#include "sounds/HhSource68.h"
+#include "sounds/MultiTomSource.h"
+#include "sounds/MultiTom.h"
+#include "sounds/Oh.h"
+#include "sounds/Sd8.h"
+#include "sounds/SdNoise.h"
+#include "sounds/Tom.h"
 
 using namespace daisy;
 using namespace daisysp;
-
-
-#include "../sounds/Bd8.h"
-#include "../sounds/Ch.h"
-#include "../sounds/Clap.h"
-#include "../sounds/Clave8.h"
-#include "../sounds/ClickSource.h"
-#include "../sounds/Cow8.h"
-#include "../sounds/Cy.h"
-#include "../sounds/DigiClap.h"
-#include "../sounds/FmDrum.h"
-#include "../sounds/HhSource68.h"
-#include "../sounds/MultiTomSource.h"
-#include "../sounds/MultiTom.h"
-#include "../sounds/Oh.h"
-#include "../sounds/Sd8.h"
-#include "../sounds/SdNoise.h"
-#include "../sounds/Tom.h"
 
 
 SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::SampleRate::SAI_32KHZ;
@@ -132,17 +115,19 @@ void InitKit(float samplerate) {
 
 int main(void) {
 
-    Main::Kit kit;
-    kit.drumCount = drumCount;
-    kit.drums = &drums;
-    kit.sourceCount = sourceCount;
-    kit.sources = &sources;
+    Runner runner(daisy::SaiHandle::Config::SampleRate::SAI_32KHZ);
 
-    Main main;
-    float samplerate = main.InitHardware(audioSampleRate);
+    float samplerate = runner.getSampleRate();
 
     InitKit(samplerate);
-    main.Run(&kit);
 
+    // kit is defined in kits/ header file
+    Runner::Kit kit;
+    kit.drumCount = 16;
+    kit.drums = (IDrum**)drums;
+    kit.sourceCount = 2;
+    kit.sources = (IDrum**)sources;
+
+    runner.Run(&kit);
 
 }

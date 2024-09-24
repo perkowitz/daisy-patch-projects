@@ -18,7 +18,15 @@ class Screen {
         static const u8 MENU_SIZE = 20;
         static std::string menuItems[MENU_SIZE];
 
-        Screen(OledDisplay<SSD130x4WireSpi128x64Driver> *display) {
+        Screen() {
+            this->display = nullptr;
+        }
+
+        // Screen(OledDisplay<SSD130x4WireSpi128x64Driver> *display) {
+        //     this->display = display;
+        // }
+
+        void setDisplay(OledDisplay<SSD130x4WireSpi128x64Driver> *display) {
             this->display = display;
         }
 

@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef RUNNER_H
+#define RUNNER_H
 
 #include "daisy_patch.h"
 #include "daisysp.h"
@@ -10,7 +10,6 @@
 #include "audio/Processing.h"
 #include "DrumWrapper.h"
 #include "IDrum.h"
-#include "Kits.h"
 #include "Screen.h"
 
 using namespace daisy;
@@ -25,19 +24,33 @@ using namespace daisysp;
 #define MENU_MIXER 1
 
 
-class Main {
+class Runner {
 
     public:
 
         struct Kit {
             u8 drumCount;
-            IDrum* drums;
+            IDrum** drums;
             u8 sourceCount;
-            IDrum* sources;
+            IDrum** sources;
         };
 
-        float InitHardware(SaiHandle::Config::SampleRate audioSampleRate);
+        Runner(SaiHandle::Config::SampleRate audioSampleRate) {
+            hw.Init(true);                              // "true" boosts processor speed from 400mhz to 480mhz
+            hw.SetAudioSampleRate(audioSampleRate);     // 8,16,32,48; higher rate requires more CPU
+            samplerate = hw.AudioSampleRate();
+            meter.Init(samplerate, 128, 1.0f);
+            screen.setDisplay(&hw.display);
+        }
+
         void Run(Kit *kit);
+        float getSampleRate() { return samplerate; }
+
+        static Runner *globalRunner;
+        static void GlobalAudioCallback(AudioHandle::InputBuffer  in,
+                AudioHandle::OutputBuffer out,
+                size_t size);
+
 
     private:
         void DisplayParamMenu();
@@ -54,7 +67,7 @@ class Main {
         float samplerate = 0;
 
         DaisyPatch hw;
-        Screen screen(&hw.display);
+        Screen screen;
         CpuLoadMeter meter;
         // MidiUsbHandler usbMidi;
         Mixer mixer;
@@ -79,6 +92,6 @@ class Main {
         float mainGain = 1;
 
 
-}
+};
 
 #endif

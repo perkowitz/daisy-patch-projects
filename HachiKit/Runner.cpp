@@ -1,11 +1,12 @@
-#include "Main.h"
+#include "Runner.h"
 
 using namespace daisy;
 using namespace daisysp;
 
+Runner* Runner::globalRunner = nullptr;
 
 // Display the available parameter names.
-void Main::DisplayParamMenu() {
+void Runner::DisplayParamMenu() {
 
     screen.DrawRect(0, 9, 127, 36, false, true);
 
@@ -18,18 +19,17 @@ void Main::DisplayParamMenu() {
     std::string sc = "";
     bool selected = false;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
-        // for (u8 row = 0; row <= drums[currentDrum]->PARAM_COUNT / 4; row++) {
         for (u8 row = 0; row < MENU_ROWS; row++) {
             Rectangle rect2(knob * 32, (row + 1) * 12, 32, 12);
-            if (currentMenu == MENU_SOUNDS) {
+            if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
                 u8 param = row * KNOB_COUNT + knob;
-                sc = drums[currentDrum]->GetParamName(param);
+                sc = kit->drums[currentDrum]->GetParamName(param);
                 selected = row == knobRow;
             } else if (currentMenu == MENU_MIXER) {
                 u8 channel = currentMixerSection * 4 + knob;
-                if (row == 0) {
+                if (row == 0 && kit->drums[channel] != nullptr) {
                     selected = false;
-                    sc = drums[channel]->Slot();  // show channel names on first row
+                    sc = kit->drums[channel]->Slot();  // show channel names on first row
                 } else if (row == 1) {
                     sc = mixer.GetChannelParamName(channel, knob);
                     selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
@@ -46,13 +46,13 @@ void Main::DisplayParamMenu() {
 
 // Display the current values and parameter names of model params for 4 knobs.
 // Knob number == param number, since model params are listed in UI order.
-void Main::DisplayKnobValues() {
+void Runner::DisplayKnobValues() {
 
     screen.DrawRect(0, 0, 127, 11, false, true);
 
     u8 knobRow = currentKnobRow;
     // make this work for mixer rows
-    // if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
+    // if (knobRow * KNOB_COUNT >= kit->drums[currentDrum]->ParamCount()) {
     //     knobRow = 0;
     // }
 
@@ -60,9 +60,9 @@ void Main::DisplayKnobValues() {
     std::string sc = "";
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         Rectangle rect(knob * 32, 0, 32, 8);
-        if (currentMenu == MENU_SOUNDS) {
+        if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
             index = knobRow * KNOB_COUNT + knob;
-            sc = drums[currentDrum]->GetParamString(index);
+            sc = kit->drums[currentDrum]->GetParamString(index);
         } else if (currentMenu == MENU_MIXER) {
             index = currentMixerSection * 4 + knob;
             sc = mixer.GetChannelParamDisplay(index, knobRow);
@@ -72,7 +72,7 @@ void Main::DisplayKnobValues() {
     }
 }
 
-void Main::DrawScreen(bool clearFirst) {
+void Runner::DrawScreen(bool clearFirst) {
     if (clearFirst) {
         hw.display.Fill(false);
     }
@@ -82,7 +82,7 @@ void Main::DrawScreen(bool clearFirst) {
     hw.display.Update();        
 }
 
-void Main::ProcessEncoder() {
+void Runner::ProcessEncoder() {
 
     bool redraw = false;
     bool screenOn = false;
@@ -94,14 +94,16 @@ void Main::ProcessEncoder() {
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
     // u8 newMenuIndex = (currentMenuIndex + inc) % Screen::MENU_SIZE;
     if (newMenuIndex != currentMenuIndex) {
-        if (newMenuIndex < drumCount) {
+        if (newMenuIndex < kit->drumCount) {
             currentMenu = MENU_SOUNDS;
             u8 newDrum = newMenuIndex;
-            drums[newDrum]->ResetParams();
+            if (kit->drums[newDrum] != nullptr) {
+                kit->drums[newDrum]->ResetParams();
+            }
             currentDrum = newDrum;
         } else {
             currentMenu = MENU_MIXER;
-            currentMixerSection = newMenuIndex - drumCount;
+            currentMixerSection = newMenuIndex - kit->drumCount;
             for (u8 i = 0; i < 4; i++) {
                 mixer.ResetChannelParams(currentMixerSection * 4 + i);
             }
@@ -116,7 +118,9 @@ void Main::ProcessEncoder() {
         if (currentMenu == MENU_SOUNDS) {
             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
             redraw = true;
-            drums[currentDrum]->ResetParams();
+            if (kit->drums[currentDrum] != nullptr) {
+                kit->drums[currentDrum]->ResetParams();
+            }
             screenOn = true;
         } else if (currentMenu == MENU_MIXER) {
             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
@@ -141,13 +145,15 @@ void Main::ProcessEncoder() {
 
 // Process the current knob values and update model params accordingly.
 // Knob number == param number, since model params are listed in UI order.
-void Main::ProcessKnobs() {
+void Runner::ProcessKnobs() {
 
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  MENU_SOUNDS) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
-            drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
+            if (kit->drums[currentDrum] != nullptr) {
+                kit->drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
+            }
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
                 usageCounter = 0;
                 lastKnobValue[knob] = sig;
@@ -175,7 +181,7 @@ void Main::ProcessKnobs() {
     }
 }
 
-void Main::ProcessControls()
+void Runner::ProcessControls()
 {
     hw.ProcessAnalogControls();
     hw.ProcessDigitalControls();
@@ -186,7 +192,7 @@ void Main::ProcessControls()
 }
 
 
-void Main::AudioCallback(AudioHandle::InputBuffer  in,
+void Runner::AudioCallback(AudioHandle::InputBuffer  in,
                    AudioHandle::OutputBuffer out,
                    size_t                    size)
 {
@@ -199,20 +205,22 @@ void Main::AudioCallback(AudioHandle::InputBuffer  in,
         cycle = (cycle + 1) % clockRange;
         if (cycle < clockThreshold) {
             // Process shared sound sources
-            for (u8 i = 0; i < sourceCount; i++) {
-                sources[i]->Process();
+            for (u8 i = 0; i < kit->sourceCount; i++) {
+                kit->sources[i]->Process();
             }
             // if (ch.IsActive() || oh.IsActive() || cy.IsActive()) {
             //     // is always active, so we skip it when the sounds that use it aren't active
             //     source68.Process();
             // }
 
-            if (CPU_SINGLE) {
-                mixer.UpdateSignal(currentDrum, drums[currentDrum]->Process());
+            if (CPU_SINGLE && kit->drums[currentDrum] != nullptr) {
+                mixer.UpdateSignal(currentDrum, kit->drums[currentDrum]->Process());
             } else {
                 mixer.ResetSignals();
-                for (uint8_t i = 0; i < drumCount; i++) {
-                    mixer.UpdateSignal(i, drums[i]->Process());
+                for (uint8_t i = 0; i < kit->drumCount; i++) {
+                    if (kit->drums[i] != nullptr) {
+                        mixer.UpdateSignal(i, kit->drums[i]->Process());
+                    }
                 }
             }
         }
@@ -229,7 +237,7 @@ void Main::AudioCallback(AudioHandle::InputBuffer  in,
 
 
 // Typical Switch case for Message Type.
-void Main::HandleMidiMessage(MidiEvent m)
+void Runner::HandleMidiMessage(MidiEvent m)
 {
 
     switch(m.type)
@@ -251,9 +259,11 @@ void Main::HandleMidiMessage(MidiEvent m)
             NoteOnEvent p = m.AsNoteOn();
             float velocity = p.velocity / 127.0f;
             if (p.velocity > 0) {
-                if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + drumCount) {
+                if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + kit->drumCount) {
                     u8 drum = p.note - MINIMUM_NOTE;
-                    drums[drum]->Trigger(velocity);
+                    if (kit->drums[drum] != nullptr) {
+                        kit->drums[drum]->Trigger(velocity);
+                    }
                     screen.ScreensaveEvent(drum);
                 }
             }
@@ -280,21 +290,13 @@ void Main::HandleMidiMessage(MidiEvent m)
     }
 }
 
-float Main::InitHardware(SaiHandle::Config::SampleRate audioSampleRate) {
-    hw.Init(true);                              // "true" boosts processor speed from 400mhz to 480mhz
-    hw.SetAudioSampleRate(audioSampleRate);     // 8,16,32,48; higher rate requires more CPU
-    samplerate = hw.AudioSampleRate();
-    meter.Init(samplerate, 128, 1.0f);
-    return samplerate;
-}
-
-void Main::Run(Kit *kit) {
+void Runner::Run(Kit *kit) {
     if (samplerate == 0) {
         // print error
         return;
     }
 
-    this.kit = kit;
+    this->kit = kit;
 
     // Set up the kit and mixer
     mixer.Reset();
@@ -314,17 +316,19 @@ void Main::Run(Kit *kit) {
     mixer.SetChannelParam(15, Channel::PARAM_SEND2, 1);
 
     // fill the menu
-    for (u8 drum = 0; drum < drumCount; drum++) {
-        screen.menuItems[drum] = drums[drum]->Slot();
+    for (u8 drum = 0; drum < kit->drumCount; drum++) {
+        if (kit->drums[drum] != nullptr) {
+            screen.menuItems[drum] = kit->drums[drum]->Slot();
+        }
     }
-    for (u8 i = drumCount; i < Screen::MENU_SIZE; i++) {
+    for (u8 i = kit->drumCount; i < Screen::MENU_SIZE; i++) {
         screen.menuItems[i] = "";
     }
-    if (Screen::MENU_SIZE >= drumCount + 4) {
-        screen.menuItems[drumCount] = "A";
-        screen.menuItems[drumCount+1] = "B";
-        screen.menuItems[drumCount+2] = "C";
-        screen.menuItems[drumCount+3] = "D";
+    if (Screen::MENU_SIZE >= kit->drumCount + 4) {
+        screen.menuItems[kit->drumCount] = "A";
+        screen.menuItems[kit->drumCount+1] = "B";
+        screen.menuItems[kit->drumCount+2] = "C";
+        screen.menuItems[kit->drumCount+3] = "D";
     }
 
     // initialize the knob tracking
@@ -343,7 +347,8 @@ void Main::Run(Kit *kit) {
     hw.midi.StartReceive();
     // usbMidi.StartReceive();
     hw.StartAdc();
-    hw.StartAudio(AudioCallback);
+    Runner::globalRunner = this;
+    hw.StartAudio(GlobalAudioCallback);
     for(;;)
     {
         hw.midi.Listen();
@@ -372,5 +377,11 @@ void Main::Run(Kit *kit) {
             screen.Screensave();
         }
         hw.display.Update();
+    }
+}
+
+void Runner::GlobalAudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
+    if (globalRunner != nullptr) {
+        globalRunner->AudioCallback(in, out, size);
     }
 }

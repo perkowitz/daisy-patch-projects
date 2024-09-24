@@ -1,10 +1,14 @@
 # Project Name
 TARGET = HachiKit
+KIT_NAME = Kit-ABCD-32k
+BIN_DIR = bin
+
 
 # Sources
 CPP_SOURCES += HachiKit.cpp \
 ParamSet.cpp \
 DrumWrapper.cpp \
+Runner.cpp \
 Screen.cpp \
 audio/AhdEnv1.cpp \
 audio/AhdEnv.cpp \
@@ -44,6 +48,11 @@ include $(SYSTEM_FILES_DIR)/Makefile
 cleanlite:
 	-rm -fR $(BUILD_DIR)/${TARGET}*
 
+kitbefore:
+	cp $(KIT_NAME).cpp HachiKit.cpp
 
-#abcd-32k: $(BUILD_DIR)/Kit-ABCD-32k.elf $(BUILD_DIR)/Kit-ABCD-32k.hex $(BUILD_DIR)/Kit-ABCD-32k.bin
-#kits: abcd-32k
+kitafter:
+	cp $(BUILD_DIR)/$(TARGET_BIN) $(BIN_DIR)/$(KIT_NAME).bin
+
+kit: kitbefore all kitafter
+
