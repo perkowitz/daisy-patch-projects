@@ -6,5 +6,5 @@ derived from the [Daisy Examples](https://github.com/electro-smith/DaisyExamples
 ## Install
 
 - `git submodule update --init --recursive`
-- ./build_libs.hs
+- ./build_libs.sh
 
