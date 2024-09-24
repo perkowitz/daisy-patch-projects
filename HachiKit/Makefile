@@ -44,3 +44,6 @@ include $(SYSTEM_FILES_DIR)/Makefile
 cleanlite:
 	-rm -fR $(BUILD_DIR)/${TARGET}*
 
+
+#abcd-32k: $(BUILD_DIR)/Kit-ABCD-32k.elf $(BUILD_DIR)/Kit-ABCD-32k.hex $(BUILD_DIR)/Kit-ABCD-32k.bin
+#kits: abcd-32k
