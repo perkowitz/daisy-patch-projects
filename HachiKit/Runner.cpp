@@ -27,12 +27,14 @@ void Runner::DisplayParamMenu() {
                 selected = row == knobRow;
             } else if (currentMenu == MENU_MIXER) {
                 u8 channel = currentMixerSection * 4 + knob;
-                if (row == 0 && kit->drums[channel] != nullptr) {
-                    selected = false;
-                    sc = kit->drums[channel]->Slot();  // show channel names on first row
-                } else if (row == 1) {
-                    sc = mixer.GetChannelParamName(channel, knob);
-                    selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
+                if (kit->drums[channel] != nullptr) {
+                    if (row == 0) {
+                        selected = false;
+                        sc = kit->drums[channel]->Slot();  // show channel names on first row
+                    } else if (row == 1) {
+                        sc = mixer.GetChannelParamName(channel, knob);
+                        selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
+                    }
                 }
             }
             screen.DrawButton(rect2, sc, selected, selected, !selected);
@@ -65,7 +67,9 @@ void Runner::DisplayKnobValues() {
             sc = kit->drums[currentDrum]->GetParamString(index);
         } else if (currentMenu == MENU_MIXER) {
             index = currentMixerSection * 4 + knob;
-            sc = mixer.GetChannelParamDisplay(index, knobRow);
+            if (kit->drums[index] != nullptr) {
+                sc = mixer.GetChannelParamDisplay(index, knobRow);
+            }
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
         // screen.DrawButton(rect, sc, false, true, false);
@@ -259,12 +263,12 @@ void Runner::HandleMidiMessage(MidiEvent m)
             NoteOnEvent p = m.AsNoteOn();
             float velocity = p.velocity / 127.0f;
             if (p.velocity > 0) {
-                if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + kit->drumCount) {
-                    u8 drum = p.note - MINIMUM_NOTE;
-                    if (kit->drums[drum] != nullptr) {
-                        kit->drums[drum]->Trigger(velocity);
+                if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + MIDIMAP_SIZE) {
+                    u8 n = p.note - MINIMUM_NOTE;
+                    if (kit->midiMap[n] != nullptr) {
+                        kit->midiMap[n]->Trigger(velocity);
                     }
-                    screen.ScreensaveEvent(drum);
+                    screen.ScreensaveEvent(n);
                 }
             }
         }

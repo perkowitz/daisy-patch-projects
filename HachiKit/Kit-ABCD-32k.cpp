@@ -9,8 +9,8 @@
 #include "sounds/DigiClap.h"
 #include "sounds/FmDrum.h"
 #include "sounds/HhSource68.h"
-#include "sounds/MultiTomSource.h"
-#include "sounds/MultiTom.h"
+// #include "sounds/MultiTomSource.h"
+// #include "sounds/MultiTom.h"
 #include "sounds/Oh.h"
 #include "sounds/Sd8.h"
 #include "sounds/SdNoise.h"
@@ -19,13 +19,15 @@
 using namespace daisy;
 using namespace daisysp;
 
+#define KIT_DRUM_COUNT 16
 
 SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::SampleRate::SAI_32KHZ;
 
-IDrum *drums[16];
+IDrum *drums[KIT_DRUM_COUNT];
 IDrum *sources[2];
-u8 drumCount = 16;
+u8 drumCount = KIT_DRUM_COUNT;
 u8 sourceCount = 2;
+IDrum *midiMap[MIDIMAP_SIZE];
 DrumWrapper drumWrappers[16];
 
 // sounds
@@ -60,7 +62,7 @@ void InitKit(float samplerate) {
     sources[1] = &clickSource;
 
     // Init all drum sounds
-    bd.Init("BD", samplerate, 64, 0.001, 4, 1.001, 0.15, 125);
+    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
     rs.Init("RS", samplerate, 0.2, 0.5, 4);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
@@ -101,9 +103,14 @@ void InitKit(float samplerate) {
     drums[14] = &cl;
     drums[15] = &cb;
 
+    for (u8 i = 0; i < MIDIMAP_SIZE; i++) {
+        midiMap[i] = nullptr;
+    }
+
     for (u8 i = 0; i < drumCount; i++) {
         drumWrappers[i].Init(drums[i]);
         drums[i] = &drumWrappers[i];
+        midiMap[i] = drums[i];
     }
     
     // buffers don't work well with claps; cymbal is just too long

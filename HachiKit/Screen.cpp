@@ -66,16 +66,25 @@ void Screen::DrawMenu(uint8_t selected) {
     uint8_t itemWidth = FONT.FontWidth * 2 + 3;
     uint8_t itemHeight = FONT.FontWidth + 4;
     uint8_t displayCount = std::min((u8)(WIDTH / itemWidth), MENU_SIZE);
-    uint8_t highlightPos = displayCount / 2;
-    // highlightPos = 4;
-    uint8_t start = std::min(std::max(0, selected - highlightPos), MENU_SIZE - displayCount);
+    uint8_t highlightItem = displayCount / 2;
+    uint8_t start = std::min(std::max(0, selected - highlightItem), MENU_SIZE - displayCount);
 
-    for (uint8_t pos = start; pos < start + displayCount; pos++) {
-        bool sel = pos == selected;
-        uint8_t x = itemWidth * (pos - start);
-        uint8_t y = HEIGHT - itemHeight;
-        Rectangle rect(x, y, itemWidth, itemHeight);
-        DrawButton(rect, this->menuItems[pos], true, sel, !sel);
+    // item = menu item shown; pos = position on screen
+    u8 pos = 0;
+    for (uint8_t item = start; item < start + displayCount; item++) {
+        if (menuItems[item].length() > 0) {
+            bool sel = item == selected;
+            uint8_t x = itemWidth * pos;
+            uint8_t y = HEIGHT - itemHeight;
+            Rectangle rect(x, y, itemWidth, itemHeight);
+            DrawButton(rect, this->menuItems[item], true, sel, !sel);
+            pos++;
+        }
+        // bool sel = item == selected;
+        // uint8_t x = itemWidth * (item - start);
+        // uint8_t y = HEIGHT - itemHeight;
+        // Rectangle rect(x, y, itemWidth, itemHeight);
+        // DrawButton(rect, this->menuItems[item], true, sel, !sel);
     }
 
 }

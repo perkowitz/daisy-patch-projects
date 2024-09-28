@@ -22,6 +22,7 @@ using namespace daisysp;
 #define MENU_ROWS 2
 #define MENU_SOUNDS 0
 #define MENU_MIXER 1
+#define MIDIMAP_SIZE 16
 
 
 class Runner {
@@ -33,6 +34,7 @@ class Runner {
             IDrum** drums;
             u8 sourceCount;
             IDrum** sources;
+            IDrum** midiMap;
         };
 
         Runner(SaiHandle::Config::SampleRate audioSampleRate) {

@@ -31,6 +31,7 @@ sounds/Sd8.cpp \
 sounds/SdNoise.cpp \
 sounds/Tom.cpp 
 
+
 # uncomment one of these to put code in SRAM or QSPI; use 'make program-boot' to update
 #APP_TYPE=BOOT_SRAM
 #APP_TYPE=BOOT_QSPI
@@ -44,6 +45,12 @@ DAISYSP_DIR = ../DaisySP
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
+
+
+# Kits
+# create a kit file with a main and build with something like:
+#   make clean; make KIT_NAME=<kitname> kit
+# then use dfu.sh to send to the daisy patch
 
 cleanlite:
 	-rm -fR $(BUILD_DIR)/${TARGET}*
