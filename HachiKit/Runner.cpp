@@ -248,27 +248,17 @@ void Runner::HandleMidiMessage(MidiEvent m)
     {
         case NoteOn:
         {
-            // NoteOnEvent p = m.AsNoteOn();
-            // This is to avoid Max/MSP Note outs for now..
-            // if(m.data[1] != 0)
-            // {
-            //     p = m.AsNoteOn();
-            //     osc.SetFreq(mtof(p.note));
-            //     osc.SetAmp((p.velocity / 127.0f));
-            // } else {
-            //     osc.SetAmp(0.0f);
-            // }
-            // screen.OledMessage("M: " + std::to_string(p.note) + ", " + std::to_string(p.velocity) + "     ", 3);
-
             NoteOnEvent p = m.AsNoteOn();
-            float velocity = p.velocity / 127.0f;
-            if (p.velocity > 0) {
-                if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + MIDIMAP_SIZE) {
-                    u8 n = p.note - MINIMUM_NOTE;
-                    if (kit->midiMap[n] != nullptr) {
-                        kit->midiMap[n]->Trigger(velocity);
+            if (p.channel == midiChannel) {
+                float velocity = p.velocity / 127.0f;
+                if (p.velocity > 0) {
+                    if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + MIDIMAP_SIZE) {
+                        u8 n = p.note - MINIMUM_NOTE;
+                        if (kit->midiMap[n] != nullptr) {
+                            kit->midiMap[n]->Trigger(velocity);
+                        }
+                        screen.ScreensaveEvent(n);
                     }
-                    screen.ScreensaveEvent(n);
                 }
             }
         }
