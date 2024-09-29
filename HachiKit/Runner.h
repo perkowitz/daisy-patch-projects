@@ -23,6 +23,7 @@ using namespace daisysp;
 #define MENU_SOUNDS 0
 #define MENU_MIXER 1
 #define MIDIMAP_SIZE 16
+#define AUDIO_PASSTHRU true
 
 
 class Runner {
@@ -64,6 +65,7 @@ class Runner {
         void AudioCallback(AudioHandle::InputBuffer  in,
                 AudioHandle::OutputBuffer out,
                 size_t size);
+        void MidiSend(MidiEvent m);
         void HandleMidiMessage(MidiEvent m);
 
         float samplerate = 0;
