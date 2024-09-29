@@ -42,7 +42,7 @@ void InitKit(float samplerate) {
     sources[0] = &clickSource;
 
     // Init all drum sounds
-    bd.Init("BD", samplerate, 64, 0.001, 4, 1.001, 0.15, 125);
+    bd.Init("BD", samplerate, 64, 0.001, 4, 0.001, 0.15, 125);
     rs.Init("RS", samplerate, 0.2, 0.5, 4);
     sd.Init("SD", samplerate);
     cp.Init("CP", samplerate, 0.012, 0.8);
@@ -61,16 +61,6 @@ void InitKit(float samplerate) {
     drums[5] = &lt;
     drums[6] = &mt;
     drums[7] = &ht;
-    // drums[6] = nullptr; 
-    // drums[7] = &mt;
-    // drums[8] = nullptr;
-    // drums[9] = &ht;
-    // drums[10] = nullptr;
-    // drums[11] = nullptr;
-    // drums[12] = nullptr;
-    // drums[13] = nullptr;
-    // drums[14] = nullptr;
-    // drums[15] = nullptr;
 
     for (u8 i = 0; i < drumCount; i++) {
         if (drums[i] != nullptr) {
@@ -79,6 +69,7 @@ void InitKit(float samplerate) {
         }
     }
 
+    // set notes we're not using to nullptr
     for (u8 i = 0; i < MIDIMAP_SIZE; i++) {
         midiMap[i] = nullptr;
     }
@@ -91,12 +82,8 @@ void InitKit(float samplerate) {
     midiMap[7] = drums[6];
     midiMap[9] = drums[7];
 
-  
-    // buffers don't work well with claps; cymbal is just too long
-    // drumWrappers[3].setBufferEnabled(false);
-    // drumWrappers[4].setBufferEnabled(false);
-    // drumWrappers[13].setBufferEnabled(false);
 }
+
 
 int main(void) {
 
