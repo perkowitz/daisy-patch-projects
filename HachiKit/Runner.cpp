@@ -234,13 +234,22 @@ void Runner::AudioCallback(AudioHandle::InputBuffer  in,
         out[1][i] = mainGain * mixer.RightSignal();
         out[2][i] = mixer.Send1Signal();
         out[3][i] = mixer.Send2Signal();
+
+        // combine the audio inputs with the corresponding outputs
+        if (AUDIO_PASSTHRU) {
+            out[0][i] += in[0][i];
+            out[1][i] += in[1][i];
+            out[2][i] += in[2][i];
+            out[3][i] += in[3][i];
+        }
+
     }
 
     meter.OnBlockEnd();
 }
 
 
-void MidiSend(MidiEvent m) {
+void Runner::MidiSend(MidiEvent m) {
 
     u8 data3[3];
     u8 length = 0;
