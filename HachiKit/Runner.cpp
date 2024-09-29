@@ -240,9 +240,41 @@ void Runner::AudioCallback(AudioHandle::InputBuffer  in,
 }
 
 
+void MidiSend(MidiEvent m) {
+
+    u8 data3[3];
+    u8 length = 0;
+    switch (m.type) {
+        case NoteOn: {
+            length = 3;
+            data3[0] = (m.channel & 0x0F) + 0x90;
+            break;
+        }
+        case NoteOff: {
+            data3[0] = (m.channel & 0x0F) + 0x80;
+            break;
+        }
+        case ControlChange: {
+            data3[0] = (m.channel & 0x0F) + 0xb0;
+            break;
+        }
+    }
+
+    if (length == 3) {
+        data3[1] = m.data[0];
+        data3[2] = m.data[1];
+        hw.midi.SendMessage(data3, 3);
+    }
+
+}
+
+
 // Typical Switch case for Message Type.
 void Runner::HandleMidiMessage(MidiEvent m)
 {
+
+    // will pass it through if it can
+    MidiSend(m);
 
     switch(m.type)
     {
