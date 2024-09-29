@@ -85,7 +85,7 @@ class Runner {
         u8 currentMixerSection = 0;
         u8 maxDrum = 1;
         float lastKnobValue[KNOB_COUNT];
-        u8 midiChannel = 10;
+        u8 midiChannel = 9;  // 0-indexed
 
         u8 cycle = 0;
         u8 cycleLength = 8;
