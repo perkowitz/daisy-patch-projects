@@ -49,8 +49,9 @@ include $(SYSTEM_FILES_DIR)/Makefile
 
 # Kits
 # create a kit file with a main and build with something like:
-#   make clean; make KIT_NAME=<kitname> kit
-# then use dfu.sh to send to the daisy patch
+# >  make clean; make KIT_NAME=<kitname> kit
+# 
+# then use dfu.sh to send the .bin to the daisy patch
 
 cleanlite:
 	-rm -fR $(BUILD_DIR)/${TARGET}*

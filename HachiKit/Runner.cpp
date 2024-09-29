@@ -27,7 +27,7 @@ void Runner::DisplayParamMenu() {
                 selected = row == knobRow;
             } else if (currentMenu == MENU_MIXER) {
                 u8 channel = currentMixerSection * 4 + knob;
-                if (kit->drums[channel] != nullptr) {
+                if (channel < kit->drumCount && kit->drums[channel] != nullptr) {
                     if (row == 0) {
                         selected = false;
                         sc = kit->drums[channel]->Slot();  // show channel names on first row
@@ -67,7 +67,7 @@ void Runner::DisplayKnobValues() {
             sc = kit->drums[currentDrum]->GetParamString(index);
         } else if (currentMenu == MENU_MIXER) {
             index = currentMixerSection * 4 + knob;
-            if (kit->drums[index] != nullptr) {
+            if (index < kit->drumCount && kit->drums[index] != nullptr) {
                 sc = mixer.GetChannelParamDisplay(index, knobRow);
             }
         }
