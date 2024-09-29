@@ -98,7 +98,6 @@ void InitKit(float samplerate) {
     // drumWrappers[13].setBufferEnabled(false);
 }
 
-
 int main(void) {
 
     Runner runner(daisy::SaiHandle::Config::SampleRate::SAI_32KHZ);
