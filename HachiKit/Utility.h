@@ -22,6 +22,7 @@ typedef unsigned char  u8;
 class Utility {
 
     public:
+
         static float Limit(float value) {
             return std::min(1.0f, std::max(0.0f, value));
         }

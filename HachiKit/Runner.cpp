@@ -248,6 +248,41 @@ void Runner::AudioCallback(AudioHandle::InputBuffer  in,
     meter.OnBlockEnd();
 }
 
+void Runner::Load(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *savedKit) {
+    if (patch >= PATCH_COUNT) return;
+    
+	KitPatch &kitPatch = savedKit->GetSettings();
+    for (u8 d = 0; d < std::min((u8)DRUMS_IN_PATCH, kit->drumCount); d++) {
+        if (kit->drums[d] != nullptr) {
+            IDrum *drum = kit->drums[d];
+            for (u8 p = 0; p < std::min((u8)PATCH_SIZE, drum->ParamCount()); p++) {
+                drum->SetParam(p, kitPatch.drumPatches[d].params[p]);
+            }
+        }        
+    }
+
+}
+
+void Runner::SaveToKitPatch(Runner::Kit *kit, Runner::KitPatch *kitPatch) {
+    for (u8 d = 0; d < std::min((u8)DRUMS_IN_PATCH, kit->drumCount); d++) {
+        if (kit->drums[d] != nullptr) {
+            IDrum *drum = kit->drums[d];
+            for (u8 p = 0; p < std::min((u8)PATCH_SIZE, drum->ParamCount()); p++) {
+                kitPatch->drumPatches[d].params[p] = drum->GetParam(p);
+            }
+        }        
+    }  
+}
+
+void Runner::Save(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *savedKit) {
+    if (patch >= PATCH_COUNT) return;
+
+    Runner::KitPatch &kitPatch = savedKit->GetSettings();
+    SaveToKitPatch(kit, &kitPatch);
+    savedKit->Save();
+    System::Delay(100);    
+}
+
 
 void Runner::MidiSend(MidiEvent m) {
 
@@ -297,8 +332,12 @@ void Runner::HandleMidiMessage(MidiEvent m)
                         u8 n = p.note - MINIMUM_NOTE;
                         if (kit->midiMap[n] != nullptr) {
                             kit->midiMap[n]->Trigger(velocity);
+                            screen.ScreensaveEvent(n);
                         }
-                        screen.ScreensaveEvent(n);
+                    } else if (p.note >= MINIMUM_NOTE + 24 && p.note < MINIMUM_NOTE + 24 + PATCH_COUNT) {
+                        saveTo = p.note - MINIMUM_NOTE - 24;
+                    } else if (p.note >= MINIMUM_NOTE + 36 && p.note < MINIMUM_NOTE + 36 + PATCH_COUNT) {
+                        loadFrom = p.note - MINIMUM_NOTE - 36;
                     }
                 }
             }
@@ -332,6 +371,8 @@ void Runner::Run(Kit *kit) {
     }
 
     this->kit = kit;
+
+    // Save(0, this->kit);
 
     // Set up the kit and mixer
     mixer.Reset();
@@ -373,6 +414,15 @@ void Runner::Run(Kit *kit) {
 
     DrawScreen(true);
 
+    // set up patch save/load
+    KitPatch defaultKitPatch;
+    SaveToKitPatch(kit, &defaultKitPatch);
+    for (u8 i = 0; i < PATCH_COUNT; i++) {
+        PersistentStorage<KitPatch> *storage = new PersistentStorage<KitPatch>(hw.seed.qspi);
+        savedKits[i] = storage;
+        savedKits[i]->Init(defaultKitPatch, sizeof(KitPatch));
+    }
+    
     // MidiUsbHandler::Config midi_cfg;
     // midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
     // usbMidi.Init(midi_cfg);
@@ -383,13 +433,21 @@ void Runner::Run(Kit *kit) {
     // usbMidi.StartReceive();
     hw.StartAdc();
     Runner::globalRunner = this;
-    hw.StartAudio(GlobalAudioCallback);
+    hw.StartAudio(GlobalAudioCallback);  
+
     for(;;)
     {
         hw.midi.Listen();
         while(hw.midi.HasEvents())
         {
             HandleMidiMessage(hw.midi.PopEvent());
+        }
+        if (saveTo >= 0 && saveTo < PATCH_COUNT) {
+            Save(saveTo, kit, savedKits[saveTo]);
+            saveTo = -1;
+        } else if (loadFrom >= 0 && loadFrom < PATCH_COUNT) {
+            Load(loadFrom, kit, savedKits[loadFrom]);
+            loadFrom = -1;
         }
 
         // usbMidi.Listen();

@@ -1,11 +1,7 @@
 /**
- * Param tracks the value of a model parameter in response to a control (e.g. analog pot)
+ * ParamFull tracks the value of a model parameter in response to a control (e.g. analog pot)
  * - ignores small changes to avoid jitter.
  * - doesn't update the stored value until the input has been swept past that value, to avoid jumps.
- * 
- * Raw value is between 0 and 1. Scaled value can be in any range; Param does not compute the
- * scaling, so must be managed externally.
- * 
 */
 #ifndef PARAMFULL_H
 #define PARAMFULL_H
