@@ -343,27 +343,29 @@ void Runner::Save(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *saved
 void Runner::MidiSend(MidiEvent m) {
 
     u8 data3[3];
-    u8 length = 0;
+    data3[1] = m.data[0];
+    data3[2] = m.data[1];
     switch (m.type) {
         case NoteOn: {
-            length = 3;
             data3[0] = (m.channel & 0x0F) + 0x90;
+            hw.midi.SendMessage(data3, 3);
             break;
         }
         case NoteOff: {
             data3[0] = (m.channel & 0x0F) + 0x80;
+            hw.midi.SendMessage(data3, 3);
             break;
         }
         case ControlChange: {
             data3[0] = (m.channel & 0x0F) + 0xb0;
+            hw.midi.SendMessage(data3, 3);
             break;
         }
-    }
-
-    if (length == 3) {
-        data3[1] = m.data[0];
-        data3[2] = m.data[1];
-        hw.midi.SendMessage(data3, 3);
+        case ProgramChange: {
+            data3[0] = (m.channel & 0x0F) + 0xc0;
+            hw.midi.SendMessage(data3, 2);
+            break;
+        }
     }
 
 }
