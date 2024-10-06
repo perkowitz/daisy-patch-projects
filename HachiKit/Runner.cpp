@@ -158,14 +158,14 @@ void Runner::ProcessEncoder() {
             u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
             switch (operation) {
                 case PatchStorage::OPERATION_LOAD:
-                    loadFrom = target;
                     currentPatch = target;
                     patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                    loadFrom = target;
                     break;
                 case PatchStorage::OPERATION_SAVE:
-                    saveTo = target;
                     currentPatch = target;
                     patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                    saveTo = target;
                     break;
             }
         }
@@ -383,10 +383,6 @@ void Runner::HandleMidiMessage(MidiEvent m)
                             kit->midiMap[n]->Trigger(velocity);
                             screen.ScreensaveEvent(n);
                         }
-                    } else if (p.note >= MINIMUM_NOTE + 24 && p.note < MINIMUM_NOTE + 24 + PATCH_COUNT) {
-                        saveTo = p.note - MINIMUM_NOTE - 24;
-                    } else if (p.note >= MINIMUM_NOTE + 36 && p.note < MINIMUM_NOTE + 36 + PATCH_COUNT) {
-                        loadFrom = p.note - MINIMUM_NOTE - 36;
                     }
                 }
             }
@@ -409,7 +405,19 @@ void Runner::HandleMidiMessage(MidiEvent m)
             }
             break;
         }
-        default: break;
+        case ProgramChange:
+        {
+            ProgramChangeEvent event = m.AsProgramChange();
+            if (event.channel == midiChannel && event.program < PATCH_COUNT) {
+                currentPatch = event.program - START_PROGRAM_CHANGE;
+                patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, event.program - START_PROGRAM_CHANGE);
+                loadFrom = event.program - START_PROGRAM_CHANGE;
+                Load(loadFrom, kit, savedKits[loadFrom]);
+            }
+            break;
+        }
+        default: 
+            break;
     }
 }
 

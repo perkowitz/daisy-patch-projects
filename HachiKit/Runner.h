@@ -32,6 +32,7 @@ using namespace daisysp;
 #define PATCH_SIZE 7
 #define DRUMS_IN_PATCH 8
 #define PATCH_COUNT 8
+#define START_PROGRAM_CHANGE 0
 
 
 
