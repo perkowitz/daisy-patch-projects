@@ -10,6 +10,7 @@
 #include "audio/Processing.h"
 #include "DrumWrapper.h"
 #include "IDrum.h"
+#include "PatchStorage.h"
 #include "Screen.h"
 
 using namespace daisy;
@@ -22,20 +23,58 @@ using namespace daisysp;
 #define MENU_ROWS 2
 #define MENU_SOUNDS 0
 #define MENU_MIXER 1
+#define MENU_PATCH 2
 #define MIDIMAP_SIZE 16
 #define AUDIO_PASSTHRU true
+#define SHOW_CPU false
+
+#define CURRENT_VERSION 0
+#define PATCH_SIZE 7
+#define DRUMS_IN_PATCH 8
+#define PATCH_COUNT 8
+#define START_PROGRAM_CHANGE 0
+
+#define LONG_PRESS_MILLIS 2000
 
 
 class Runner {
 
     public:
-
         struct Kit {
             u8 drumCount;
             IDrum** drums;
             u8 sourceCount;
             IDrum** sources;
             IDrum** midiMap;
+        };
+
+        struct DrumPatch {
+            float params[PATCH_SIZE];
+
+            bool operator!=(const DrumPatch& p) const {
+                bool equal = true;
+                for (u8 i = 0; i < PATCH_SIZE; i++) {
+                    if (p.params[i] != params[i]) {
+                        equal = false;
+                    }
+                }
+                return !equal;
+            }
+        };
+
+        struct KitPatch {
+            u16 version = CURRENT_VERSION;
+            DrumPatch drumPatches[DRUMS_IN_PATCH];
+
+            bool operator!=(const KitPatch& p) const {
+                bool equal = true;
+                for (u8 i = 0; i < DRUMS_IN_PATCH; i++) {
+                    if (p.drumPatches[i] != drumPatches[i]) {
+                        equal = false;
+                    }
+                }
+                return !equal;
+            }
         };
 
         Runner(SaiHandle::Config::SampleRate audioSampleRate) {
@@ -67,6 +106,9 @@ class Runner {
                 size_t size);
         void MidiSend(MidiEvent m);
         void HandleMidiMessage(MidiEvent m);
+        void Load(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *savedKit);
+        void SaveToKitPatch(Runner::Kit *kit, Runner::KitPatch *kitPatch);
+        void Save(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *savedKit);
 
         float samplerate = 0;
 
@@ -77,6 +119,7 @@ class Runner {
         Mixer mixer;
 
         Kit *kit;
+        u8 mixerSections = 4;
 
         u8 currentMenu = 0; 
         u8 currentMenuIndex = 0;
@@ -85,6 +128,11 @@ class Runner {
         u8 currentMixerSection = 0;
         u8 maxDrum = 1;
         float lastKnobValue[KNOB_COUNT];
+        u8 midiChannel = 9;  // 0-indexed
+
+        u8 currentPatch = 0;
+        PatchStorage patchStorage;
+        u8 menuSize = Screen::MENU_SIZE;
 
         u8 cycle = 0;
         u8 cycleLength = 8;
@@ -94,6 +142,11 @@ class Runner {
         u8 clockRange = 8;
         u8 clockThreshold = 8;
         float mainGain = 1;
+
+        PersistentStorage<KitPatch> *savedKits[PATCH_COUNT];
+        s8 saveTo = -1;
+        s8 loadFrom = -1;
+        u32 lastEncoderTime = 0;
 
 
 };

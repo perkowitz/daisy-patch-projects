@@ -15,7 +15,7 @@ class Screen {
         static const u8 HEIGHT = 63;
         static const u8 WIDTH = 127;
         static const FontDef FONT;
-        static const u8 MENU_SIZE = 20;
+        static const u8 MENU_SIZE = 21;
         static std::string menuItems[MENU_SIZE];
 
         Screen() {

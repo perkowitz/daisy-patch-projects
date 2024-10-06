@@ -20,6 +20,8 @@ void Runner::DisplayParamMenu() {
     bool selected = false;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         for (u8 row = 0; row < MENU_ROWS; row++) {
+            sc = "";
+            selected = false;
             Rectangle rect2(knob * 32, (row + 1) * 12, 32, 12);
             if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
                 u8 param = row * KNOB_COUNT + knob;
@@ -35,6 +37,11 @@ void Runner::DisplayParamMenu() {
                         sc = mixer.GetChannelParamName(channel, knob);
                         selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
                     }
+                }
+            } else if (currentMenu == MENU_PATCH) {
+                if (row == 0) {
+                    sc = patchStorage.GetParamSet()->GetParamName(knob);
+                    selected = knob == 0;
                 }
             }
             screen.DrawButton(rect2, sc, selected, selected, !selected);
@@ -59,8 +66,8 @@ void Runner::DisplayKnobValues() {
     // }
 
     u8 index;
-    std::string sc = "";
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
+        std::string sc = "";
         Rectangle rect(knob * 32, 0, 32, 8);
         if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
             index = knobRow * KNOB_COUNT + knob;
@@ -69,6 +76,18 @@ void Runner::DisplayKnobValues() {
             index = currentMixerSection * 4 + knob;
             if (index < kit->drumCount && kit->drums[index] != nullptr) {
                 sc = mixer.GetChannelParamDisplay(index, knobRow);
+            }
+        } else if (currentMenu == MENU_PATCH) {
+            switch (knob) {
+                case 0:
+                    sc = "_" + std::to_string(currentPatch) + "_";
+                    break;
+                case 1:
+                    sc = patchStorage.GetOperation();
+                    break;
+                case 2:
+                    sc = patchStorage.GetParamSet()->GetParamDisplay(knob);
+                    break;
             }
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
@@ -95,8 +114,8 @@ void Runner::ProcessEncoder() {
     if (inc != 0) {
         screenOn = true;
     }
-    u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, Screen::MENU_SIZE-1);
-    // u8 newMenuIndex = (currentMenuIndex + inc) % Screen::MENU_SIZE;
+    u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, menuSize-1);
+    // u8 newMenuIndex = (currentMenuIndex + inc) % menuSize-1;
     if (newMenuIndex != currentMenuIndex) {
         if (newMenuIndex < kit->drumCount) {
             currentMenu = MENU_SOUNDS;
@@ -105,12 +124,15 @@ void Runner::ProcessEncoder() {
                 kit->drums[newDrum]->ResetParams();
             }
             currentDrum = newDrum;
-        } else {
+        } else if (newMenuIndex < kit->drumCount + mixerSections) {
             currentMenu = MENU_MIXER;
             currentMixerSection = newMenuIndex - kit->drumCount;
             for (u8 i = 0; i < 4; i++) {
                 mixer.ResetChannelParams(currentMixerSection * 4 + i);
             }
+        } else if (newMenuIndex < kit->drumCount + mixerSections + 1) {
+            currentMenu = MENU_PATCH;
+            patchStorage.GetParamSet()->ResetParams();
         }
 
         currentMenuIndex = newMenuIndex;
@@ -119,18 +141,40 @@ void Runner::ProcessEncoder() {
     }
 
     if (hw.encoder.RisingEdge()) {
-        if (currentMenu == MENU_SOUNDS) {
-            currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-            redraw = true;
-            if (kit->drums[currentDrum] != nullptr) {
-                kit->drums[currentDrum]->ResetParams();
+        lastEncoderTime = System::GetNow();
+    }
+    if (hw.encoder.FallingEdge()) {
+        if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
+            saveTo = currentPatch;
+        } else {
+            if (currentMenu == MENU_SOUNDS) {
+                currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
+                redraw = true;
+                if (kit->drums[currentDrum] != nullptr) {
+                    kit->drums[currentDrum]->ResetParams();
+                }
+                screenOn = true;
+            } else if (currentMenu == MENU_MIXER) {
+                currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
+                redraw = true;
+                // reset params for mixer row?
+                screenOn = true;
+            } else if (currentMenu == MENU_PATCH) {
+                u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
+                u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
+                switch (operation) {
+                    case PatchStorage::OPERATION_LOAD:
+                        currentPatch = target;
+                        patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                        loadFrom = target;
+                        break;
+                    case PatchStorage::OPERATION_SAVE:
+                        currentPatch = target;
+                        patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                        saveTo = target;
+                        break;
+                }
             }
-            screenOn = true;
-        } else if (currentMenu == MENU_MIXER) {
-            currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-            redraw = true;
-            // reset params for mixer row?
-            screenOn = true;
         }
     }
 
@@ -172,6 +216,18 @@ void Runner::ProcessKnobs() {
             u8 channel = currentMixerSection * 4 + knob;
             bool changed = mixer.UpdateChannelParam(channel, currentKnobRow, sig);
             if (changed) {           // TODO combine for both menus at end of function
+                usageCounter = 0;
+                lastKnobValue[knob] = sig;
+                if (!screen.IsScreenOn()) {
+                    screen.SetScreenOn(true);
+                    DrawScreen(true);
+                } else {
+                    DisplayKnobValues();
+                }
+            }
+        } else if (currentMenu == MENU_PATCH) {
+            bool changed = patchStorage.GetParamSet()->UpdateParam(knob, sig);
+            if (changed) {
                 usageCounter = 0;
                 lastKnobValue[knob] = sig;
                 if (!screen.IsScreenOn()) {
@@ -248,6 +304,41 @@ void Runner::AudioCallback(AudioHandle::InputBuffer  in,
     meter.OnBlockEnd();
 }
 
+void Runner::Load(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *savedKit) {
+    if (patch >= PATCH_COUNT) return;
+    
+	KitPatch &kitPatch = savedKit->GetSettings();
+    for (u8 d = 0; d < std::min((u8)DRUMS_IN_PATCH, kit->drumCount); d++) {
+        if (kit->drums[d] != nullptr) {
+            IDrum *drum = kit->drums[d];
+            for (u8 p = 0; p < std::min((u8)PATCH_SIZE, drum->ParamCount()); p++) {
+                drum->SetParam(p, kitPatch.drumPatches[d].params[p]);
+            }
+        }        
+    }
+
+}
+
+void Runner::SaveToKitPatch(Runner::Kit *kit, Runner::KitPatch *kitPatch) {
+    for (u8 d = 0; d < std::min((u8)DRUMS_IN_PATCH, kit->drumCount); d++) {
+        if (kit->drums[d] != nullptr) {
+            IDrum *drum = kit->drums[d];
+            for (u8 p = 0; p < std::min((u8)PATCH_SIZE, drum->ParamCount()); p++) {
+                kitPatch->drumPatches[d].params[p] = drum->GetParam(p);
+            }
+        }        
+    }  
+}
+
+void Runner::Save(u8 patch, Runner::Kit *kit, PersistentStorage<KitPatch> *savedKit) {
+    if (patch >= PATCH_COUNT) return;
+
+    Runner::KitPatch &kitPatch = savedKit->GetSettings();
+    SaveToKitPatch(kit, &kitPatch);
+    savedKit->Save();
+    System::Delay(100);    
+}
+
 
 void Runner::MidiSend(MidiEvent m) {
 
@@ -289,27 +380,17 @@ void Runner::HandleMidiMessage(MidiEvent m)
     {
         case NoteOn:
         {
-            // NoteOnEvent p = m.AsNoteOn();
-            // This is to avoid Max/MSP Note outs for now..
-            // if(m.data[1] != 0)
-            // {
-            //     p = m.AsNoteOn();
-            //     osc.SetFreq(mtof(p.note));
-            //     osc.SetAmp((p.velocity / 127.0f));
-            // } else {
-            //     osc.SetAmp(0.0f);
-            // }
-            // screen.OledMessage("M: " + std::to_string(p.note) + ", " + std::to_string(p.velocity) + "     ", 3);
-
             NoteOnEvent p = m.AsNoteOn();
-            float velocity = p.velocity / 127.0f;
-            if (p.velocity > 0) {
-                if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + MIDIMAP_SIZE) {
-                    u8 n = p.note - MINIMUM_NOTE;
-                    if (kit->midiMap[n] != nullptr) {
-                        kit->midiMap[n]->Trigger(velocity);
+            if (p.channel == midiChannel) {
+                float velocity = p.velocity / 127.0f;
+                if (p.velocity > 0) {
+                    if (p.note >= MINIMUM_NOTE && p.note < MINIMUM_NOTE + MIDIMAP_SIZE) {
+                        u8 n = p.note - MINIMUM_NOTE;
+                        if (kit->midiMap[n] != nullptr) {
+                            kit->midiMap[n]->Trigger(velocity);
+                            screen.ScreensaveEvent(n);
+                        }
                     }
-                    screen.ScreensaveEvent(n);
                 }
             }
         }
@@ -331,7 +412,19 @@ void Runner::HandleMidiMessage(MidiEvent m)
             }
             break;
         }
-        default: break;
+        case ProgramChange:
+        {
+            ProgramChangeEvent event = m.AsProgramChange();
+            if (event.channel == midiChannel && event.program < PATCH_COUNT) {
+                currentPatch = event.program - START_PROGRAM_CHANGE;
+                patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, event.program - START_PROGRAM_CHANGE);
+                loadFrom = event.program - START_PROGRAM_CHANGE;
+                Load(loadFrom, kit, savedKits[loadFrom]);
+            }
+            break;
+        }
+        default: 
+            break;
     }
 }
 
@@ -343,10 +436,13 @@ void Runner::Run(Kit *kit) {
 
     this->kit = kit;
 
+    // Save(0, this->kit);
+
     // Set up the kit and mixer
     mixer.Reset();
     currentDrum = 0;
     currentMenuIndex = 0;
+    mixerSections = kit->drumCount / 4;
 
     // send the toms out the send1
     mixer.SetChannelParam(2, Channel::PARAM_SEND1, 0.5);
@@ -366,15 +462,11 @@ void Runner::Run(Kit *kit) {
             screen.menuItems[drum] = kit->drums[drum]->Slot();
         }
     }
-    for (u8 i = kit->drumCount; i < Screen::MENU_SIZE; i++) {
-        screen.menuItems[i] = "";
+    for (u8 i = 0; i < mixerSections; i++) {
+        screen.menuItems[kit->drumCount + i] = "ABCDEFGH"[i];
     }
-    if (Screen::MENU_SIZE >= kit->drumCount + 4) {
-        screen.menuItems[kit->drumCount] = "A";
-        screen.menuItems[kit->drumCount+1] = "B";
-        screen.menuItems[kit->drumCount+2] = "C";
-        screen.menuItems[kit->drumCount+3] = "D";
-    }
+    screen.menuItems[kit->drumCount + mixerSections] = "Pa";     // patch storage menu
+    menuSize = kit->drumCount + mixerSections + 1;
 
     // initialize the knob tracking
     for (u8 i = 0; i < KNOB_COUNT; i++) {
@@ -383,6 +475,15 @@ void Runner::Run(Kit *kit) {
 
     DrawScreen(true);
 
+    // set up patch save/load
+    KitPatch defaultKitPatch;
+    SaveToKitPatch(kit, &defaultKitPatch);
+    for (u8 i = 0; i < PATCH_COUNT; i++) {
+        PersistentStorage<KitPatch> *storage = new PersistentStorage<KitPatch>(hw.seed.qspi);
+        savedKits[i] = storage;
+        savedKits[i]->Init(defaultKitPatch, sizeof(KitPatch));
+    }
+    
     // MidiUsbHandler::Config midi_cfg;
     // midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
     // usbMidi.Init(midi_cfg);
@@ -393,13 +494,21 @@ void Runner::Run(Kit *kit) {
     // usbMidi.StartReceive();
     hw.StartAdc();
     Runner::globalRunner = this;
-    hw.StartAudio(GlobalAudioCallback);
+    hw.StartAudio(GlobalAudioCallback);  
+
     for(;;)
     {
         hw.midi.Listen();
         while(hw.midi.HasEvents())
         {
             HandleMidiMessage(hw.midi.PopEvent());
+        }
+        if (saveTo >= 0 && saveTo < PATCH_COUNT) {
+            Save(saveTo, kit, savedKits[saveTo]);
+            saveTo = -1;
+        } else if (loadFrom >= 0 && loadFrom < PATCH_COUNT) {
+            Load(loadFrom, kit, savedKits[loadFrom]);
+            loadFrom = -1;
         }
 
         // usbMidi.Listen();
@@ -410,9 +519,11 @@ void Runner::Run(Kit *kit) {
 
         DisplayKnobValues();
 
-        float avgCpu = meter.GetAvgCpuLoad();
-        screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
-        screen.ShowCpu(avgCpu);
+        if (SHOW_CPU) {
+            float avgCpu = meter.GetAvgCpuLoad();
+            screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
+            screen.ShowCpu(avgCpu);
+        }
 
         usageCounter++;
         if (usageCounter > 10000) {    // 10000=about 90 seconds

@@ -22,7 +22,6 @@ IDrum *sources[1];
 IDrum *midiMap[MIDIMAP_SIZE];
 DrumWrapper drumWrappers[KIT_DRUM_COUNT];
 
-
 // sounds
 Bd8 bd;
 SdNoise rs;
