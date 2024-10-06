@@ -380,8 +380,7 @@ void Runner::HandleMidiMessage(MidiEvent m)
 
     switch(m.type)
     {
-        case NoteOn:
-        {
+        case NoteOn: {
             NoteOnEvent p = m.AsNoteOn();
             if (p.channel == midiChannel) {
                 float velocity = p.velocity / 127.0f;
@@ -395,27 +394,32 @@ void Runner::HandleMidiMessage(MidiEvent m)
                     }
                 }
             }
+            break;
         }
-        break;
-        case NoteOff:
-        {
+        case NoteOff: {
+            break;
         }
-        break;
-        case ControlChange:
-        {
+        case ControlChange: {
             ControlChangeEvent p = m.AsControlChange();
-            switch(p.control_number)
-            {
-                case 1:
-                    break;
-                case 2:
-                    break;
-                default: break;
+            if (p.channel == midiChannel) {
+                float sig = (float)p.value / 127;
+                if (p.control_number >= MIDICC_VOLUME && p.control_number < MIDICC_VOLUME + MIDICC_LIMIT) {
+                    u8 drum = p.control_number - MIDICC_VOLUME - midiCcOffset;
+                    mixer.UpdateChannelParam(drum, Channel::PARAM_LEVEL, sig, true);
+                }  else if (p.control_number >= MIDICC_SEND_1 && p.control_number < MIDICC_SEND_1 + MIDICC_LIMIT) {
+                    u8 drum = p.control_number - MIDICC_SEND_1 - midiCcOffset;
+                    mixer.UpdateChannelParam(drum, Channel::PARAM_SEND1, sig, true);
+// this doesn't work properly yet & needs some refactoring in the drums
+                // }  else if (p.control_number >= MIDICC_PARAM_1 && p.control_number < MIDICC_PARAM_1 + MIDICC_LIMIT) {
+                //     u8 drum = p.control_number - MIDICC_PARAM_1 - midiCcOffset;
+                //     if (drum < kit->drumCount && kit->drums[drum] != nullptr) {
+                //         kit->drums[drum]->UpdateParam(0, sig);
+                //     }
+                }
             }
             break;
         }
-        case ProgramChange:
-        {
+        case ProgramChange: {
             ProgramChangeEvent event = m.AsProgramChange();
             if (event.channel == midiChannel && event.program < PATCH_COUNT) {
                 currentPatch = event.program - START_PROGRAM_CHANGE;

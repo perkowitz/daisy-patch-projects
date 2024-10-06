@@ -40,9 +40,13 @@ void Mixer::UpdateSignal(u8 channel, float signal) {
 }
 
 bool Mixer::UpdateChannelParam(u8 channel, u8 param, float raw) {
+    return UpdateChannelParam(channel, param, raw, false);
+}
+
+bool Mixer::UpdateChannelParam(u8 channel, u8 param, float raw, bool forceUpdate) {
     if (channel >= CHANNELS) return false;
 
-    return channels[channel].GetParamSet()->UpdateParam(param, raw);
+    return channels[channel].GetParamSet()->UpdateParam(param, raw, forceUpdate);
 }
 
 void Mixer::SetChannelParam(u8 channel, u8 param, float scaled) {

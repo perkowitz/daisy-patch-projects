@@ -71,23 +71,31 @@ class ParamFull {
          * 
          * Returns true if the value changed.
         */
-        bool Update(float raw) {
-            if (std::abs(raw - this->raw) <= delta) return false;
+        bool Update(float raw, bool forceUpdate) {
+            if (std::abs(raw - this->raw) <= delta && !forceUpdate) return false;
             if (raw < 0.01) raw = 0;  // TODO do this in the scaling function
             if (raw > 0.99) raw = 1;
 
             float scaled = Utility::ScaleFloat(raw, scaleLo - margin, scaleHi + 2 * margin, scaleLo, scaleHi, scaleCurve);
-            if (!active) {
+            if (!active && !forceUpdate) {
                 if (scaled <= this->scaled || (raw <= 0.01 && raw >= 0.0f)) lower = true;
                 if (scaled >= this->scaled || raw >= 0.99) higher = true;
                 active = (lower && higher);
-            } else if (active) {
+            } else if (active || forceUpdate) {
                 this->raw = raw;
                 this->scaled = scaled;
+                if (forceUpdate) {
+                    Reset();            // so regular knobs don't get confused
+                }
                 return true;
             }
             return false;
         }
+
+        bool Update(float raw) {
+            return Update(raw, false);
+        }
+
 
         std::string Display() {
             return std::to_string((int)(scaled * displayScale));

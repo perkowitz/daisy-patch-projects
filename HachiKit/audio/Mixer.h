@@ -17,6 +17,7 @@ class Mixer {
 
         void UpdateSignal(u8 channel, float signal);
         bool UpdateChannelParam(u8 channel, u8 param, float raw);
+        bool UpdateChannelParam(u8 channel, u8 param, float raw, bool forceUpdate);
         void SetChannelParam(u8 channel, u8 param, float scaled);
         void ResetChannelParams(u8 channel);
         std::string GetChannelParamDisplay(u8 channel, u8 param);

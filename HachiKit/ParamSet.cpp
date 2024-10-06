@@ -9,7 +9,11 @@ u8 ParamSet::ParamCount() {
 }
 
 bool ParamSet::UpdateParam(u8 param, float raw) {
-    return param < paramCount ? params[param].Update(raw) : false;    
+    return UpdateParam(param, raw, false);
+}
+
+bool ParamSet::UpdateParam(u8 param, float raw, bool forceUpdate) {
+    return param < paramCount ? params[param].Update(raw, forceUpdate) : false;    
 }
 
 void ParamSet::SetParam(u8 param, float scaled) {

@@ -36,6 +36,14 @@ using namespace daisysp;
 
 #define LONG_PRESS_MILLIS 2000
 
+#define MIDICC_LIMIT 16
+#define MIDICC_VOLUME 16
+#define MIDICC_SEND_1 32
+#define MIDICC_PARAM_1 48
+#define MIDICC_PARAM_2 64
+#define MIDICC_PARAM_3 80
+#define MIDICC_PARAM_4 96
+
 
 class Runner {
 
@@ -129,6 +137,7 @@ class Runner {
         u8 maxDrum = 1;
         float lastKnobValue[KNOB_COUNT];
         u8 midiChannel = 9;  // 0-indexed
+        u8 midiCcOffset = 0;
 
         u8 currentPatch = 0;
         PatchStorage patchStorage;
