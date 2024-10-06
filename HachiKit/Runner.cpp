@@ -141,32 +141,39 @@ void Runner::ProcessEncoder() {
     }
 
     if (hw.encoder.RisingEdge()) {
-        if (currentMenu == MENU_SOUNDS) {
-            currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-            redraw = true;
-            if (kit->drums[currentDrum] != nullptr) {
-                kit->drums[currentDrum]->ResetParams();
-            }
-            screenOn = true;
-        } else if (currentMenu == MENU_MIXER) {
-            currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-            redraw = true;
-            // reset params for mixer row?
-            screenOn = true;
-        } else if (currentMenu == MENU_PATCH) {
-            u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
-            u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
-            switch (operation) {
-                case PatchStorage::OPERATION_LOAD:
-                    currentPatch = target;
-                    patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-                    loadFrom = target;
-                    break;
-                case PatchStorage::OPERATION_SAVE:
-                    currentPatch = target;
-                    patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-                    saveTo = target;
-                    break;
+        lastEncoderTime = System::GetNow();
+    }
+    if (hw.encoder.FallingEdge()) {
+        if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
+            saveTo = currentPatch;
+        } else {
+            if (currentMenu == MENU_SOUNDS) {
+                currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
+                redraw = true;
+                if (kit->drums[currentDrum] != nullptr) {
+                    kit->drums[currentDrum]->ResetParams();
+                }
+                screenOn = true;
+            } else if (currentMenu == MENU_MIXER) {
+                currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
+                redraw = true;
+                // reset params for mixer row?
+                screenOn = true;
+            } else if (currentMenu == MENU_PATCH) {
+                u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
+                u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
+                switch (operation) {
+                    case PatchStorage::OPERATION_LOAD:
+                        currentPatch = target;
+                        patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                        loadFrom = target;
+                        break;
+                    case PatchStorage::OPERATION_SAVE:
+                        currentPatch = target;
+                        patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                        saveTo = target;
+                        break;
+                }
             }
         }
     }

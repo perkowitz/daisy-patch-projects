@@ -34,6 +34,7 @@ using namespace daisysp;
 #define PATCH_COUNT 8
 #define START_PROGRAM_CHANGE 0
 
+#define LONG_PRESS_MILLIS 2000
 
 
 class Runner {
@@ -145,6 +146,7 @@ class Runner {
         PersistentStorage<KitPatch> *savedKits[PATCH_COUNT];
         s8 saveTo = -1;
         s8 loadFrom = -1;
+        u32 lastEncoderTime = 0;
 
 
 };
