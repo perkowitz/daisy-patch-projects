@@ -78,6 +78,9 @@ void Screen::DrawMenu(uint8_t selected) {
             uint8_t y = HEIGHT - itemHeight;
             Rectangle rect(x, y, itemWidth, itemHeight);
             DrawButton(rect, this->menuItems[item], true, sel, !sel);
+            // if (sel) {  // only draw selected
+            //     DrawButton(rect, this->menuItems[item], true, false, true);
+            // }
             pos++;
         }
         // bool sel = item == selected;
@@ -92,28 +95,31 @@ void Screen::DrawMenu(uint8_t selected) {
 void Screen::SetScreenOn(bool screenOn) { 
     this->screenOn = screenOn; 
     if (!screenOn) {
-        screenCounter = 0;
+        sweepX = 0;
+        lastScreenSaveUpdate = 0;
     }
 }
 
-void Screen::Screensave() {
+void Screen::Screensave(u32 time) {
     if (screenOn) { return; }
 
-    // horizontal wipe
-    u8 x = (screenCounter / screenSweepRate) % (WIDTH + 1);
-    display->DrawLine(x, 0, x, HEIGHT, false);
-    if (x < WIDTH - 1) {
-        display->DrawLine(x + 1, 0, x + 1, HEIGHT, true);
+    if (time - lastScreenSaveUpdate >= SCREEN_SCAN_TIME) {
+        u8 x = sweepX % (WIDTH + 1);
+        display->DrawLine(x, 0, x, HEIGHT, false);
+        if (x < WIDTH - 1) {
+            display->DrawLine(x + 1, 0, x + 1, HEIGHT, true);
+        }
+        display->Update();
+        sweepX++;
+        lastScreenSaveUpdate = time;
     }
-
-    screenCounter++;
 }
 
 void Screen::ScreensaveEvent(u8 drum) {
     if (screenOn) { return; }
 
     // show notes with horizontal wipe
-    u8 x = (screenCounter / screenSweepRate) % (WIDTH + 1);
+    u8 x = sweepX % (WIDTH + 1);
     if (x > 5 && x < WIDTH + 1) {
         display->DrawCircle(x - 4, (15-drum) * 4 + 1, 1, true);
     }

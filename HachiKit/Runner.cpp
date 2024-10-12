@@ -26,6 +26,9 @@ void Runner::DisplayParamMenu() {
             if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
                 u8 param = row * KNOB_COUNT + knob;
                 sc = kit->drums[currentDrum]->GetParamName(param);
+                // if (row == knobRow) {   // only draw selected row
+                //     sc = kit->drums[currentDrum]->GetParamName(param);
+                // }
                 selected = row == knobRow;
             } else if (currentMenu == MENU_MIXER) {
                 u8 channel = currentMixerSection * 4 + knob;
@@ -137,7 +140,7 @@ void Runner::ProcessEncoder() {
 
         currentMenuIndex = newMenuIndex;
         redraw = true;
-        hw.display.Fill(false);
+        // hw.display.Fill(false);
     }
 
     if (hw.encoder.RisingEdge()) {
@@ -179,7 +182,7 @@ void Runner::ProcessEncoder() {
     }
 
     if (screenOn) {
-        usageCounter = 0;
+        lastScreenTime = System::GetNow();
         if (!screen.IsScreenOn()) {
             screen.SetScreenOn(true);
             hw.display.Fill(false);
@@ -203,7 +206,7 @@ void Runner::ProcessKnobs() {
                 kit->drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
             }
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
-                usageCounter = 0;
+                lastScreenTime = System::GetNow();
                 lastKnobValue[knob] = sig;
                 if (!screen.IsScreenOn()) {
                     screen.SetScreenOn(true);
@@ -216,7 +219,7 @@ void Runner::ProcessKnobs() {
             u8 channel = currentMixerSection * 4 + knob;
             bool changed = mixer.UpdateChannelParam(channel, currentKnobRow, sig);
             if (changed) {           // TODO combine for both menus at end of function
-                usageCounter = 0;
+                lastScreenTime = System::GetNow();
                 lastKnobValue[knob] = sig;
                 if (!screen.IsScreenOn()) {
                     screen.SetScreenOn(true);
@@ -228,7 +231,7 @@ void Runner::ProcessKnobs() {
         } else if (currentMenu == MENU_PATCH) {
             bool changed = patchStorage.GetParamSet()->UpdateParam(knob, sig);
             if (changed) {
-                usageCounter = 0;
+                lastScreenTime = System::GetNow();
                 lastKnobValue[knob] = sig;
                 if (!screen.IsScreenOn()) {
                     screen.SetScreenOn(true);
@@ -495,13 +498,14 @@ void Runner::Run(Kit *kit) {
     // usbMidi.Init(midi_cfg);
 
     // Start stuff.
-    hw.SetAudioBlockSize(128);
+    hw.SetAudioBlockSize(64);
     hw.midi.StartReceive();
     // usbMidi.StartReceive();
     hw.StartAdc();
     Runner::globalRunner = this;
     hw.StartAudio(GlobalAudioCallback);  
 
+    u32 clock = 0;
     for(;;)
     {
         hw.midi.Listen();
@@ -523,7 +527,10 @@ void Runner::Run(Kit *kit) {
         //     HandleMidiMessage(usbMidi.PopEvent());
         // }
 
-        DisplayKnobValues();
+        if (clock == 0) {
+            DisplayKnobValues();
+            hw.display.Update();
+        }
 
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
@@ -531,14 +538,15 @@ void Runner::Run(Kit *kit) {
             screen.ShowCpu(avgCpu);
         }
 
-        usageCounter++;
-        if (usageCounter > 10000) {    // 10000=about 90 seconds
+        u32 now = System::GetNow();
+        if (now - lastScreenTime > SCREEN_SAVE_MILLIS) {
             if (screen.IsScreenOn()) {
                 screen.SetScreenOn(false);
             }
-            screen.Screensave();
+            screen.Screensave(now);
         }
-        hw.display.Update();
+
+        clock = (clock + 1) % UPDATE_CLOCK_TICKS;
     }
 }
 

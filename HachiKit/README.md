@@ -40,3 +40,14 @@ Drum sounds require the following percentages of CPU to run (at 48k, 400mhz):
 - SdNoise - 
 - Tom - 7% (+ ClickSource)
 
+## MIDI Controllers
+
+HachiKit uses the following MIDI CC ranges for these functions:
+
+- Volume of each drum voice: CC 16-31
+- Send A for each drum voice: CC 32-47
+- Drum voice parameter 1: CC 48-63
+- Drum voice parameter 2: CC 64-79
+- Drum voice parameter 3: CC 80-95
+- Drum voice parameter 4: CC 96-111
+- FX: CC 112-119

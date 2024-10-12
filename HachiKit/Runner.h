@@ -35,6 +35,8 @@ using namespace daisysp;
 #define START_PROGRAM_CHANGE 0
 
 #define LONG_PRESS_MILLIS 2000
+#define SCREEN_SAVE_MILLIS 10000
+#define UPDATE_CLOCK_TICKS 512000
 
 #define MIDICC_LIMIT 16
 #define MIDICC_VOLUME 16
@@ -146,7 +148,6 @@ class Runner {
         u8 cycle = 0;
         u8 cycleLength = 8;
         float savedSignal = 0.0f;
-        u32 usageCounter = 0;
 
         u8 clockRange = 8;
         u8 clockThreshold = 8;
@@ -156,6 +157,7 @@ class Runner {
         s8 saveTo = -1;
         s8 loadFrom = -1;
         u32 lastEncoderTime = 0;
+        u32 lastScreenTime = 0;
 
 
 };
