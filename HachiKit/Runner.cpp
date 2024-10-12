@@ -25,11 +25,11 @@ void Runner::DisplayParamMenu() {
             Rectangle rect2(knob * 32, (row + 1) * 12, 32, 12);
             if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
                 u8 param = row * KNOB_COUNT + knob;
-                sc = kit->drums[currentDrum]->GetParamName(param);
-                // if (row == knobRow) {   // only draw selected row
-                //     sc = kit->drums[currentDrum]->GetParamName(param);
-                // }
-                selected = row == knobRow;
+                // sc = kit->drums[currentDrum]->GetParamName(param);
+                // selected = row == knobRow;
+                if (row == knobRow) {   // only draw selected row
+                    sc = kit->drums[currentDrum]->GetParamName(param);
+                }
             } else if (currentMenu == MENU_MIXER) {
                 u8 channel = currentMixerSection * 4 + knob;
                 if (channel < kit->drumCount && kit->drums[channel] != nullptr) {
@@ -48,10 +48,6 @@ void Runner::DisplayParamMenu() {
                 }
             }
             screen.DrawButton(rect2, sc, selected, selected, !selected);
-            // hw.display.WriteStringAligned(sc.c_str(), Font_6x8, rect2, Alignment::centered, true);
-            // hw.display.SetCursor(rect2.GetX(), rect2.GetY());
-            // hw.display.WriteString(sc.c_str(), Font_6x8, true);
-            // hw.display.DrawLine(0, rect2.GetY() + 11, 127, rect2.GetY() + 11, true);
         }
     }
 }

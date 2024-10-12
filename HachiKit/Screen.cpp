@@ -77,10 +77,10 @@ void Screen::DrawMenu(uint8_t selected) {
             uint8_t x = itemWidth * pos;
             uint8_t y = HEIGHT - itemHeight;
             Rectangle rect(x, y, itemWidth, itemHeight);
-            DrawButton(rect, this->menuItems[item], true, sel, !sel);
-            // if (sel) {  // only draw selected
-            //     DrawButton(rect, this->menuItems[item], true, false, true);
-            // }
+            // DrawButton(rect, this->menuItems[item], true, sel, !sel);
+            if (sel) {  // only draw selected
+                DrawButton(rect, this->menuItems[item], true, false, true);
+            }
             pos++;
         }
         // bool sel = item == selected;
