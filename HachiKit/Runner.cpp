@@ -10,47 +10,100 @@ void Runner::DisplayParamMenu() {
 
     screen.DrawRect(0, 9, 127, 36, false, true);
 
-    // TODO make this work for mixer channels
+    // display labels for the parameters edited by the knobs
     u8 knobRow = currentKnobRow;
-    // if (knobRow * KNOB_COUNT >= drums[currentDrum]->ParamCount()) {
-    //     knobRow = 0;
-    // }
-
     std::string sc = "";
-    bool selected = false;
+    std::string rc = "";
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
-        for (u8 row = 0; row < MENU_ROWS; row++) {
-            sc = "";
-            selected = false;
-            Rectangle rect2(knob * 32, (row + 1) * 12, 32, 12);
-            if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
-                u8 param = row * KNOB_COUNT + knob;
-                // sc = kit->drums[currentDrum]->GetParamName(param);
-                // selected = row == knobRow;
-                if (row == knobRow) {   // only draw selected row
-                    sc = kit->drums[currentDrum]->GetParamName(param);
-                }
-            } else if (currentMenu == MENU_MIXER) {
-                u8 channel = currentMixerSection * 4 + knob;
-                if (channel < kit->drumCount && kit->drums[channel] != nullptr) {
-                    if (row == 0) {
-                        selected = false;
-                        sc = kit->drums[channel]->Slot();  // show channel names on first row
-                    } else if (row == 1) {
-                        sc = mixer.GetChannelParamName(channel, knob);
-                        selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
-                    }
-                }
-            } else if (currentMenu == MENU_PATCH) {
-                if (row == 0) {
-                    sc = patchStorage.GetParamSet()->GetParamName(knob);
-                    selected = knob == 0;
-                }
+        sc = "";
+        rc = "";
+        if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
+            if (knobRow * KNOB_COUNT >= kit->drums[currentDrum]->ParamCount()) {
+                knobRow = 0;
             }
-            screen.DrawButton(rect2, sc, selected, selected, !selected);
+            // needs to be updated if MENU_ROWS becomes > 2          
+            if (kit->drums[currentDrum]->ParamCount() >= 4 && knobRow == 0) {
+                rc = "o.";
+            } else if (kit->drums[currentDrum]->ParamCount() >= 4 && knobRow == 1) {
+                rc = ".o";
+            }
+            u8 param = knobRow * KNOB_COUNT + knob;
+            sc = kit->drums[currentDrum]->GetParamName(param);
+        } else if (currentMenu == MENU_MIXER) {
+            if (knobRow > 1) {  // mixer only has 2 rows of params
+                knobRow = 0;
+            }
+            u8 channel = currentMixerSection * 4 + knob;
+            if (channel < kit->drumCount && kit->drums[channel] != nullptr) {
+                sc = kit->drums[channel]->Slot();  // show channel names on first row
+            }
+            rc = mixer.GetChannelParamName(currentMixerSection * 4, knobRow);
+        } else if (currentMenu == MENU_PATCH) {
+            sc = patchStorage.GetParamSet()->GetParamName(knob);
         }
+        Rectangle rect2(knob * 32, 12, 32, 12);
+        screen.DrawButton(rect2, sc, false, false, true);
     }
+    Rectangle rect3(0, 24, 32, 12);
+    screen.DrawButton(rect3, rc, false, false, true);
+
 }
+
+// // Display the available parameter names.
+// void Runner::DisplayParamMenu2() {
+
+//     screen.DrawRect(0, 9, 127, 36, false, true);
+
+//     u8 knobRow = currentKnobRow;
+//     u8 displayRow = 0;
+//     std::string sc = "";
+//     bool selected = false;
+//     for (int knob = 0; knob < KNOB_COUNT; knob++) {
+//         for (u8 row = 0; row < MENU_ROWS; row++) {
+//             sc = "";
+//             selected = false;
+//             if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
+//                 if (knobRow * KNOB_COUNT >= kit->drums[currentDrum]->ParamCount()) {
+//                     knobRow = 0;
+//                 }
+//                 // if (knob == currentKnob) {
+//                     u8 param = row * KNOB_COUNT + knob;
+//                     // sc = kit->drums[currentDrum]->GetParamName(param);
+//                     // selected = row == knobRow;
+//                     if (row == knobRow) {   // only draw selected row
+//                         sc = kit->drums[currentDrum]->GetParamName(param);
+//                     }
+//                 // }
+//                 displayRow = row;
+//             } else if (currentMenu == MENU_MIXER) {
+//                 if (knobRow > 1) {  // mixer only has 2 rows of params
+//                     knobRow = 0;
+//                 }
+//                 u8 channel = currentMixerSection * 4 + knob;
+//                 if (channel < kit->drumCount && kit->drums[channel] != nullptr) {
+//                     if (row == 0) {
+//                         selected = false;
+//                         sc = kit->drums[channel]->Slot();  // show channel names on first row
+//                     } else if (row == 1) {
+//                         // sc = mixer.GetChannelParamName(channel, knob);
+//                         // selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
+//                         if (knobRow == knob) {
+//                             sc = mixer.GetChannelParamName(channel, knob);
+//                         }
+//                     }
+//                 }
+//                 displayRow = row;
+//             } else if (currentMenu == MENU_PATCH) {
+//                 if (row == 0) {
+//                     sc = patchStorage.GetParamSet()->GetParamName(knob);
+//                     // selected = knob == 0;
+//                 }
+//             }
+//             Rectangle rect2(knob * 32, (displayRow + 1) * 12, 32, 12);
+//             screen.DrawButton(rect2, sc, selected, selected, !selected);
+//         }
+//     }
+// }
 
 // Display the current values and parameter names of model params for 4 knobs.
 // Knob number == param number, since model params are listed in UI order.
@@ -59,19 +112,22 @@ void Runner::DisplayKnobValues() {
     screen.DrawRect(0, 0, 127, 11, false, true);
 
     u8 knobRow = currentKnobRow;
-    // make this work for mixer rows
-    // if (knobRow * KNOB_COUNT >= kit->drums[currentDrum]->ParamCount()) {
-    //     knobRow = 0;
-    // }
-
     u8 index;
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         std::string sc = "";
         Rectangle rect(knob * 32, 0, 32, 8);
         if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
+            if (knobRow * KNOB_COUNT >= kit->drums[currentDrum]->ParamCount()) {
+                knobRow = 0;
+            }
             index = knobRow * KNOB_COUNT + knob;
-            sc = kit->drums[currentDrum]->GetParamString(index);
+            // if (knob == currentKnob) {
+                sc = kit->drums[currentDrum]->GetParamString(index);
+            // }
         } else if (currentMenu == MENU_MIXER) {
+            if (knobRow > 1) {  // mixer only has 2 rows of params
+                knobRow = 0;
+            }
             index = currentMixerSection * 4 + knob;
             if (index < kit->drumCount && kit->drums[index] != nullptr) {
                 sc = mixer.GetChannelParamDisplay(index, knobRow);
@@ -199,17 +255,20 @@ void Runner::ProcessKnobs() {
         if (currentMenu ==  MENU_SOUNDS) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
             if (kit->drums[currentDrum] != nullptr) {
+                if (param >= kit->drums[currentDrum]->ParamCount()) {
+                    param = param % KNOB_COUNT;
+                }
                 kit->drums[currentDrum]->UpdateParam(param, sig);   // TODO bool changed = 
             }
             if (std::abs(sig - lastKnobValue[knob]) > 0.1f) {    // TODO: use delta value from Param?
                 lastScreenTime = System::GetNow();
                 lastKnobValue[knob] = sig;
+                currentKnob = knob;
                 if (!screen.IsScreenOn()) {
                     screen.SetScreenOn(true);
                     DrawScreen(true);
-                } else {
-                    DisplayKnobValues();
                 }
+                DisplayKnobValues();
             }
         } else if (currentMenu == MENU_MIXER) {
             u8 channel = currentMixerSection * 4 + knob;
@@ -468,9 +527,11 @@ void Runner::Run(Kit *kit) {
         }
     }
     for (u8 i = 0; i < mixerSections; i++) {
-        screen.menuItems[kit->drumCount + i] = "ABCDEFGH"[i];
+        // screen.menuItems[kit->drumCount + i] = "ABCDEFGH"[i];
+        screen.menuItems[kit->drumCount + i] = "Mx";
+        screen.menuItems[kit->drumCount + i] += "ABCDEFGH"[i];
     }
-    screen.menuItems[kit->drumCount + mixerSections] = "Pa";     // patch storage menu
+    screen.menuItems[kit->drumCount + mixerSections] = "Sav";     // patch storage menu
     menuSize = kit->drumCount + mixerSections + 1;
 
     // initialize the knob tracking

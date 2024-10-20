@@ -36,7 +36,7 @@ using namespace daisysp;
 
 #define LONG_PRESS_MILLIS 2000
 #define SCREEN_SAVE_MILLIS 10000
-#define UPDATE_CLOCK_TICKS 512000
+#define UPDATE_CLOCK_TICKS 512
 
 #define MIDICC_LIMIT 16
 #define MIDICC_VOLUME 16
@@ -135,6 +135,7 @@ class Runner {
         u8 currentMenuIndex = 0;
         uint8_t currentDrum = 0;
         uint8_t currentKnobRow = 0;
+        u8 currentKnob = 0;
         u8 currentMixerSection = 0;
         u8 maxDrum = 1;
         float lastKnobValue[KNOB_COUNT];

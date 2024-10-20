@@ -5,6 +5,10 @@ using namespace daisysp;
 
 
 const FontDef Screen::FONT = Font_6x8;
+const FontDef Screen::MENU_FONT = Font_11x18;
+const FontDef font1 = Font_11x18;
+const FontDef font2 = Font_16x26;
+const FontDef font3 = Font_7x10;
 std::string Screen::menuItems[Screen::MENU_SIZE];
 
 
@@ -61,36 +65,47 @@ void Screen::DrawButton(Rectangle rect, std::string str, bool border, bool fill,
 }
 
 void Screen::DrawMenu(uint8_t selected) {
+    DrawSimpleMenu(selected);
+}
+
+void Screen::DrawSimpleMenu(uint8_t selected) {
     if (!screenOn) { return; }
 
-    uint8_t itemWidth = FONT.FontWidth * 2 + 3;
-    uint8_t itemHeight = FONT.FontWidth + 4;
-    uint8_t displayCount = std::min((u8)(WIDTH / itemWidth), MENU_SIZE);
-    uint8_t highlightItem = displayCount / 2;
-    uint8_t start = std::min(std::max(0, selected - highlightItem), MENU_SIZE - displayCount);
-
-    // item = menu item shown; pos = position on screen
-    u8 pos = 0;
-    for (uint8_t item = start; item < start + displayCount; item++) {
-        if (menuItems[item].length() > 0) {
-            bool sel = item == selected;
-            uint8_t x = itemWidth * pos;
-            uint8_t y = HEIGHT - itemHeight;
-            Rectangle rect(x, y, itemWidth, itemHeight);
-            // DrawButton(rect, this->menuItems[item], true, sel, !sel);
-            if (sel) {  // only draw selected
-                DrawButton(rect, this->menuItems[item], true, false, true);
-            }
-            pos++;
-        }
-        // bool sel = item == selected;
-        // uint8_t x = itemWidth * (item - start);
-        // uint8_t y = HEIGHT - itemHeight;
-        // Rectangle rect(x, y, itemWidth, itemHeight);
-        // DrawButton(rect, this->menuItems[item], true, sel, !sel);
-    }
-
+    display->SetCursor(2, HEIGHT - 20);
+    display->WriteString(menuItems[selected].c_str(), MENU_FONT, true);
 }
+
+// void Screen::DrawLinearMenu(uint8_t selected) {
+//     if (!screenOn) { return; }
+
+//     uint8_t itemWidth = FONT.FontWidth * 2 + 3;
+//     uint8_t itemHeight = FONT.FontWidth + 4;
+//     uint8_t displayCount = std::min((u8)(WIDTH / itemWidth), MENU_SIZE);
+//     uint8_t highlightItem = displayCount / 2;
+//     uint8_t start = std::min(std::max(0, selected - highlightItem), MENU_SIZE - displayCount);
+
+//     // item = menu item shown; pos = position on screen
+//     u8 pos = 0;
+//     for (uint8_t item = start; item < start + displayCount; item++) {
+//         if (menuItems[item].length() > 0) {
+//             bool sel = item == selected;
+//             uint8_t x = itemWidth * pos;
+//             uint8_t y = HEIGHT - itemHeight;
+//             Rectangle rect(x, y, itemWidth, itemHeight);
+//             // DrawButton(rect, this->menuItems[item], true, sel, !sel);
+//             if (sel) {  // only draw selected
+//                 DrawButton(rect, this->menuItems[item], true, false, true);
+//             }
+//             pos++;
+//         }
+//         // bool sel = item == selected;
+//         // uint8_t x = itemWidth * (item - start);
+//         // uint8_t y = HEIGHT - itemHeight;
+//         // Rectangle rect(x, y, itemWidth, itemHeight);
+//         // DrawButton(rect, this->menuItems[item], true, sel, !sel);
+//     }
+
+// }
 
 void Screen::SetScreenOn(bool screenOn) { 
     this->screenOn = screenOn; 

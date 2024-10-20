@@ -16,6 +16,7 @@ class Screen {
         static const u8 HEIGHT = 63;
         static const u8 WIDTH = 127;
         static const FontDef FONT;
+        static const FontDef MENU_FONT;
         static const u8 MENU_SIZE = 21;
         static const u16 SCREEN_SCAN_TIME = 2000 / WIDTH;
         static std::string menuItems[MENU_SIZE];
@@ -52,6 +53,8 @@ class Screen {
         void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill);
 
         void DrawMenu(uint8_t selected);
+        void DrawSimpleMenu(uint8_t selected);
+        // void DrawLinearMenu(uint8_t selected);
 
         void SetScreenOn(bool screenOn);
         bool IsScreenOn() { return screenOn; }
