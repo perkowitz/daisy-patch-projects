@@ -23,7 +23,8 @@ using namespace daisysp;
 #define MENU_ROWS 2
 #define MENU_SOUNDS 0
 #define MENU_MIXER 1
-#define MENU_PATCH 2
+#define MENU_MIXER_MAIN 2
+#define MENU_PATCH 3
 #define MIDIMAP_SIZE 16
 #define AUDIO_PASSTHRU true
 #define SHOW_CPU false

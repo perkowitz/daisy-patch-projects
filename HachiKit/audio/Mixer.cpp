@@ -23,10 +23,11 @@ void Mixer::ResetSignals() {
 }
 
 void Mixer::Process() {
-    leftSignal = Utility::LimitFloat(outputGain * leftSignal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
-    rightSignal = Utility::LimitFloat(outputGain * rightSignal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
-    send1Signal = Utility::LimitFloat(send1Gain * send1Signal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
-    send2Signal = Utility::LimitFloat(send2Gain * send2Signal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
+    float gain = OutputGain();
+    leftSignal = Utility::LimitFloat(gain * leftSignal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
+    rightSignal = Utility::LimitFloat(gain * rightSignal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
+    send1Signal = Utility::LimitFloat(Send1Gain() * send1Signal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
+    send2Signal = Utility::LimitFloat(Send2Gain() * send2Signal / CHANNELS, -1 * OUTPUT_LIMIT, OUTPUT_LIMIT);
 }
 
 void Mixer::UpdateSignal(u8 channel, float signal) {

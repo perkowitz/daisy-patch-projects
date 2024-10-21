@@ -11,6 +11,21 @@ class Mixer {
     public:
         static const u8 CHANNELS = 16;
 
+        // Number of settable mixer-global parameters.
+        static const u8 PARAM_COUNT = 3;
+        // This is the order params will appear in the UI.
+        static const uint8_t PARAM_OUTPUT_GAIN = 0;
+        static const uint8_t PARAM_SEND1_GAIN = 1;
+        static const uint8_t PARAM_SEND2_GAIN = 2;
+        u8 ParamCount() { return PARAM_COUNT; }
+
+        Mixer() {
+            globalParams[0].Init("Gain", 2, 0, 5, Parameter::EXPONENTIAL, 100);
+            globalParams[1].Init("Fx1", 2, 0, 5, Parameter::EXPONENTIAL, 100);
+            globalParams[2].Init("Fx2", 2, 0, 5, Parameter::EXPONENTIAL, 100);
+            globalParamSet.Init(PARAM_COUNT, globalParams);
+        }
+
         void Reset();
         void ResetSignals();
         void Process();
@@ -28,10 +43,11 @@ class Mixer {
         float Send1Signal() { return send1Signal; }
         float Send2Signal() { return send2Signal; }
 
-        // TODO: use params
-        // void SetOutputGain(float gain) { this->outputGain = gain; }
-        // void SetSend1Gain(float gain) { this->send1Gain = gain; }
-        // void SetSend2Gain(float gain) { this->send2Gain = gain; }
+        ParamSet* GetGlobals() { return &globalParamSet; }
+        float OutputGain() { return globalParamSet.GetParamValue(PARAM_OUTPUT_GAIN); }
+        float Send1Gain() { return globalParamSet.GetParamValue(PARAM_SEND1_GAIN); }
+        float Send2Gain() { return globalParamSet.GetParamValue(PARAM_SEND2_GAIN); }
+
 
     private:
         static const uint8_t OUTPUT_LIMIT = 2;
@@ -42,9 +58,9 @@ class Mixer {
         float send1Signal = 0.0f;
         float send2Signal = 0.0f;
 
-        float outputGain = 1;
-        float send1Gain = 1;
-        float send2Gain = 1;
+        ParamFull globalParams[PARAM_COUNT];
+        ParamSet globalParamSet;
+
 
 };
 
