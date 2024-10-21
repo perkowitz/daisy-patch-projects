@@ -31,6 +31,7 @@ class ParamSet {
 
         u8 ParamCount();
         bool UpdateParam(u8 param, float raw);
+        bool UpdateParam(u8 param, float raw, bool forceUpdate);
         void SetParam(u8 param, float scaled);
         void ResetParams();
         float GetParamValue(u8 param);

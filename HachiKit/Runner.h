@@ -23,7 +23,8 @@ using namespace daisysp;
 #define MENU_ROWS 2
 #define MENU_SOUNDS 0
 #define MENU_MIXER 1
-#define MENU_PATCH 2
+#define MENU_MIXER_MAIN 2
+#define MENU_PATCH 3
 #define MIDIMAP_SIZE 16
 #define AUDIO_PASSTHRU true
 #define SHOW_CPU false
@@ -35,6 +36,16 @@ using namespace daisysp;
 #define START_PROGRAM_CHANGE 0
 
 #define LONG_PRESS_MILLIS 2000
+#define SCREEN_SAVE_MILLIS 10000
+#define UPDATE_CLOCK_TICKS 512
+
+#define MIDICC_LIMIT 16
+#define MIDICC_VOLUME 16
+#define MIDICC_SEND_1 32
+#define MIDICC_PARAM_1 48
+#define MIDICC_PARAM_2 64
+#define MIDICC_PARAM_3 80
+#define MIDICC_PARAM_4 96
 
 
 class Runner {
@@ -125,10 +136,12 @@ class Runner {
         u8 currentMenuIndex = 0;
         uint8_t currentDrum = 0;
         uint8_t currentKnobRow = 0;
+        u8 currentKnob = 0;
         u8 currentMixerSection = 0;
         u8 maxDrum = 1;
         float lastKnobValue[KNOB_COUNT];
         u8 midiChannel = 9;  // 0-indexed
+        u8 midiCcOffset = 0;
 
         u8 currentPatch = 0;
         PatchStorage patchStorage;
@@ -137,7 +150,6 @@ class Runner {
         u8 cycle = 0;
         u8 cycleLength = 8;
         float savedSignal = 0.0f;
-        u32 usageCounter = 0;
 
         u8 clockRange = 8;
         u8 clockThreshold = 8;
@@ -147,6 +159,7 @@ class Runner {
         s8 saveTo = -1;
         s8 loadFrom = -1;
         u32 lastEncoderTime = 0;
+        u32 lastScreenTime = 0;
 
 
 };
