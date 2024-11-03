@@ -329,6 +329,16 @@ void Runner::ProcessControls()
     // ProcessGates();
 }
 
+void Runner::CvOut(u8 output, float signal) {
+    DacHandle::Channel ch = output == 0 ? DacHandle::Channel::ONE : DacHandle::Channel::TWO;
+    if (output < CV_OUT_COUNT) {
+        hw.seed.dac.WriteValue(ch, static_cast<uint16_t>(CV_OUT_SCALE_FACTOR * signal));
+    }
+}
+
+void Runner::GateOut(bool value) {
+    dsy_gpio_write(&hw.gate_output, value);
+}
 
 void Runner::AudioCallback(AudioHandle::InputBuffer  in,
                    AudioHandle::OutputBuffer out,
@@ -468,6 +478,14 @@ void Runner::HandleMidiMessage(MidiEvent m)
                         if (kit->midiMap[n] != nullptr) {
                             kit->midiMap[n]->Trigger(velocity);
                             screen.ScreensaveEvent(n);
+                            // if (gateOutSource == TRIGGER_ALL_SOURCE || gateOutSource == kit->midiMap[n]) {
+                            if (gateOutSource == TRIGGER_ALL_SOURCE) {   // setting it to a specific source doesn't work yet
+                                u32 now = System::GetNow();
+                                if (now - lastGateOutTime > gateOutLengthMillis) {   // only send one gate if triggers arrive close together
+                                    GateOut(true);
+                                    lastGateOutTime = now;
+                                }
+                            }
                         }
                     }
                 }
@@ -622,6 +640,9 @@ void Runner::Run(Kit *kit) {
                 screen.SetScreenOn(false);
             }
             screen.Screensave(now);
+        }
+        if (now - lastGateOutTime > gateOutLengthMillis) {
+            GateOut(false);
         }
 
         clock = (clock + 1) % UPDATE_CLOCK_TICKS;
