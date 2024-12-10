@@ -6,7 +6,7 @@ using namespace daisysp;
 
 #include "daisy_patch.h"
 #include "daisysp.h"
-#include "lib/ParamSet.h"
+#include "lib/ParamPage.h"
 #include <string>
 
 
@@ -17,6 +17,7 @@ class ISynth {
         virtual ~ISynth() { }
 
         virtual std::string Name() = 0;
+        virtual std::string ShortName() = 0;
         virtual void Init(float sample_rate) = 0;
         virtual bool IsActive() = 0;
 
@@ -26,8 +27,7 @@ class ISynth {
         virtual void NoteOff(u8 note) = 0;
 
         virtual u8 PageCount() = 0;
-        virtual ParamSet *GetParamSet(u8 page) = 0;
-        virtual std::string GetPageName(u8 page) = 0;
+        virtual ParamPage *GetParamPage(u8 page) = 0;
         virtual void ResetParams(u8 page) = 0;
 
 };

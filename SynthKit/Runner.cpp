@@ -14,6 +14,7 @@ void Runner::DisplayParamMenu() {
     u8 knobRow = currentKnobRow;
     std::string sc = "";
     std::string rc = "";
+    ParamPage *paramPage = synth->GetParamPage(currentSynthPage);
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         sc = "";
         rc = "";
@@ -22,7 +23,7 @@ void Runner::DisplayParamMenu() {
                 knobRow = 0;    // assumes synth pages only ever have one row
             }
             u8 param = knobRow * KNOB_COUNT + knob;
-            sc = synth->GetParamSet(currentSynthPage)->GetParamName(param);
+            sc = paramPage->GetParamName(param);
         } else if (currentMenu == MENU_MIXER) {
             if (knobRow > 1) {  // mixer only has 2 rows of params
                 knobRow = 0;
@@ -42,6 +43,8 @@ void Runner::DisplayParamMenu() {
     }
     Rectangle rect3(0, 24, 32, 12);
     screen.DrawButton(rect3, rc, false, false, true);
+    screen.DrawPageTitle(paramPage->getModuleName(), paramPage->getTitle());
+
 }
 
 // Display the current values and parameter names of model params for 4 knobs.
@@ -52,6 +55,7 @@ void Runner::DisplayKnobValues() {
 
     u8 knobRow = currentKnobRow;
     u8 index;
+    ParamPage *paramPage = synth->GetParamPage(currentSynthPage);
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         std::string sc = "";
         Rectangle rect(knob * 32, 0, 32, 8);
@@ -60,7 +64,7 @@ void Runner::DisplayKnobValues() {
                 knobRow = 0;    // assumes synth pages only ever have one row
             }
             index = knobRow * KNOB_COUNT + knob;
-            sc = synth->GetParamSet(currentSynthPage)->GetParamDisplay(index);
+            sc = paramPage->GetParamDisplay(index);
         } else if (currentMenu == MENU_MIXER) {
             if (knobRow > 1) {  // mixer only has 2 rows of params
                 knobRow = 0;
@@ -111,7 +115,7 @@ void Runner::ProcessEncoder() {
         if (newMenuIndex < synth->PageCount()) {
             currentMenu = MENU_SYNTH;
             currentSynthPage = newMenuIndex;
-            synth->GetParamSet(currentSynthPage)->ResetParams();
+            synth->GetParamPage(currentSynthPage)->ResetParams();
         } else if (newMenuIndex < synth->PageCount() + mixerSections) {
             currentMenu = MENU_MIXER;
             currentMixerSection = newMenuIndex - synth->PageCount();
@@ -193,7 +197,7 @@ void Runner::ProcessKnobs() {
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  MENU_SYNTH) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
-            changed = synth->GetParamSet(currentSynthPage)->UpdateParam(param, sig);
+            changed = synth->GetParamPage(currentSynthPage)->UpdateParam(param, sig);
         } else if (currentMenu == MENU_MIXER) {
             u8 channel = currentMixerSection * 4 + knob;
             changed = mixer.UpdateChannelParam(channel, currentKnobRow, sig);
@@ -311,26 +315,22 @@ void Runner::MidiSend(MidiEvent m) {
 // Typical Switch case for Message Type.
 void Runner::HandleMidiMessage(MidiEvent m) {
 
-    screen.OledMessage("Midi", 2);
     // will pass it through if it can
     // MidiSend(m);
 
     switch(m.type) {
         case NoteOn: {
             NoteOnEvent event = m.AsNoteOn();
-            screen.OledMessage("Note:" + std::to_string(event.channel) + ":" + std::to_string(event.note), 3);
+            // screen.OledMessage("Note:" + std::to_string(event.channel) + ":" + std::to_string(event.note), 3);
             if (event.channel == midiChannel) {
                 float velocity = (float)event.velocity / 127.0f;
-                // screen.OledMessage("  v:" + std::to_string(event.velocity), 4);
                 if (velocity > 0) {
-                    screen.OledMessage("Note on", 4);
                     synth->NoteOn(event.note, velocity);
+                    screen.ScreensaveEvent(event.note);
                 } else {
-                    screen.OledMessage("Note off", 4);
                     synth->NoteOff(event.note);
                 }
             }
-            screen.OledMessage("  note done", 5);
             break;
         }
         case NoteOff: {

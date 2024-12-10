@@ -54,6 +54,7 @@ class Screen {
 
         void DrawMenu(uint8_t selected);
         void DrawSimpleMenu(uint8_t selected);
+        void DrawPageTitle(std::string moduleName, std::string pageTitle);
         // void DrawLinearMenu(uint8_t selected);
 
         void SetScreenOn(bool screenOn);

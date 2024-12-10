@@ -32,7 +32,7 @@ using namespace daisysp;
 #define START_PROGRAM_CHANGE 0
 
 #define LONG_PRESS_MILLIS 2000
-#define SCREEN_SAVE_MILLIS 10000
+#define SCREEN_SAVE_MILLIS 60000
 #define UPDATE_CLOCK_TICKS 512
 
 #define MIDICC_LIMIT 16
