@@ -13,7 +13,7 @@ HACHILIB_DIR = ../lib
 
 # CPP_SOURCES += $(HACHILIB_SOURCES) $(LOCAL_SOURCES)
 
-CPP_SOURCES += SynthKit.cpp \
+CPP_SOURCES += Avatar.cpp \
 $(HACHILIB_DIR)/ParamPage.cpp \
 $(HACHILIB_DIR)/ParamSet.cpp \
 $(HACHILIB_DIR)/audio/AdsrEnv.cpp \

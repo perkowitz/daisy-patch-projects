@@ -1,5 +1,5 @@
 #include "Runner.h"
-#include "Simple.h"
+#include "Toph.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -11,12 +11,12 @@ SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::SampleRate::S
 
 int main(void) {
 
-    Simple simple;
+    Toph toph;
 
     Runner runner(daisy::SaiHandle::Config::SampleRate::SAI_48KHZ);
 
     float sampleRate = runner.getSampleRate();
-    simple.Init(sampleRate);
+    toph.Init(sampleRate);
 
-    runner.Run(&simple);
+    runner.Run(&toph);
 }
