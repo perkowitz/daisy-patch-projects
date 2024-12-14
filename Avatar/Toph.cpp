@@ -23,11 +23,11 @@ void Toph::Init(float sampleRate) {
     params[PARAM_FS].Init("S", 0, 0.0, 1.0, Parameter::LINEAR, 100);
     params[PARAM_FR].Init("R", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     // assign nullptr to leave a slot blank
-    pages[0].Init("", "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
-    pages[1].Init("", "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
-    pages[2].Init("", "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], nullptr);
-    pages[3].Init("", "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
-    pages[4].Init("", "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
+    pages[0].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
+    pages[1].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
+    pages[2].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], nullptr);
+    pages[3].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
+    pages[4].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
 
     // audio settings -- only set the values that are not set in Process()
     // oscillators
@@ -62,7 +62,7 @@ float Toph::Process() {
     filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
     filtEnv.SetSustainLevel(params[PARAM_FS].Value());
     // svf.SetFreq(params[PARAM_FREQ].Value());
-    svf.SetFreq(params[PARAM_FREQ].Value() + MAX_FREQ * params[PARAM_FENV].Value() * filtEnv.Process());
+    svf.SetFreq(params[PARAM_FREQ].Value() + MAX_FREQ * params[PARAM_FENV].Value() * params[PARAM_FENV].Value() * filtEnv.Process());
     svf.SetRes(params[PARAM_RES].Value());
     svf.Process(signal);
     // signal = svf.Low();

@@ -6,6 +6,7 @@ using namespace daisysp;
 
 const FontDef Screen::FONT = Font_6x8;
 const FontDef Screen::MENU_FONT = Font_7x10;
+const FontDef Screen::TITLE_FONT = Font_11x18;
 const FontDef font1 = Font_11x18;
 const FontDef font2 = Font_16x26;
 const FontDef font3 = Font_7x10;
@@ -78,12 +79,17 @@ void Screen::DrawSimpleMenu(uint8_t selected) {
 void Screen::DrawPageTitle(std::string moduleName, std::string pageTitle) {
     if (!screenOn) { return; }
 
-    display->SetCursor(2, HEIGHT - 20);
-    if (moduleName == "") {
-        display->WriteString(pageTitle.c_str(), MENU_FONT, true);
-    } else {
-        display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
-    }
+    Rectangle titleRect(0, HEIGHT - 20, WIDTH, 20);
+
+    display->WriteStringAligned(pageTitle.c_str(), MENU_FONT, titleRect, Alignment::bottomLeft, true);
+    display->WriteStringAligned(moduleName.c_str(), TITLE_FONT, titleRect, Alignment::bottomRight, true);
+
+    // display->SetCursor(2, HEIGHT - 20);
+    // if (moduleName == "") {
+    //     display->WriteString(pageTitle.c_str(), MENU_FONT, true);
+    // } else {
+    //     display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
+    // }
 }
 
 
