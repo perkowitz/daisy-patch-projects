@@ -1,5 +1,5 @@
-#ifndef SIMPLE_H
-#define SIMPLE_H
+#ifndef TOPH_H
+#define TOPH_H
 
 #include "daisy_patch.h"
 #include "daisysp.h"
@@ -11,7 +11,7 @@
 using namespace daisy;
 using namespace daisysp;
 
-class Simple: public ISynth {
+class Toph: public ISynth {
 
     public:
         // pages
@@ -43,8 +43,8 @@ class Simple: public ISynth {
 
         void Init(float sampleRate);
         bool IsActive() { return active; }
-        std::string Name() { return "Simple"; }
-        std::string ShortName() { return "Sim"; }
+        std::string Name() { return "Toph"; }
+        std::string ShortName() { return "To"; }
 
         float Process();
         float GetOutput(u8 channel);

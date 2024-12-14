@@ -1,9 +1,9 @@
-#include "Simple.h"
+#include "Toph.h"
 
 using namespace daisy;
 using namespace daisysp;
 
-void Simple::Init(float sampleRate) {
+void Toph::Init(float sampleRate) {
     // set up the params and arrange them in pages
     params[PARAM_OCTAVE].Init("Oct", 0, -3, 3, Parameter::LINEAR, 1);
     params[PARAM_SAW].Init("Saw", 1, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -46,7 +46,7 @@ void Simple::Init(float sampleRate) {
     ampEnv.SetCurve(1);
 }
 
-float Simple::Process() {
+float Toph::Process() {
 
     // oscillators
     multiOsc.SetPulsewidth(params[PARAM_PULSEWIDTH].Value());
@@ -83,11 +83,11 @@ float Simple::Process() {
     return leftSignal;
 }
 
-float Simple::GetOutput(u8 channel) {
+float Toph::GetOutput(u8 channel) {
     return channel == 0 ? leftSignal : rightSignal;
 }
 
-void Simple::NoteOn(u8 note, float velocity) {
+void Toph::NoteOn(u8 note, float velocity) {
     this->velocity = Utility::Limit(velocity);
     if (this->velocity == 0) {
         NoteOff(note);
@@ -109,7 +109,7 @@ void Simple::NoteOn(u8 note, float velocity) {
     }
 }
 
-void Simple::NoteOff(u8 note) {
+void Toph::NoteOff(u8 note) {
     // if (activeGates > 0) {
     //     activeGates--;
     // }
@@ -117,14 +117,14 @@ void Simple::NoteOff(u8 note) {
     filtEnv.GateOff();
 }
 
-ParamPage *Simple::GetParamPage(u8 page) {
+ParamPage *Toph::GetParamPage(u8 page) {
     if (page < PAGE_COUNT) {
         return &pages[page];
     }
     return nullptr;
 }
 
-void Simple::ResetParams(u8 page) {
+void Toph::ResetParams(u8 page) {
     if (page < PAGE_COUNT) {
         paramSets[page].ResetParams();
     }
