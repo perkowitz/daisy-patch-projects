@@ -405,7 +405,7 @@ void Runner::Run(ISynth *synth) {
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
             screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
-            screen.ShowCpu(avgCpu);
+            // screen.ShowCpu(avgCpu);
         }
 
         u32 now = System::GetNow();

@@ -79,7 +79,11 @@ void Screen::DrawPageTitle(std::string moduleName, std::string pageTitle) {
     if (!screenOn) { return; }
 
     display->SetCursor(2, HEIGHT - 20);
-    display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
+    if (moduleName == "") {
+        display->WriteString(pageTitle.c_str(), MENU_FONT, true);
+    } else {
+        display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
+    }
 }
 
 

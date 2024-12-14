@@ -78,10 +78,11 @@ class Param {
 
             float scaled = Utility::ScaleFloat(raw, scaleLo - margin, scaleHi + 2 * margin, scaleLo, scaleHi, scaleCurve);
             if (!active && !forceUpdate) {
-                if (scaled <= this->scaled || (raw <= 0.01 && raw >= 0.0f)) lower = true;
+                if (scaled <= this->scaled || raw <= 0.01) lower = true;
                 if (scaled >= this->scaled || raw >= 0.99) higher = true;
                 active = (lower && higher);
-            } else if (active || forceUpdate) {
+            } 
+            if (active || forceUpdate) {
                 this->raw = raw;
                 this->scaled = scaled;
                 if (forceUpdate) {

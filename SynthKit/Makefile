@@ -18,6 +18,7 @@ $(HACHILIB_DIR)/ParamPage.cpp \
 $(HACHILIB_DIR)/ParamSet.cpp \
 $(HACHILIB_DIR)/audio/AdsrEnv.cpp \
 $(HACHILIB_DIR)/audio/Mixer.cpp \
+$(HACHILIB_DIR)/audio/MultiOsc.cpp \
 $(HACHILIB_DIR)/audio/Processing.cpp \
 Runner.cpp \
 Screen.cpp \
