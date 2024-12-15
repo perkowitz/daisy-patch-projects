@@ -20,15 +20,15 @@ void Screen::DrawRect(uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fa
 }
 
 Rectangle Screen::WriteStringAligned(
-    const char*    str,
-    const FontDef& font,
-    Rectangle      boundingBox,
-    Alignment      alignment,
-    bool           on) {
+        const char*    str,
+        const FontDef& font,
+        Rectangle      boundingBox,
+        Alignment      alignment,
+        bool           on) {
 
-        if (!screenOn) { return boundingBox; }
+    if (!screenOn) { return boundingBox; }
 
-        return display->WriteStringAligned(str, font, boundingBox, alignment, on);
+    return display->WriteStringAligned(str, font, boundingBox, alignment, on);
 }
 
 void Screen::DrawLine(
@@ -83,13 +83,6 @@ void Screen::DrawPageTitle(std::string moduleName, std::string pageTitle) {
 
     display->WriteStringAligned(pageTitle.c_str(), MENU_FONT, titleRect, Alignment::bottomLeft, true);
     display->WriteStringAligned(moduleName.c_str(), TITLE_FONT, titleRect, Alignment::bottomRight, true);
-
-    // display->SetCursor(2, HEIGHT - 20);
-    // if (moduleName == "") {
-    //     display->WriteString(pageTitle.c_str(), MENU_FONT, true);
-    // } else {
-    //     display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
-    // }
 }
 
 
@@ -214,15 +207,33 @@ void Screen::OledMessage(std::string message, int row, int column) {
     display->Update();
 }
 
-void Screen::ShowCpu(float usage) {
+void Screen::Write(std::string message, u8 x, u8 y) {
     if (!screenOn) { return; }
 
-    u8 menuHeight = FONT.FontWidth + 4;
-    u8 scaled = (int)(usage * WIDTH);
-    u8 qtr = WIDTH / 4;
-    display->DrawRect(0, HEIGHT - menuHeight - 3, WIDTH, HEIGHT - menuHeight - 1, false, true);
-    display->DrawRect(0, HEIGHT - menuHeight - 3, scaled, HEIGHT - menuHeight - 1, true, true);
-    display->DrawLine(qtr, HEIGHT - menuHeight - 4, qtr, HEIGHT - menuHeight -1, true);
-    display->DrawLine(2 * qtr, HEIGHT - menuHeight - 4, 2 * qtr, HEIGHT - menuHeight -1, true);
-    display->DrawLine(3 * qtr, HEIGHT - menuHeight - 4, 3 * qtr, HEIGHT - menuHeight -1, true);
+    char* mstr = &message[0];
+    display->SetCursor(x, y);
+    display->WriteString(mstr, Font_6x8, true);
+    display->Update();
+}
+
+
+void Screen::ShowCpu(float usage, bool showGraphic) {
+    if (!screenOn) { return; }
+
+    std::string  cpu = "cpu:" + std::to_string((int)(usage * 100)) + "%";
+    display->SetCursor(40, 0);
+    display->WriteString(cpu.c_str(), MENU_FONT, true);
+    display->SetCursor(40, 80);
+    display->WriteString(cpu.c_str(), MENU_FONT, true);
+
+    if (showGraphic) {
+        u8 menuHeight = FONT.FontWidth + 4;
+        u8 scaled = (int)(usage * WIDTH);
+        u8 qtr = WIDTH / 4;
+        display->DrawRect(0, HEIGHT - menuHeight - 3, WIDTH, HEIGHT - menuHeight - 1, false, true);
+        display->DrawRect(0, HEIGHT - menuHeight - 3, scaled, HEIGHT - menuHeight - 1, true, true);
+        display->DrawLine(qtr, HEIGHT - menuHeight - 4, qtr, HEIGHT - menuHeight -1, true);
+        display->DrawLine(2 * qtr, HEIGHT - menuHeight - 4, 2 * qtr, HEIGHT - menuHeight -1, true);
+        display->DrawLine(3 * qtr, HEIGHT - menuHeight - 4, 3 * qtr, HEIGHT - menuHeight -1, true);
+    }
 }

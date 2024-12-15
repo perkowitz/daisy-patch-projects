@@ -52,6 +52,7 @@ class Screen {
         void DrawRectFilled(Rectangle rect, bool border, bool fill);
 
         void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill);
+        void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill, Alignment alignment);
 
         void DrawMenu(uint8_t selected);
         void DrawSimpleMenu(uint8_t selected);
@@ -66,8 +67,9 @@ class Screen {
 
         void OledMessage(std::string message, int row);
         void OledMessage(std::string message, int row, int column);
+        void Write(std::string str, u8 x, u8 y);
 
-        void ShowCpu(float usage);
+        void ShowCpu(float usage, bool showGraphic);
 
     private:
         OledDisplay<SSD130x4WireSpi128x64Driver> *display;

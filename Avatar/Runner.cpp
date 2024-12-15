@@ -5,6 +5,21 @@ using namespace daisysp;
 
 Runner* Runner::globalRunner = nullptr;
 
+void Runner::DrawPageTitle(std::string moduleName, std::string pageTitle) {
+    // Rectangle titleRect(0, HEIGHT - 20, WIDTH, 20);
+
+    // display->WriteStringAligned(pageTitle.c_str(), MENU_FONT, titleRect, Alignment::bottomLeft, true);
+    // display->WriteStringAligned(moduleName.c_str(), TITLE_FONT, titleRect, Alignment::bottomRight, true);
+
+    // display->SetCursor(2, HEIGHT - 20);
+    // if (moduleName == "") {
+    //     display->WriteString(pageTitle.c_str(), MENU_FONT, true);
+    // } else {
+    //     display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
+    // }
+}
+
+
 // Display the available parameter names.
 void Runner::DisplayParamMenu() {
 
@@ -116,12 +131,12 @@ void Runner::ProcessEncoder() {
             currentMenu = MENU_SYNTH;
             currentSynthPage = newMenuIndex;
             synth->GetParamPage(currentSynthPage)->ResetParams();
-        } else if (newMenuIndex < synth->PageCount() + mixerSections) {
-            currentMenu = MENU_MIXER;
-            currentMixerSection = newMenuIndex - synth->PageCount();
-            for (u8 i = 0; i < 4; i++) {
-                mixer.ResetChannelParams(currentMixerSection * 4 + i);
-            }
+        // } else if (newMenuIndex < synth->PageCount() + mixerSections) {
+        //     currentMenu = MENU_MIXER;
+        //     currentMixerSection = newMenuIndex - synth->PageCount();
+        //     for (u8 i = 0; i < 4; i++) {
+        //         mixer.ResetChannelParams(currentMixerSection * 4 + i);
+        //     }
         // } else if (newMenuIndex < kit->drumCount + mixerSections + 1) {
         //     currentMenu = MENU_MIXER_MAIN;
         //     mixer.GetGlobals()->ResetParams();
@@ -405,8 +420,8 @@ void Runner::Run(ISynth *synth) {
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
             screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
-            // screen.ShowCpu(avgCpu);
-        }
+            // screen.ShowCpu(avgCpu, false);
+        } 
 
         u32 now = System::GetNow();
         if (now - lastScreenTime > SCREEN_SAVE_MILLIS) {
