@@ -246,6 +246,7 @@ void Runner::ProcessKnobs() {
     }
 
     if (anyChanged) {
+        synth->ProcessChanges();
         lastScreenTime = System::GetNow();
         if (!screen.IsScreenOn()) {
             screen.SetScreenOn(true);
@@ -327,11 +328,48 @@ void Runner::MidiSend(MidiEvent m) {
 
 }
 
+void Runner::HandleMidiRealtime(MidiEvent m) {
+
+    switch (m.srt_type) {
+        case Start: {
+            currentMeasure = currentStep = currentTick = 0;
+            running = true;
+            break;
+        }
+        case Continue: {
+            currentMeasure = currentStep = currentTick = 0;
+            running = true;
+            break;
+        }
+        case Stop: {
+            currentMeasure = currentStep = currentTick = 0;
+            running = false;
+            break;
+        }
+        case TimingClock: {
+            if (currentTick == 0) {
+                synth->Clock(currentMeasure, currentStep, currentTick);
+            }
+            currentTick = (currentTick + 1) % TICKS_PER_STEP;
+            if (currentTick == 0) {
+                currentStep = (currentStep + 1) % STEPS_PER_MEASURE;
+                if (currentStep == 0) {
+                    currentMeasure++;
+                }
+            }
+            break;
+        }
+        
+    }
+}
+
 // Typical Switch case for Message Type.
 void Runner::HandleMidiMessage(MidiEvent m) {
 
     // will pass it through if it can
     // MidiSend(m);
+
+    // screen.OledMessage("M:" + std::to_string(m.type), 2);
 
     switch(m.type) {
         case NoteOn: {
@@ -364,6 +402,10 @@ void Runner::HandleMidiMessage(MidiEvent m) {
         case ProgramChange: {
             break;
         }
+        case SystemRealTime: {
+            HandleMidiRealtime(m);
+            break;
+        }
         default: 
             break;
     }
@@ -377,6 +419,7 @@ void Runner::Run(ISynth *synth) {
 
     this->synth = synth;
     mixer.Reset();
+    menuSize = synth->PageCount();
 
     // initialize the knob tracking
     for (u8 i = 0; i < KNOB_COUNT; i++) {
@@ -419,7 +462,7 @@ void Runner::Run(ISynth *synth) {
 
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
-            screen.OledMessage("cpu:" + std::to_string((int)(avgCpu * 100)) + "%", 4, 10);
+            screen.OledMessage(std::to_string((int)(avgCpu * 100)) + "%", 4, 13);
             // screen.ShowCpu(avgCpu, false);
         } 
 

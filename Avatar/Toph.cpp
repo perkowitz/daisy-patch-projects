@@ -117,6 +117,10 @@ void Toph::NoteOff(u8 note) {
     filtEnv.GateOff();
 }
 
+void Toph::Clock(u8 measure, u8 step, u8 tick) {
+    
+}
+
 ParamPage *Toph::GetParamPage(u8 page) {
     if (page < PAGE_COUNT) {
         return &pages[page];

@@ -50,9 +50,11 @@ class Toph: public ISynth {
         float GetOutput(u8 channel);
         void NoteOn(u8 note, float velocity);
         void NoteOff(u8 note);
+        void Clock(u8 measure, u8 step, u8 tick);
 
         ParamPage *GetParamPage(u8 page);
         void ResetParams(u8 page);
+        void ProcessChanges() { }
 
     private:
         bool active = false;

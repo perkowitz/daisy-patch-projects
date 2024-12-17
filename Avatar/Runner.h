@@ -35,6 +35,8 @@ using namespace daisysp;
 #define SCREEN_SAVE_MILLIS 60000
 #define UPDATE_CLOCK_TICKS 512
 
+#define STEPS_PER_MEASURE 16
+#define TICKS_PER_STEP 6
 #define MIDICC_LIMIT 16
 #define MIDICC_VOLUME 16
 #define MIDICC_SEND_1 32
@@ -75,6 +77,7 @@ class Runner {
                 AudioHandle::OutputBuffer out,
                 size_t size);
         void MidiSend(MidiEvent m);
+        void HandleMidiRealtime(MidiEvent m);
         void HandleMidiMessage(MidiEvent m);
 
         float samplerate = 0;
@@ -94,6 +97,11 @@ class Runner {
         u8 currentSynth = 0;
         u8 currentSynthPage = 0;
         u8 currentKnobRow = 0;
+
+        bool running = false;
+        u8 currentMeasure = 0;
+        u8 currentStep = 0;
+        u8 currentTick = 0;
 
         float lastKnobValue[KNOB_COUNT];
 

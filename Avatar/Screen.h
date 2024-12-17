@@ -18,7 +18,7 @@ class Screen {
         static const FontDef FONT;
         static const FontDef MENU_FONT;
         static const FontDef TITLE_FONT;
-        static const u8 MENU_SIZE = 21;
+        static const u8 MENU_SIZE = 6;
         static const u16 SCREEN_SCAN_TIME = 2000 / WIDTH;
         static std::string menuItems[MENU_SIZE];
 

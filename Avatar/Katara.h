@@ -3,9 +3,11 @@
 
 #include "daisy_patch.h"
 #include "daisysp.h"
+#include "Filters/onepole.h"
 #include "lib/ParamSet.h"
 #include "lib/audio/AdsrEnv.h"
 #include "lib/audio/MultiOsc.h"
+#include "lib/audio/SyncEnv.h"
 #include "ISynth.h"
 
 using namespace daisy;
@@ -24,12 +26,15 @@ class Katara: public ISynth {
     };
 
     public:
+        // polyphony
+        static const u8 VOICE_COUNT = 4;
+
         // pages
-        static const u8 PAGE_COUNT = 5;
+        static const u8 PAGE_COUNT = 7;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 18;  // total count of all params following
+        static const u8 PARAM_COUNT = 23;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -48,11 +53,15 @@ class Katara: public ISynth {
         static const u8 PARAM_SAW2 = 15;
         static const u8 PARAM_PULSEWIDTH = 16;
         static const u8 PARAM_HPF = 17;
+        static const u8 PARAM_TA = 18;
+        static const u8 PARAM_TH = 19;
+        static const u8 PARAM_TD = 20;
+        static const u8 PARAM_SENV_STEPS = 21;
+        static const u8 PARAM_F_SENV = 22;
 
         // constants
         static const u16 MAX_FREQ = 24000;
-        static const u8 VOICE_COUNT = 6;
-        static const u8 MIX_SCALE = 2;
+        static const u8 MIX_SCALE = 1;
 
         void Init(float sampleRate);
         bool IsActive() { return active; }
@@ -63,9 +72,11 @@ class Katara: public ISynth {
         float GetOutput(u8 channel);
         void NoteOn(u8 note, float velocity);
         void NoteOff(u8 note);
+        void Clock(u8 measure, u8 step, u8 tick);
 
         ParamPage *GetParamPage(u8 page);
         void ResetParams(u8 page);
+        void ProcessChanges();
 
     private:
         bool active = false;
@@ -80,7 +91,8 @@ class Katara: public ISynth {
         Voice voices[VOICE_COUNT];
         u8 nextVoice = 0;
 
-        Svf hpf;
+        OnePole hpf;
+        SyncEnv syncEnv;
 
 };
 
