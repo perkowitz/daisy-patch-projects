@@ -22,6 +22,7 @@ class Katara: public ISynth {
         AdsrEnv filtEnv;
         u8 note;
         u8 adjustedNote;
+        u8 velocity;
         bool gateOn;
     };
 
@@ -78,9 +79,11 @@ class Katara: public ISynth {
         void ResetParams(u8 page);
         void ProcessChanges();
 
+        void SetMidiChannel(u8 channel) { midiChannel = channel; }
+        virtual u8 GetMidiChanel() { return midiChannel; }
+
     private:
         bool active = false;
-        float velocity = 0;
         float leftSignal = 0;
         float rightSignal = 0;
 
@@ -90,6 +93,7 @@ class Katara: public ISynth {
 
         Voice voices[VOICE_COUNT];
         u8 nextVoice = 0;
+        u8 midiChannel = 1;
 
         OnePole hpf;
         SyncEnv syncEnv;

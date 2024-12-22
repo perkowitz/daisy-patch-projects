@@ -23,35 +23,20 @@ void Runner::DrawPageTitle(std::string moduleName, std::string pageTitle) {
 // Display the available parameter names.
 void Runner::DisplayParamMenu() {
 
-    screen.DrawRect(0, 9, 127, 36, false, true);
-
     // display labels for the parameters edited by the knobs
     u8 knobRow = currentKnobRow;
     std::string sc = "";
     std::string rc = "";
-    ParamPage *paramPage = synth->GetParamPage(currentSynthPage);
+    ParamPage *paramPage = currentSynth->GetParamPage(currentSynthPage);
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         sc = "";
         rc = "";
-        if (currentMenu == MENU_SYNTH && currentSynthPage < synth->PageCount()) {
+        if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
             if (knobRow > 0) {
                 knobRow = 0;    // assumes synth pages only ever have one row
             }
             u8 param = knobRow * KNOB_COUNT + knob;
             sc = paramPage->GetParamName(param);
-        } else if (currentMenu == MENU_MIXER) {
-            if (knobRow > 1) {  // mixer only has 2 rows of params
-                knobRow = 0;
-            }
-            u8 channel = currentMixerSection * 4 + knob;
-            if (channel == 0) {
-                sc = "Synth";
-            }
-            rc = mixer.GetChannelParamName(currentMixerSection * 4, knobRow);
-        } else if (currentMenu == MENU_MIXER_MAIN) {
-            // sc = mixer.GetGlobals()->GetParamName(knob);
-        } else if (currentMenu == MENU_PATCH) {
-            // sc = patchStorage.GetParamSet()->GetParamName(knob);
         }
         Rectangle rect2(knob * 32, 12, 32, 12);
         screen.DrawButton(rect2, sc, false, false, true);
@@ -70,36 +55,16 @@ void Runner::DisplayKnobValues() {
 
     u8 knobRow = currentKnobRow;
     u8 index;
-    ParamPage *paramPage = synth->GetParamPage(currentSynthPage);
+    ParamPage *paramPage = currentSynth->GetParamPage(currentSynthPage);
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         std::string sc = "";
         Rectangle rect(knob * 32, 0, 32, 8);
-        if (currentMenu == MENU_SYNTH && currentSynthPage < synth->PageCount()) {
+        if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
             if (knobRow > 0) {
                 knobRow = 0;    // assumes synth pages only ever have one row
             }
             index = knobRow * KNOB_COUNT + knob;
             sc = paramPage->GetParamDisplay(index);
-        } else if (currentMenu == MENU_MIXER) {
-            if (knobRow > 1) {  // mixer only has 2 rows of params
-                knobRow = 0;
-            }
-            index = currentMixerSection * 4 + knob;  // only using 1 channel & 1 mixer section
-            sc = mixer.GetChannelParamDisplay(index, knobRow);
-        } else if (currentMenu == MENU_MIXER_MAIN) {
-            // sc = mixer.GetGlobals()->GetParamDisplay(knob);
-        } else if (currentMenu == MENU_PATCH) {
-            // switch (knob) {
-            //     case 0:
-            //         sc = "_" + std::to_string(currentPatch) + "_";
-            //         break;
-            //     case 1:
-            //         sc = patchStorage.GetOperation();
-            //         break;
-            //     case 2:
-            //         sc = patchStorage.GetParamSet()->GetParamDisplay(knob);
-            //         break;
-            // }
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
     }
@@ -109,7 +74,8 @@ void Runner::DrawScreen(bool clearFirst) {
     if (clearFirst) {
         hw.display.Fill(false);
     }
-    screen.DrawMenu(currentMenuIndex);
+    screen.OledMessage("Draw0", 0);
+    // screen.DrawMenu(currentMenuIndex);
     DisplayParamMenu();
     DisplayKnobValues();
     hw.display.Update();        
@@ -127,67 +93,60 @@ void Runner::ProcessEncoder() {
     }
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, menuSize-1);
     if (newMenuIndex != currentMenuIndex && screen.IsScreenOn()) {
-        if (newMenuIndex < synth->PageCount()) {
+        if (newMenuIndex < synth1->PageCount()) {
             currentMenu = MENU_SYNTH;
+            currentSynth = synth1;
             currentSynthPage = newMenuIndex;
-            synth->GetParamPage(currentSynthPage)->ResetParams();
-        // } else if (newMenuIndex < synth->PageCount() + mixerSections) {
-        //     currentMenu = MENU_MIXER;
-        //     currentMixerSection = newMenuIndex - synth->PageCount();
-        //     for (u8 i = 0; i < 4; i++) {
-        //         mixer.ResetChannelParams(currentMixerSection * 4 + i);
-        //     }
-        // } else if (newMenuIndex < kit->drumCount + mixerSections + 1) {
-        //     currentMenu = MENU_MIXER_MAIN;
-        //     mixer.GetGlobals()->ResetParams();
-        // } else if (newMenuIndex < kit->drumCount + mixerSections + 2) {
-        //     currentMenu = MENU_PATCH;
-        //     patchStorage.GetParamSet()->ResetParams();
+        } else if (synth2 != nullptr && newMenuIndex < synth1->PageCount() + synth2->PageCount()) {
+            currentMenu = MENU_SYNTH;
+            currentSynth = synth2;
+            currentSynthPage = newMenuIndex - synth1->PageCount();
         }
 
+        currentSynth->GetParamPage(currentSynthPage)->ResetParams();
         currentMenuIndex = newMenuIndex;
         redraw = true;
     }
 
-    // Encoder press
-    if (hw.encoder.RisingEdge() || hw.encoder.FallingEdge()) {
-        screenOn = true;
-    }
-    if (hw.encoder.RisingEdge() && screen.IsScreenOn()) {
-        lastEncoderTime = System::GetNow();
-    }
-    if (hw.encoder.FallingEdge() && screen.IsScreenOn()) {
-        if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
-            // saveTo = currentPatch;
-        } else {
-            if (currentMenu == MENU_SYNTH) {
-                // do nothing for now
-                screenOn = true;
-            } else if (currentMenu == MENU_MIXER) {
-                currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-                redraw = true;
-                // reset params for mixer row?
-                screenOn = true;
-            } else if (currentMenu == MENU_MIXER_MAIN) {
-                // nothing happens
-            } else if (currentMenu == MENU_PATCH) {
-                // u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
-                // u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
-                // switch (operation) {
-                //     case PatchStorage::OPERATION_LOAD:
-                //         currentPatch = target;
-                //         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-                //         loadFrom = target;
-                //         break;
-                //     case PatchStorage::OPERATION_SAVE:
-                //         currentPatch = target;
-                //         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-                //         saveTo = target;
-                //         break;
-                // }
-            }
-        }
-    }
+    // // Encoder press
+    // if (hw.encoder.RisingEdge() || hw.encoder.FallingEdge()) {
+    //     screenOn = true;
+    // }
+    // if (hw.encoder.RisingEdge() && screen.IsScreenOn()) {
+    //     lastEncoderTime = System::GetNow();
+    // }
+    // if (hw.encoder.FallingEdge() && screen.IsScreenOn()) {
+    //     if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
+    //         // saveTo = currentPatch;
+    //     } else {
+    //         if (currentMenu == MENU_SYNTH) {
+    //             // do nothing for now
+    //             screenOn = true;
+    //         } else if (currentMenu == MENU_MIXER) {
+    //             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
+    //             redraw = true;
+    //             // reset params for mixer row?
+    //             screenOn = true;
+    //         } else if (currentMenu == MENU_MIXER_MAIN) {
+    //             // nothing happens
+    //         } else if (currentMenu == MENU_PATCH) {
+    //             // u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
+    //             // u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
+    //             // switch (operation) {
+    //             //     case PatchStorage::OPERATION_LOAD:
+    //             //         currentPatch = target;
+    //             //         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+    //             //         loadFrom = target;
+    //             //         break;
+    //             //     case PatchStorage::OPERATION_SAVE:
+    //             //         currentPatch = target;
+    //             //         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+    //             //         saveTo = target;
+    //             //         break;
+    //             // }
+    //         }
+    //     }
+    // }
 
     if (screenOn) {
         lastScreenTime = System::GetNow();
@@ -212,32 +171,7 @@ void Runner::ProcessKnobs() {
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  MENU_SYNTH) {
             u8 param = currentKnobRow * KNOB_COUNT + knob;
-            changed = synth->GetParamPage(currentSynthPage)->UpdateParam(param, sig);
-        } else if (currentMenu == MENU_MIXER) {
-            u8 channel = currentMixerSection * 4 + knob;
-            changed = mixer.UpdateChannelParam(channel, currentKnobRow, sig);
-        // } else if (currentMenu == MENU_MIXER_MAIN) {
-        //     bool changed = mixer.GetGlobals()->UpdateParam(knob, sig);
-        //     if (changed) {
-        //         lastScreenTime = System::GetNow();
-        //         lastKnobValue[knob] = sig;
-        //         if (!screen.IsScreenOn()) {
-        //             screen.SetScreenOn(true);
-        //             DrawScreen(true);
-        //         }
-        //         DisplayKnobValues();
-        //     }
-        // } else if (currentMenu == MENU_PATCH) {
-        //     bool changed = patchStorage.GetParamSet()->UpdateParam(knob, sig);
-        //     if (changed) {
-        //         lastScreenTime = System::GetNow();
-        //         lastKnobValue[knob] = sig;
-        //         if (!screen.IsScreenOn()) {
-        //             screen.SetScreenOn(true);
-        //             DrawScreen(true);
-        //         }
-        //         DisplayKnobValues();
-        //     }
+            changed = currentSynth->GetParamPage(currentSynthPage)->UpdateParam(param, sig);
         }
         if (changed) {
             lastKnobValue[knob] = sig;
@@ -246,7 +180,7 @@ void Runner::ProcessKnobs() {
     }
 
     if (anyChanged) {
-        synth->ProcessChanges();
+        currentSynth->ProcessChanges();
         lastScreenTime = System::GetNow();
         if (!screen.IsScreenOn()) {
             screen.SetScreenOn(true);
@@ -272,20 +206,24 @@ void Runner::AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffe
     for(size_t i = 0; i < size; i++) {
         // cycle = (cycle + 1) % clockRange;
         // // if (cycle < clockThreshold) {
-        //     float signal = synth->Process();
+        //     float signal = synths[currentSynthIndex]->Process();
         //     mixer.ResetSignals();
         //     mixer.UpdateSignal(0, signal);
         // // }
-        synth->Process();
-        out[0][i] = synth->GetOutput(0);
-        out[1][i] = synth->GetOutput(1);
+        synth1->Process();
+        if (synth2 != nullptr) {
+            synth2->Process();
+        }
+
+        // hardcoded synth outputs
+        out[0][i] = synth1->GetOutput(0);
+        out[1][i] = synth1->GetOutput(1);
         out[2][i] = 0;
         out[3][i] = 0;
-        // mixer.Process();
-        // out[0][i] = mainGain * mixer.LeftSignal();
-        // out[1][i] = mainGain * mixer.RightSignal();
-        // out[2][i] = mixer.Send1Signal();
-        // out[3][i] = mixer.Send2Signal();
+        if (synth2 != nullptr) {
+            out[1][i] += synth2->GetOutput(0);
+            out[2][i] = synth2->GetOutput(0);
+        }
 
         // combine the audio inputs with the corresponding outputs
         if (AUDIO_PASSTHRU) {
@@ -348,7 +286,10 @@ void Runner::HandleMidiRealtime(MidiEvent m) {
         }
         case TimingClock: {
             if (currentTick == 0) {
-                synth->Clock(currentMeasure, currentStep, currentTick);
+                synth1->Clock(currentMeasure, currentStep, currentTick);
+                if (synth2 != nullptr) {
+                    synth2->Clock(currentMeasure, currentStep, currentTick);
+                }
             }
             currentTick = (currentTick + 1) % TICKS_PER_STEP;
             if (currentTick == 0) {
@@ -363,32 +304,43 @@ void Runner::HandleMidiRealtime(MidiEvent m) {
     }
 }
 
+void Runner::HandleMidiNote(ISynth *synth, u8 note, u8 velocity) {
+    if (velocity > 0) {
+        float v = (float)velocity / 127.0f;
+        synth->NoteOn(note, v);
+        screen.ScreensaveEvent(note);
+    } else {
+        synth->NoteOff(note);
+    }
+}
+
 // Typical Switch case for Message Type.
 void Runner::HandleMidiMessage(MidiEvent m) {
 
+    // screen.OledMessage("M:" + std::to_string(m.type), 2);
     // will pass it through if it can
     // MidiSend(m);
-
-    // screen.OledMessage("M:" + std::to_string(m.type), 2);
 
     switch(m.type) {
         case NoteOn: {
             NoteOnEvent event = m.AsNoteOn();
             // screen.OledMessage("Note:" + std::to_string(event.channel) + ":" + std::to_string(event.note), 3);
-            if (event.channel == midiChannel) {
-                float velocity = (float)event.velocity / 127.0f;
-                if (velocity > 0) {
-                    synth->NoteOn(event.note, velocity);
-                    screen.ScreensaveEvent(event.note);
-                } else {
-                    synth->NoteOff(event.note);
-                }
+            if (event.channel == synth1->GetMidiChanel()) {
+                HandleMidiNote(synth1, event.note, event.velocity);
+            }
+            if (synth2 != nullptr && event.channel == synth2->GetMidiChanel()) {
+                HandleMidiNote(synth2, event.note, event.velocity);
             }
             break;
         }
         case NoteOff: {
             NoteOffEvent event = m.AsNoteOff();
-            synth->NoteOff(event.note);
+            if (event.channel == synth1->GetMidiChanel()) {
+                synth1->NoteOff(event.note);
+            }
+            if (synth2 != nullptr && event.channel == synth2->GetMidiChanel()) {
+                synth2->NoteOff(event.note);
+            }
             break;
         }
         case ControlChange: {
@@ -411,15 +363,22 @@ void Runner::HandleMidiMessage(MidiEvent m) {
     }
 }
 
-void Runner::Run(ISynth *synth) {
+void Runner::Run(ISynth *synth1, ISynth *synth2) {
     if (samplerate == 0) {
         // print error
         return;
     }
 
-    this->synth = synth;
-    mixer.Reset();
-    menuSize = synth->PageCount();
+    // hw.display.Fill(false);
+    screen.OledMessage("Runner1", 4);
+
+    this->synth1 = synth1;
+    this->synth2 = synth2;
+    currentSynth = this->synth1;
+    menuSize = synth1->PageCount();
+    if (synth2 != nullptr) {
+        menuSize += synth2->PageCount();
+    }
 
     // initialize the knob tracking
     for (u8 i = 0; i < KNOB_COUNT; i++) {

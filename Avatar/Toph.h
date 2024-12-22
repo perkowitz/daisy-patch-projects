@@ -56,6 +56,9 @@ class Toph: public ISynth {
         void ResetParams(u8 page);
         void ProcessChanges() { }
 
+        void SetMidiChannel(u8 channel) { midiChannel = channel; }
+        virtual u8 GetMidiChanel() { return midiChannel; }
+
     private:
         bool active = false;
         float velocity = 0;
@@ -68,6 +71,7 @@ class Toph: public ISynth {
         Param params[PARAM_COUNT];
         ParamSet paramSets[PAGE_COUNT];
         ParamPage pages[PAGE_COUNT];
+        u8 midiChannel = 1;
 
         MultiOsc multiOsc;
         Svf svf;

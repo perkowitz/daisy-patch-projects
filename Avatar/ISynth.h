@@ -32,6 +32,9 @@ class ISynth {
         virtual void ResetParams(u8 page) = 0;
         virtual void ProcessChanges() = 0;
 
+        virtual void SetMidiChannel(u8 channel) = 0;    // zero-indexed
+        virtual u8 GetMidiChanel() = 0;                 // zero-indexed
+
 };
 
 

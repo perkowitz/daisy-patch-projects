@@ -113,8 +113,9 @@ float Katara::Process() {
         signal = voices[voice].svf.Low();
 
         // amp
-        left += velocity * signal * voices[voice].ampEnv.Process();
-        right += velocity * signal * voices[voice].ampEnv.Process();
+        // left += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
+        left += signal * voices[voice].ampEnv.Process();
+        right += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
     }
     left = hpf.Process(left);
 
@@ -130,8 +131,8 @@ float Katara::GetOutput(u8 channel) {
 }
 
 void Katara::NoteOn(u8 note, float velocity) {
-    this->velocity = Utility::Limit(velocity);
-    if (this->velocity == 0) {
+    float v = Utility::Limit(velocity);
+    if (v == 0) {
         NoteOff(note);
         return;
     }
@@ -162,6 +163,7 @@ void Katara::NoteOn(u8 note, float velocity) {
         voices[assignedVoice].ampEnv.GateOn();
         voices[assignedVoice].filtEnv.GateOn();
         voices[assignedVoice].gateOn = true;
+        voices[assignedVoice].velocity = v;
     }
 }
 
