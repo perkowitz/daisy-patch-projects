@@ -94,6 +94,10 @@ class Runner {
         ISynth *synth1;
         ISynth *synth2;
         ISynth *currentSynth;
+        u8 synth1Page = 0;
+        u8 synth2Page = 0;
+        u8 currentSynthPage = 0;
+
         u8 *midiChannels;
         Mixer mixer;
         u8 mixerSections = 1;
@@ -101,8 +105,6 @@ class Runner {
         u8 currentMenu = 0; 
         u8 currentMenuIndex = 0;
         u8 currentMixerSection = 0;
-        u8 currentSynthPage = 0;
-        u8 currentKnobRow = 0;
 
         bool running = false;
         u8 currentMeasure = 0;

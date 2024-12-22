@@ -24,7 +24,6 @@ void Runner::DrawPageTitle(std::string moduleName, std::string pageTitle) {
 void Runner::DisplayParamMenu() {
 
     // display labels for the parameters edited by the knobs
-    u8 knobRow = currentKnobRow;
     std::string sc = "";
     std::string rc = "";
     ParamPage *paramPage = currentSynth->GetParamPage(currentSynthPage);
@@ -32,11 +31,7 @@ void Runner::DisplayParamMenu() {
         sc = "";
         rc = "";
         if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
-            if (knobRow > 0) {
-                knobRow = 0;    // assumes synth pages only ever have one row
-            }
-            u8 param = knobRow * KNOB_COUNT + knob;
-            sc = paramPage->GetParamName(param);
+            sc = paramPage->GetParamName(knob);
         }
         Rectangle rect2(knob * 32, 12, 32, 12);
         screen.DrawButton(rect2, sc, false, false, true);
@@ -53,18 +48,13 @@ void Runner::DisplayKnobValues() {
 
     screen.DrawRect(0, 0, 127, 11, false, true);
 
-    u8 knobRow = currentKnobRow;
     u8 index;
     ParamPage *paramPage = currentSynth->GetParamPage(currentSynthPage);
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         std::string sc = "";
         Rectangle rect(knob * 32, 0, 32, 8);
         if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
-            if (knobRow > 0) {
-                knobRow = 0;    // assumes synth pages only ever have one row
-            }
-            index = knobRow * KNOB_COUNT + knob;
-            sc = paramPage->GetParamDisplay(index);
+            sc = paramPage->GetParamDisplay(knob);
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
     }
@@ -91,62 +81,42 @@ void Runner::ProcessEncoder() {
     if (inc != 0) {
         screenOn = true;
     }
+    menuSize = currentSynth->PageCount();
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, menuSize-1);
     if (newMenuIndex != currentMenuIndex && screen.IsScreenOn()) {
-        if (newMenuIndex < synth1->PageCount()) {
-            currentMenu = MENU_SYNTH;
-            currentSynth = synth1;
-            currentSynthPage = newMenuIndex;
-        } else if (synth2 != nullptr && newMenuIndex < synth1->PageCount() + synth2->PageCount()) {
-            currentMenu = MENU_SYNTH;
-            currentSynth = synth2;
-            currentSynthPage = newMenuIndex - synth1->PageCount();
+        currentSynthPage = newMenuIndex;
+        if (currentSynth == synth1) {
+            synth1Page = currentSynthPage;
+        } else if (currentSynth == synth2) {
+            synth2Page = currentSynthPage;
         }
-
         currentSynth->GetParamPage(currentSynthPage)->ResetParams();
         currentMenuIndex = newMenuIndex;
         redraw = true;
     }
 
-    // // Encoder press
-    // if (hw.encoder.RisingEdge() || hw.encoder.FallingEdge()) {
-    //     screenOn = true;
-    // }
-    // if (hw.encoder.RisingEdge() && screen.IsScreenOn()) {
-    //     lastEncoderTime = System::GetNow();
-    // }
-    // if (hw.encoder.FallingEdge() && screen.IsScreenOn()) {
-    //     if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
-    //         // saveTo = currentPatch;
-    //     } else {
-    //         if (currentMenu == MENU_SYNTH) {
-    //             // do nothing for now
-    //             screenOn = true;
-    //         } else if (currentMenu == MENU_MIXER) {
-    //             currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-    //             redraw = true;
-    //             // reset params for mixer row?
-    //             screenOn = true;
-    //         } else if (currentMenu == MENU_MIXER_MAIN) {
-    //             // nothing happens
-    //         } else if (currentMenu == MENU_PATCH) {
-    //             // u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
-    //             // u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
-    //             // switch (operation) {
-    //             //     case PatchStorage::OPERATION_LOAD:
-    //             //         currentPatch = target;
-    //             //         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-    //             //         loadFrom = target;
-    //             //         break;
-    //             //     case PatchStorage::OPERATION_SAVE:
-    //             //         currentPatch = target;
-    //             //         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-    //             //         saveTo = target;
-    //             //         break;
-    //             // }
-    //         }
-    //     }
-    // }
+    // Encoder press
+    if (hw.encoder.RisingEdge() || hw.encoder.FallingEdge()) {
+        screenOn = true;
+    }
+    if (hw.encoder.RisingEdge() && screen.IsScreenOn()) {
+        lastEncoderTime = System::GetNow();
+    }
+    if (hw.encoder.FallingEdge() && screen.IsScreenOn()) {
+        if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
+            // saveTo = currentPatch;
+        } else {
+            if (currentSynth == synth1) {
+                currentSynth = synth2;
+                currentSynthPage = currentMenuIndex = synth2Page;
+                redraw = true;
+            } else if (currentSynth == synth2) {
+                currentSynth = synth1;
+                currentSynthPage = currentMenuIndex = synth1Page;
+                redraw = true;
+            }
+        }
+    }
 
     if (screenOn) {
         lastScreenTime = System::GetNow();
@@ -170,8 +140,7 @@ void Runner::ProcessKnobs() {
         bool changed = false;
         float sig = hw.controls[knob].Value();
         if (currentMenu ==  MENU_SYNTH) {
-            u8 param = currentKnobRow * KNOB_COUNT + knob;
-            changed = currentSynth->GetParamPage(currentSynthPage)->UpdateParam(param, sig);
+            changed = currentSynth->GetParamPage(currentSynthPage)->UpdateParam(knob, sig);
         }
         if (changed) {
             lastKnobValue[knob] = sig;

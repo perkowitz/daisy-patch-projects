@@ -23,6 +23,6 @@ int main(void) {
     toph.Init(sampleRate);
     toph.SetMidiChannel(5); // zero-indexed
 
-    // runner.Run(&katara, &toph);
-    runner.Run(&toph, nullptr);
+    runner.Run(&katara, &toph);
+    // runner.Run(&toph, nullptr);
 }
