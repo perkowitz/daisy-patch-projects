@@ -22,8 +22,8 @@ using namespace daisysp;
 #define MENU_MIXER_MAIN 2
 #define MENU_PATCH 3
 #define MIDIMAP_SIZE 16
-#define AUDIO_PASSTHRU true
-#define SHOW_CPU false
+#define AUDIO_PASSTHRU false
+#define SHOW_CPU true
 
 #define CURRENT_VERSION 0
 #define PATCH_SIZE 7
@@ -32,9 +32,11 @@ using namespace daisysp;
 #define START_PROGRAM_CHANGE 0
 
 #define LONG_PRESS_MILLIS 2000
-#define SCREEN_SAVE_MILLIS 60000
+#define SCREEN_SAVE_MILLIS 6000
 #define UPDATE_CLOCK_TICKS 512
 
+#define STEPS_PER_MEASURE 16
+#define TICKS_PER_STEP 6
 #define MIDICC_LIMIT 16
 #define MIDICC_VOLUME 16
 #define MIDICC_SEND_1 32
@@ -46,15 +48,18 @@ using namespace daisysp;
 
 class Runner {
     public:
+
         Runner(SaiHandle::Config::SampleRate audioSampleRate) {
             hw.Init(true);                              // "true" boosts processor speed from 400mhz to 480mhz
             hw.SetAudioSampleRate(audioSampleRate);     // 8,16,32,48; higher rate requires more CPU
             samplerate = hw.AudioSampleRate();
             meter.Init(samplerate, 128, 1.0f);
             screen.setDisplay(&hw.display);
+            screen.DrawLine(0, 0, 60, 60, true);
         }
 
         void Run(ISynth *synth);
+        void Run(ISynth *synth1, ISynth *synth2);
         float getSampleRate() { return samplerate; }
 
         static Runner *globalRunner;
@@ -64,6 +69,7 @@ class Runner {
 
 
     private:
+        void DrawPageTitle(std::string moduleName, std::string pageTitle);
         void DisplayParamMenu();
         void DisplayKnobValues();
         void DrawScreen(bool clearFirst);
@@ -74,6 +80,8 @@ class Runner {
                 AudioHandle::OutputBuffer out,
                 size_t size);
         void MidiSend(MidiEvent m);
+        void HandleMidiRealtime(MidiEvent m);
+        void HandleMidiNote(ISynth *synth, u8 note, u8 velocity);
         void HandleMidiMessage(MidiEvent m);
 
         float samplerate = 0;
@@ -83,16 +91,25 @@ class Runner {
         CpuLoadMeter meter;
         // MidiUsbHandler usbMidi;
 
-        ISynth *synth;
+        ISynth *synth1;
+        ISynth *synth2;
+        ISynth *currentSynth;
+        u8 synth1Page = 0;
+        u8 synth2Page = 0;
+        u8 currentSynthPage = 0;
+
+        u8 *midiChannels;
         Mixer mixer;
         u8 mixerSections = 1;
 
         u8 currentMenu = 0; 
         u8 currentMenuIndex = 0;
         u8 currentMixerSection = 0;
-        u8 currentSynth = 0;
-        u8 currentSynthPage = 0;
-        u8 currentKnobRow = 0;
+
+        bool running = false;
+        u8 currentMeasure = 0;
+        u8 currentStep = 0;
+        u8 currentTick = 0;
 
         float lastKnobValue[KNOB_COUNT];
 

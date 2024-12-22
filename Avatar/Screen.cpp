@@ -20,15 +20,15 @@ void Screen::DrawRect(uint_fast8_t x1, uint_fast8_t y1, uint_fast8_t x2, uint_fa
 }
 
 Rectangle Screen::WriteStringAligned(
-    const char*    str,
-    const FontDef& font,
-    Rectangle      boundingBox,
-    Alignment      alignment,
-    bool           on) {
+        const char*    str,
+        const FontDef& font,
+        Rectangle      boundingBox,
+        Alignment      alignment,
+        bool           on) {
 
-        if (!screenOn) { return boundingBox; }
+    if (!screenOn) { return boundingBox; }
 
-        return display->WriteStringAligned(str, font, boundingBox, alignment, on);
+    return display->WriteStringAligned(str, font, boundingBox, alignment, on);
 }
 
 void Screen::DrawLine(
@@ -46,7 +46,12 @@ void Screen::DrawLine(
 void Screen::DrawRect(Rectangle rect, bool on, bool fill) {
     if (!screenOn) { return; }
 
-    display->DrawRect(rect.GetX(), rect.GetY(), rect.GetX() + rect.GetWidth(), rect.GetY() + rect.GetHeight(), on, fill);
+    if (rect.GetX() >= 0 && rect.GetX() < WIDTH &&
+            rect.GetY() >= 0 && rect.GetY() < HEIGHT &&
+            rect.GetRight() >= 0 && rect.GetRight() < WIDTH &&
+            rect.GetBottom() >= 0 && rect.GetBottom() < HEIGHT) {
+        display->DrawRect(rect.GetX(), rect.GetY(), rect.GetX() + rect.GetWidth(), rect.GetY() + rect.GetHeight(), on, fill);
+    }
 }
 
 void Screen::DrawRectFilled(Rectangle rect, bool border, bool fill) {
@@ -57,23 +62,19 @@ void Screen::DrawRectFilled(Rectangle rect, bool border, bool fill) {
 }
 
 void Screen::DrawButton(Rectangle rect, std::string str, bool border, bool fill, bool text) {
+    DrawButton(rect, str, border, fill, text, Alignment::centered);
+}
+
+void Screen::DrawButton(Rectangle rect, std::string str, bool border, bool fill, bool text, Alignment alignment) {
     if (!screenOn) { return; }
 
     DrawRectFilled(rect, border, fill);
-    display->WriteStringAligned(str.c_str(), FONT, rect, Alignment::centered, text);
-    // display->SetCursor(rect.GetX() + 2, rect.GetY() + 2);
-    // display->WriteString(str.c_str(), FONT, text);
-}
-
-void Screen::DrawMenu(uint8_t selected) {
-    DrawSimpleMenu(selected);
-}
-
-void Screen::DrawSimpleMenu(uint8_t selected) {
-    if (!screenOn) { return; }
-
-    display->SetCursor(2, HEIGHT - 20);
-    display->WriteString(menuItems[selected].c_str(), MENU_FONT, true);
+    if (rect.GetX() >= 0 && rect.GetX() <= WIDTH &&
+            rect.GetY() >= 0 && rect.GetY() <= HEIGHT &&
+            rect.GetRight() >= 0 && rect.GetRight() <= WIDTH &&
+            rect.GetBottom() >= 0 && rect.GetBottom() <= HEIGHT) {
+        display->WriteStringAligned(str.c_str(), FONT, rect, alignment, text);
+    }
 }
 
 void Screen::DrawPageTitle(std::string moduleName, std::string pageTitle) {
@@ -83,47 +84,7 @@ void Screen::DrawPageTitle(std::string moduleName, std::string pageTitle) {
 
     display->WriteStringAligned(pageTitle.c_str(), MENU_FONT, titleRect, Alignment::bottomLeft, true);
     display->WriteStringAligned(moduleName.c_str(), TITLE_FONT, titleRect, Alignment::bottomRight, true);
-
-    // display->SetCursor(2, HEIGHT - 20);
-    // if (moduleName == "") {
-    //     display->WriteString(pageTitle.c_str(), MENU_FONT, true);
-    // } else {
-    //     display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
-    // }
 }
-
-
-// void Screen::DrawLinearMenu(uint8_t selected) {
-//     if (!screenOn) { return; }
-
-//     uint8_t itemWidth = FONT.FontWidth * 2 + 3;
-//     uint8_t itemHeight = FONT.FontWidth + 4;
-//     uint8_t displayCount = std::min((u8)(WIDTH / itemWidth), MENU_SIZE);
-//     uint8_t highlightItem = displayCount / 2;
-//     uint8_t start = std::min(std::max(0, selected - highlightItem), MENU_SIZE - displayCount);
-
-//     // item = menu item shown; pos = position on screen
-//     u8 pos = 0;
-//     for (uint8_t item = start; item < start + displayCount; item++) {
-//         if (menuItems[item].length() > 0) {
-//             bool sel = item == selected;
-//             uint8_t x = itemWidth * pos;
-//             uint8_t y = HEIGHT - itemHeight;
-//             Rectangle rect(x, y, itemWidth, itemHeight);
-//             // DrawButton(rect, this->menuItems[item], true, sel, !sel);
-//             if (sel) {  // only draw selected
-//                 DrawButton(rect, this->menuItems[item], true, false, true);
-//             }
-//             pos++;
-//         }
-//         // bool sel = item == selected;
-//         // uint8_t x = itemWidth * (item - start);
-//         // uint8_t y = HEIGHT - itemHeight;
-//         // Rectangle rect(x, y, itemWidth, itemHeight);
-//         // DrawButton(rect, this->menuItems[item], true, sel, !sel);
-//     }
-
-// }
 
 void Screen::SetScreenOn(bool screenOn) { 
     this->screenOn = screenOn; 
@@ -147,33 +108,20 @@ void Screen::Screensave(u32 time) {
         sweepX++;
         lastScreenSaveUpdate = time;
     }
-
-    // u8 bx = (sweepX + 17);
-    // if (bx < 200 && bx > 20) {
-    //     display->Fill(false);
-    //     // display->DrawCircle(bx, 40, 12, false);
-    //     // display->DrawCircle(bx + 10, 30, 9, false);
-    //     display->DrawCircle(bx, 40, 10, true);
-    //     display->DrawLine(bx - 16, 40, bx - 10, 40, true);
-    //     // display->DrawLine(bx - 10, 40, x - 16, 37, true);
-    //     // display->DrawLine(bx - 10, 40, x - 16, 43, true);
-    //     display->DrawLine(bx - 1, 50, bx + 1, 53, true);
-    //     display->DrawLine(bx + 1, 50, bx + 1, 53, true);
-    //     display->DrawCircle(bx + 10, 30, 7, true);
-    //     display->DrawLine(bx + 17, 30, bx + 21, 30, true);
-    //     display->DrawCircle(bx + 12, 28, 1, true);
-    // }
 }
 
-void Screen::ScreensaveEvent(u8 note) {
+void Screen::ScreensaveEvent(u8 note, bool on) {
     if (screenOn) { return; }
 
-    // show notes with horizontal wipe
-    note = Utility::LimitInt(note, 0, HEIGHT);
-    u8 x = sweepX % (WIDTH + 1);
-    if (x > 5 && x < WIDTH + 1) {
-        display->DrawPixel(x - 4, note, true);
-    }
+    // display->DrawPixel(note, 32, on);
+    display->DrawLine(note, 28, note, 36, on);
+
+    // // show notes with horizontal wipe
+    // note = Utility::LimitInt(note, 0, HEIGHT);
+    // u8 x = sweepX % (WIDTH + 1);
+    // if (x > 5 && x < WIDTH + 1) {
+    //     display->DrawPixel(x - 4, note, true);
+    // }
 }
 
 // void Screen::DrawHachiLogo(u8 startX) {
@@ -195,34 +143,42 @@ void Screen::ScreensaveEvent(u8 note) {
 //     }
 // }
 
-
 void Screen::OledMessage(std::string message, int row) {
     if (!screenOn) { return; }
 
-    char* mstr = &message[0];
-    display->SetCursor(0, row * 10);
-    display->WriteString(mstr, Font_6x8, true);
-    display->Update();
+    Write(message, 0, row * 10);
 }
 
 void Screen::OledMessage(std::string message, int row, int column) {
     if (!screenOn) { return; }
 
-    char* mstr = &message[0];
-    display->SetCursor(column * 8, row * 10);
-    display->WriteString(mstr, Font_6x8, true);
+    Write(message, column * 8, row * 10);
+}
+
+void Screen::Write(std::string message, u8 x, u8 y) {
+    if (!screenOn) { return; }
+
+    Rectangle rect(x, y, WIDTH - x, HEIGHT - y);
+    DrawButton(rect, message, false, false, true, Alignment::topLeft);
     display->Update();
 }
 
-void Screen::ShowCpu(float usage) {
+
+void Screen::ShowCpu(float usage, bool showGraphic) {
     if (!screenOn) { return; }
 
-    u8 menuHeight = FONT.FontWidth + 4;
-    u8 scaled = (int)(usage * WIDTH);
-    u8 qtr = WIDTH / 4;
-    display->DrawRect(0, HEIGHT - menuHeight - 3, WIDTH, HEIGHT - menuHeight - 1, false, true);
-    display->DrawRect(0, HEIGHT - menuHeight - 3, scaled, HEIGHT - menuHeight - 1, true, true);
-    display->DrawLine(qtr, HEIGHT - menuHeight - 4, qtr, HEIGHT - menuHeight -1, true);
-    display->DrawLine(2 * qtr, HEIGHT - menuHeight - 4, 2 * qtr, HEIGHT - menuHeight -1, true);
-    display->DrawLine(3 * qtr, HEIGHT - menuHeight - 4, 3 * qtr, HEIGHT - menuHeight -1, true);
+    std::string  cpu = "cpu:" + std::to_string((int)(usage * 100)) + "%";
+    Write(cpu, 40, 0);
+    Write(cpu, 40, 80);
+
+    if (showGraphic) {
+        u8 menuHeight = FONT.FontWidth + 4;
+        u8 scaled = (int)(usage * WIDTH);
+        u8 qtr = WIDTH / 4;
+        display->DrawRect(0, HEIGHT - menuHeight - 3, WIDTH, HEIGHT - menuHeight - 1, false, true);
+        display->DrawRect(0, HEIGHT - menuHeight - 3, scaled, HEIGHT - menuHeight - 1, true, true);
+        display->DrawLine(qtr, HEIGHT - menuHeight - 4, qtr, HEIGHT - menuHeight -1, true);
+        display->DrawLine(2 * qtr, HEIGHT - menuHeight - 4, 2 * qtr, HEIGHT - menuHeight -1, true);
+        display->DrawLine(3 * qtr, HEIGHT - menuHeight - 4, 3 * qtr, HEIGHT - menuHeight -1, true);
+    }
 }

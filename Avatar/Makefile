@@ -17,12 +17,14 @@ CPP_SOURCES += Avatar.cpp \
 $(HACHILIB_DIR)/ParamPage.cpp \
 $(HACHILIB_DIR)/ParamSet.cpp \
 $(HACHILIB_DIR)/audio/AdsrEnv.cpp \
+$(HACHILIB_DIR)/audio/AhdEnv.cpp \
 $(HACHILIB_DIR)/audio/Mixer.cpp \
 $(HACHILIB_DIR)/audio/MultiOsc.cpp \
 $(HACHILIB_DIR)/audio/Processing.cpp \
 Runner.cpp \
 Screen.cpp \
-Toph.cpp
+Toph.cpp \
+Katara.cpp
 
 
 # uncomment one of these to put code in SRAM or QSPI; use 'make program-boot' to update

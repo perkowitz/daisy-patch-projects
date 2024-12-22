@@ -18,7 +18,7 @@ class Screen {
         static const FontDef FONT;
         static const FontDef MENU_FONT;
         static const FontDef TITLE_FONT;
-        static const u8 MENU_SIZE = 21;
+        static const u8 MENU_SIZE = 6;
         static const u16 SCREEN_SCAN_TIME = 2000 / WIDTH;
         static std::string menuItems[MENU_SIZE];
 
@@ -52,22 +52,20 @@ class Screen {
         void DrawRectFilled(Rectangle rect, bool border, bool fill);
 
         void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill);
-
-        void DrawMenu(uint8_t selected);
-        void DrawSimpleMenu(uint8_t selected);
+        void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill, Alignment alignment);
         void DrawPageTitle(std::string moduleName, std::string pageTitle);
-        // void DrawLinearMenu(uint8_t selected);
 
         void SetScreenOn(bool screenOn);
         bool IsScreenOn() { return screenOn; }
         void Screensave(u32 time);
-        void ScreensaveEvent(u8 drum);
+        void ScreensaveEvent(u8 note, bool on);
         // void DrawHachiLogo(u8 x);
 
         void OledMessage(std::string message, int row);
         void OledMessage(std::string message, int row, int column);
+        void Write(std::string str, u8 x, u8 y);
 
-        void ShowCpu(float usage);
+        void ShowCpu(float usage, bool showGraphic);
 
     private:
         OledDisplay<SSD130x4WireSpi128x64Driver> *display;
