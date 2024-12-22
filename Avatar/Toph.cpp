@@ -22,12 +22,17 @@ void Toph::Init(float sampleRate) {
     params[PARAM_FD].Init("D", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_FS].Init("S", 0, 0.0, 1.0, Parameter::LINEAR, 100);
     params[PARAM_FR].Init("R", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_OUT_12].Init("1-2", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_3].Init("3", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+
     // assign nullptr to leave a slot blank
     pages[0].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
     pages[1].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
     pages[2].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], nullptr);
     pages[3].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
     pages[4].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
+    pages[5].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
 
     // audio settings -- only set the values that are not set in Process()
     // oscillators
@@ -84,7 +89,13 @@ float Toph::Process() {
 }
 
 float Toph::GetOutput(u8 channel) {
-    return channel == 0 ? leftSignal : rightSignal;
+    switch (channel) {
+        case 0: return leftSignal * params[PARAM_OUT_12].Value();
+        case 1: return rightSignal * params[PARAM_OUT_12].Value();
+        case 2: return leftSignal * params[PARAM_OUT_3].Value();
+        case 3: return rightSignal * params[PARAM_OUT_4].Value();
+    }
+    return 0;
 }
 
 void Toph::NoteOn(u8 note, float velocity) {
@@ -132,4 +143,11 @@ void Toph::ResetParams(u8 page) {
     if (page < PAGE_COUNT) {
         paramSets[page].ResetParams();
     }
+}
+
+Param *Toph::GetParam(u8 index) { 
+    if (index < PARAM_COUNT) {
+        return &params[index];
+    }
+    return nullptr;
 }

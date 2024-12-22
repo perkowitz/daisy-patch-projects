@@ -3,10 +3,15 @@
 using namespace daisy;
 using namespace daisysp;
 
+
 void Katara::Init(float sampleRate) {
+    Init(sampleRate, VOICE_COUNT);
+}
+
+void Katara::Init(float sampleRate, u8 voiceLimit) {
     // set up the params and arrange them in pages
     params[PARAM_OCTAVE].Init("Oct", 0, -3, 3, Parameter::LINEAR, 1);
-    params[PARAM_SAW].Init("Saw", 1, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_SAW].Init("Saw", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_PULSE].Init("Pulse", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_SUB].Init("Sub", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_SAW2].Init("Sw2", 0, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -28,6 +33,9 @@ void Katara::Init(float sampleRate) {
     params[PARAM_TH].Init("H", 0, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_TD].Init("D", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_SENV_STEPS].Init("16ths", 16, 0, 128, Parameter::LINEAR, 1);
+    params[PARAM_OUT_12].Init("1-2", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_3].Init("3", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
 
     // assign nullptr to leave a slot blank
     pages[0].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
@@ -37,8 +45,12 @@ void Katara::Init(float sampleRate) {
     pages[4].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
     pages[5].Init(Name(), "SyncEnv", &params[PARAM_TA], &params[PARAM_TH], &params[PARAM_TD], &params[PARAM_SENV_STEPS]);
     pages[6].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
+    pages[7].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
 
-    for (u8 voice = 0; voice < VOICE_COUNT; voice++) {
+    if (voiceLimit > 0 && voiceLimit < VOICE_COUNT) {
+        this->voiceLimit = voiceLimit;
+    }
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
         // audio settings -- only set the values that are not set in Process()
         // oscillators
         voices[voice].multiOsc.Init(sampleRate);
@@ -70,7 +82,7 @@ void Katara::ProcessChanges() {
     syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
     hpf.SetFrequency(params[PARAM_HPF].Value());
 
-    for (u8 voice = 0; voice < VOICE_COUNT; voice++) {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
         // oscillator
         voices[voice].multiOsc.SetPulsewidth(params[PARAM_PULSEWIDTH].Value());
 
@@ -95,7 +107,7 @@ float Katara::Process() {
 
     float trigEnvSignal = syncEnv.Process();
 
-    for (u8 voice = 0; voice < VOICE_COUNT; voice++) {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
         // oscillators
         voices[voice].multiOsc.Process();
         float signal = params[PARAM_SAW].Value() * voices[voice].multiOsc.Saw();
@@ -119,15 +131,21 @@ float Katara::Process() {
     }
     left = hpf.Process(left);
 
-    leftSignal = MIX_SCALE * left / VOICE_COUNT;
-    // rightSignal = MIX_SCALE * right / VOICE_COUNT;
+    leftSignal = MIX_SCALE * left / voiceLimit;
+    // rightSignal = MIX_SCALE * right / voiceLimit;
     rightSignal = leftSignal;
 
     return leftSignal;
 }
 
 float Katara::GetOutput(u8 channel) {
-    return channel == 0 ? leftSignal : rightSignal;
+    switch (channel) {
+        case 0: return leftSignal * params[PARAM_OUT_12].Value();
+        case 1: return rightSignal * params[PARAM_OUT_12].Value();
+        case 2: return leftSignal * params[PARAM_OUT_3].Value();
+        case 3: return rightSignal * params[PARAM_OUT_4].Value();
+    }
+    return 0;
 }
 
 void Katara::NoteOn(u8 note, float velocity) {
@@ -138,7 +156,7 @@ void Katara::NoteOn(u8 note, float velocity) {
     }
 
     s8 assignedVoice = -1;
-    for (u8 voice = 0; voice < VOICE_COUNT; voice++) {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
         if (!voices[voice].gateOn) {
             assignedVoice = voice;
         }
@@ -146,7 +164,7 @@ void Katara::NoteOn(u8 note, float velocity) {
 
     if (assignedVoice == -1) {
         assignedVoice = nextVoice;
-        nextVoice = (nextVoice + 1) % VOICE_COUNT;
+        nextVoice = (nextVoice + 1) % voiceLimit;
     }
     if (voices[assignedVoice].gateOn) {
         // should call noteoff, but have to tell it which voice
@@ -168,7 +186,7 @@ void Katara::NoteOn(u8 note, float velocity) {
 }
 
 void Katara::NoteOff(u8 note) {
-    for (u8 voice = 0; voice < VOICE_COUNT; voice++) {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
         if (note == voices[voice].note) {
             voices[voice].ampEnv.GateOff();
             voices[voice].filtEnv.GateOff();
@@ -192,4 +210,11 @@ void Katara::ResetParams(u8 page) {
     if (page < PAGE_COUNT) {
         paramSets[page].ResetParams();
     }
+}
+
+Param *Katara::GetParam(u8 index) { 
+    if (index < PARAM_COUNT) {
+        return &params[index];
+    }
+    return nullptr;
 }

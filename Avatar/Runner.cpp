@@ -33,7 +33,7 @@ void Runner::DisplayParamMenu() {
         if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
             sc = paramPage->GetParamName(knob);
         }
-        Rectangle rect2(knob * 32, 12, 32, 12);
+        Rectangle rect2(knob * 32, 12, 31, 12);
         screen.DrawButton(rect2, sc, false, false, true);
     }
     Rectangle rect3(0, 24, 32, 12);
@@ -106,7 +106,7 @@ void Runner::ProcessEncoder() {
         if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
             // saveTo = currentPatch;
         } else {
-            if (currentSynth == synth1) {
+            if (currentSynth == synth1 && synth2 != nullptr) {
                 currentSynth = synth2;
                 currentSynthPage = currentMenuIndex = synth2Page;
                 redraw = true;
@@ -115,6 +115,7 @@ void Runner::ProcessEncoder() {
                 currentSynthPage = currentMenuIndex = synth1Page;
                 redraw = true;
             }
+            currentSynth->GetParamPage(currentSynthPage)->ResetParams();
         }
     }
 
@@ -184,14 +185,11 @@ void Runner::AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffe
             synth2->Process();
         }
 
-        // hardcoded synth outputs
-        out[0][i] = synth1->GetOutput(0);
-        out[1][i] = synth1->GetOutput(1);
-        out[2][i] = 0;
-        out[3][i] = 0;
-        if (synth2 != nullptr) {
-            out[1][i] += synth2->GetOutput(0);
-            out[2][i] = synth2->GetOutput(0);
+        for (u8 o = 0; o < 4; o++) {
+            out[o][i] = synth1->GetOutput(o);
+            if (synth2 != nullptr) {
+                out[o][i] += synth2->GetOutput(o);
+            }
         }
 
         // combine the audio inputs with the corresponding outputs
@@ -277,9 +275,10 @@ void Runner::HandleMidiNote(ISynth *synth, u8 note, u8 velocity) {
     if (velocity > 0) {
         float v = (float)velocity / 127.0f;
         synth->NoteOn(note, v);
-        screen.ScreensaveEvent(note);
+        screen.ScreensaveEvent(note, true);
     } else {
         synth->NoteOff(note);
+        screen.ScreensaveEvent(note, false);
     }
 }
 
@@ -310,6 +309,7 @@ void Runner::HandleMidiMessage(MidiEvent m) {
             if (synth2 != nullptr && event.channel == synth2->GetMidiChanel()) {
                 synth2->NoteOff(event.note);
             }
+            screen.ScreensaveEvent(event.note, false);
             break;
         }
         case ControlChange: {
@@ -390,7 +390,7 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
 
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
-            screen.OledMessage(std::to_string((int)(avgCpu * 100)) + "%", 4, 13);
+            screen.Write(std::to_string((int)(avgCpu * 100)) + "%", 100, 36);
             // screen.ShowCpu(avgCpu, false);
         } 
 

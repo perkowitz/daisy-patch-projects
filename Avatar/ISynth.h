@@ -29,6 +29,7 @@ class ISynth {
 
         virtual u8 PageCount() = 0;
         virtual ParamPage *GetParamPage(u8 page) = 0;
+        virtual Param *GetParam(u8 index) = 0;
         virtual void ResetParams(u8 page) = 0;
         virtual void ProcessChanges() = 0;
 

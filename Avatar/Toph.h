@@ -15,11 +15,11 @@ class Toph: public ISynth {
 
     public:
         // pages
-        static const u8 PAGE_COUNT = 5;
+        static const u8 PAGE_COUNT = 6;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 17;  // total count of all params following
+        static const u8 PARAM_COUNT = 20;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -37,6 +37,9 @@ class Toph: public ISynth {
         static const u8 PARAM_SUB = 14;
         static const u8 PARAM_SAW2 = 15;
         static const u8 PARAM_PULSEWIDTH = 16;
+        static const u8 PARAM_OUT_12 = 17;
+        static const u8 PARAM_OUT_3 = 18;
+        static const u8 PARAM_OUT_4 = 19;
 
         // constants
         static const u16 MAX_FREQ = 24000;
@@ -53,6 +56,7 @@ class Toph: public ISynth {
         void Clock(u8 measure, u8 step, u8 tick);
 
         ParamPage *GetParamPage(u8 page);
+        Param *GetParam(u8 index);
         void ResetParams(u8 page);
         void ProcessChanges() { }
 

@@ -28,14 +28,14 @@ class Katara: public ISynth {
 
     public:
         // polyphony
-        static const u8 VOICE_COUNT = 4;
+        static const u8 VOICE_COUNT = 5;
 
         // pages
-        static const u8 PAGE_COUNT = 7;
+        static const u8 PAGE_COUNT = 8;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 23;  // total count of all params following
+        static const u8 PARAM_COUNT = 26;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -59,12 +59,16 @@ class Katara: public ISynth {
         static const u8 PARAM_TD = 20;
         static const u8 PARAM_SENV_STEPS = 21;
         static const u8 PARAM_F_SENV = 22;
+        static const u8 PARAM_OUT_12 = 23;
+        static const u8 PARAM_OUT_3 = 24;
+        static const u8 PARAM_OUT_4 = 25;
 
         // constants
         static const u16 MAX_FREQ = 24000;
         static const u8 MIX_SCALE = 1;
 
         void Init(float sampleRate);
+        void Init(float sampleRate, u8 voiceLimit);
         bool IsActive() { return active; }
         std::string Name() { return "Katara"; }
         std::string ShortName() { return "Kat"; }
@@ -76,6 +80,7 @@ class Katara: public ISynth {
         void Clock(u8 measure, u8 step, u8 tick);
 
         ParamPage *GetParamPage(u8 page);
+        Param *GetParam(u8 index);
         void ResetParams(u8 page);
         void ProcessChanges();
 
@@ -94,6 +99,7 @@ class Katara: public ISynth {
         Voice voices[VOICE_COUNT];
         u8 nextVoice = 0;
         u8 midiChannel = 1;
+        u8 voiceLimit = VOICE_COUNT;
 
         OnePole hpf;
         SyncEnv syncEnv;

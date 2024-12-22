@@ -53,16 +53,12 @@ class Screen {
 
         void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill);
         void DrawButton(Rectangle rect, std::string str, bool border, bool text, bool fill, Alignment alignment);
-
-        void DrawMenu(uint8_t selected);
-        void DrawSimpleMenu(uint8_t selected);
         void DrawPageTitle(std::string moduleName, std::string pageTitle);
-        // void DrawLinearMenu(uint8_t selected);
 
         void SetScreenOn(bool screenOn);
         bool IsScreenOn() { return screenOn; }
         void Screensave(u32 time);
-        void ScreensaveEvent(u8 drum);
+        void ScreensaveEvent(u8 note, bool on);
         // void DrawHachiLogo(u8 x);
 
         void OledMessage(std::string message, int row);
