@@ -68,7 +68,7 @@ class Katara: public ISynth {
         static const u8 MIX_SCALE = 1;
 
         void Init(float sampleRate);
-        void Init(float sampleRate, u8 voiceLimit);
+        void Init(float sampleRate, u8 voiceLimit, bool filterEnabled);
         bool IsActive() { return active; }
         std::string Name() { return "Katara"; }
         std::string ShortName() { return "Kat"; }
@@ -99,7 +99,8 @@ class Katara: public ISynth {
         Voice voices[VOICE_COUNT];
         u8 nextVoice = 0;
         u8 midiChannel = 1;
-        u8 voiceLimit = VOICE_COUNT;
+        u8 voiceLimit = VOICE_COUNT;    // max number of voices to use of those available (reduce processing)
+        bool filterEnabled = true;      // disable per-voice LPFs to reduce processing
 
         OnePole hpf;
         SyncEnv syncEnv;

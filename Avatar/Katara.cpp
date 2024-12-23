@@ -5,10 +5,10 @@ using namespace daisysp;
 
 
 void Katara::Init(float sampleRate) {
-    Init(sampleRate, VOICE_COUNT);
+    Init(sampleRate, VOICE_COUNT, true);
 }
 
-void Katara::Init(float sampleRate, u8 voiceLimit) {
+void Katara::Init(float sampleRate, u8 voiceLimit, bool filterEnabled) {
     // set up the params and arrange them in pages
     params[PARAM_OCTAVE].Init("Oct", 0, -3, 3, Parameter::LINEAR, 1);
     params[PARAM_SAW].Init("Saw", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -47,6 +47,7 @@ void Katara::Init(float sampleRate, u8 voiceLimit) {
     pages[6].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[7].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
 
+    this->filterEnabled = filterEnabled;
     if (voiceLimit > 0 && voiceLimit < VOICE_COUNT) {
         this->voiceLimit = voiceLimit;
     }
@@ -56,10 +57,12 @@ void Katara::Init(float sampleRate, u8 voiceLimit) {
         voices[voice].multiOsc.Init(sampleRate);
 
         // filter
-        voices[voice].svf.Init(sampleRate);
-        voices[voice].svf.SetDrive(0);
-        voices[voice].filtEnv.Init(sampleRate);
-        voices[voice].filtEnv.SetCurve(1);
+        if (filterEnabled) {
+            voices[voice].svf.Init(sampleRate);
+            voices[voice].svf.SetDrive(0);
+            voices[voice].filtEnv.Init(sampleRate);
+            voices[voice].filtEnv.SetCurve(1);
+        }
 
         // amp
         voices[voice].ampEnv.Init(sampleRate);
@@ -87,10 +90,12 @@ void Katara::ProcessChanges() {
         voices[voice].multiOsc.SetPulsewidth(params[PARAM_PULSEWIDTH].Value());
 
         // filter
-        voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_FA].Value());
-        voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_DECAY, params[PARAM_FD].Value());
-        voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
-        voices[voice].filtEnv.SetSustainLevel(params[PARAM_FS].Value());
+        if (filterEnabled) {
+            voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_FA].Value());
+            voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_DECAY, params[PARAM_FD].Value());
+            voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
+            voices[voice].filtEnv.SetSustainLevel(params[PARAM_FS].Value());
+        }
 
         // amp
         voices[voice].ampEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_A].Value());
@@ -116,18 +121,20 @@ float Katara::Process() {
         signal += params[PARAM_SAW2].Value() * voices[voice].multiOsc.Saw2();
 
         // filter
-        float freq = params[PARAM_FREQ].Value();
-        freq += MAX_FREQ * params[PARAM_FENV].Value() * params[PARAM_FENV].Value() * voices[voice].filtEnv.Process();
-        freq += MAX_FREQ * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
-        voices[voice].svf.SetFreq(freq);
-        voices[voice].svf.SetRes(params[PARAM_RES].Value());
-        voices[voice].svf.Process(signal);
-        signal = voices[voice].svf.Low();
+        if (filterEnabled) {
+            float freq = params[PARAM_FREQ].Value();
+            freq += MAX_FREQ * params[PARAM_FENV].Value() * params[PARAM_FENV].Value() * voices[voice].filtEnv.Process();
+            freq += MAX_FREQ * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
+            voices[voice].svf.SetFreq(freq);
+            voices[voice].svf.SetRes(params[PARAM_RES].Value());
+            voices[voice].svf.Process(signal);
+            signal = voices[voice].svf.Low();
+        }
 
         // amp
         // left += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
         left += signal * voices[voice].ampEnv.Process();
-        right += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
+        // right += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
     }
     left = hpf.Process(left);
 
