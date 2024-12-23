@@ -31,7 +31,7 @@ class AdsrEnv {
         float sampleRate = 48000;
         long stageTimes[STAGE_COUNT] = { 1, 100, 1, 1000 };  // stagetime doesn't matter for sustain
         u8 curve = 0;
-        bool retrigger = false;
+        bool retrigger = true;
         u8 activeGates = 0;
         float sustainLevel = 1;
 

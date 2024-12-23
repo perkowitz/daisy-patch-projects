@@ -113,15 +113,14 @@ void Screen::Screensave(u32 time) {
 void Screen::ScreensaveEvent(u8 note, bool on) {
     if (screenOn) { return; }
 
-    // display->DrawPixel(note, 32, on);
-    display->DrawLine(note, 28, note, 36, on);
-
-    // // show notes with horizontal wipe
-    // note = Utility::LimitInt(note, 0, HEIGHT);
-    // u8 x = sweepX % (WIDTH + 1);
-    // if (x > 5 && x < WIDTH + 1) {
-    //     display->DrawPixel(x - 4, note, true);
-    // }
+    // show notes with horizontal wipe
+    if (on) {
+        note = Utility::LimitInt(note, 0, HEIGHT);
+        u8 x = sweepX % (WIDTH + 1);
+        if (x > 5 && x < WIDTH + 1) {
+            display->DrawPixel(x - 4, note, true);
+        }
+    }
 }
 
 // void Screen::DrawHachiLogo(u8 startX) {

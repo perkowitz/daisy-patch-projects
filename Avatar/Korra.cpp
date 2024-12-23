@@ -1,14 +1,14 @@
-#include "Katara.h"
+#include "Korra.h"
 
 using namespace daisy;
 using namespace daisysp;
 
 
-void Katara::Init(float sampleRate) {
-    Init(sampleRate, VOICE_COUNT, true);
+void Korra::Init(float sampleRate) {
+    Init(sampleRate, VOICE_COUNT);
 }
 
-void Katara::Init(float sampleRate, u8 voiceLimit, bool filterEnabled) {
+void Korra::Init(float sampleRate, u8 voiceLimit) {
     // set up the params and arrange them in pages
     params[PARAM_OCTAVE].Init("Oct", 0, -3, 3, Parameter::LINEAR, 1);
     params[PARAM_SAW].Init("Saw", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -36,39 +36,31 @@ void Katara::Init(float sampleRate, u8 voiceLimit, bool filterEnabled) {
     params[PARAM_OUT_12].Init("1-2", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_3].Init("3", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_KLOK].Init("Klok", 0, 0, KORRA_MAX_KLOK, Parameter::LINEAR, 1);
 
     // assign nullptr to leave a slot blank
     pages[0].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
     pages[1].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
     pages[2].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], &params[PARAM_F_SENV]);
-    pages[3].Init(Name(), "Filt", &params[PARAM_HPF], nullptr, nullptr, nullptr);
+    pages[3].Init(Name(), "Filt2", &params[PARAM_HPF], &params[PARAM_KLOK], nullptr, nullptr);
     pages[4].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
     pages[5].Init(Name(), "SyncEnv", &params[PARAM_TA], &params[PARAM_TH], &params[PARAM_TD], &params[PARAM_SENV_STEPS]);
     pages[6].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[7].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
 
-    this->filterEnabled = filterEnabled;
     if (voiceLimit > 0 && voiceLimit < VOICE_COUNT) {
         this->voiceLimit = voiceLimit;
     }
     for (u8 voice = 0; voice < voiceLimit; voice++) {
-        // audio settings -- only set the values that are not set in Process()
-        // oscillators
         voices[voice].multiOsc.Init(sampleRate);
-
-        // filter
-        if (filterEnabled) {
-            voices[voice].svf.Init(sampleRate);
-            voices[voice].svf.SetDrive(0);
-            voices[voice].filtEnv.Init(sampleRate);
-            voices[voice].filtEnv.SetCurve(1);
-        }
-
-        // amp
         voices[voice].ampEnv.Init(sampleRate);
         voices[voice].ampEnv.SetCurve(1);
     }
 
+    svf.Init(sampleRate);
+    svf.SetDrive(0);
+    filtEnv.Init(sampleRate);
+    filtEnv.SetCurve(1);
     hpf.Init();
     hpf.SetFilterMode(OnePole::FILTER_MODE_HIGH_PASS);
     hpf.SetFrequency(0);
@@ -77,25 +69,11 @@ void Katara::Init(float sampleRate, u8 voiceLimit, bool filterEnabled) {
     syncEnv.SetCurve(2);
 }
 
-void Katara::ProcessChanges() {
-
-    syncEnv.SetStageTime(AhdEnv::STAGE_ATTACK, params[PARAM_TA].Value());
-    syncEnv.SetStageTime(AhdEnv::STAGE_HOLD, params[PARAM_TH].Value());
-    syncEnv.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_TD].Value());
-    syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
-    hpf.SetFrequency(params[PARAM_HPF].Value());
+void Korra::ProcessChanges() {
 
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         // oscillator
         voices[voice].multiOsc.SetPulsewidth(params[PARAM_PULSEWIDTH].Value());
-
-        // filter
-        if (filterEnabled) {
-            voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_FA].Value());
-            voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_DECAY, params[PARAM_FD].Value());
-            voices[voice].filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
-            voices[voice].filtEnv.SetSustainLevel(params[PARAM_FS].Value());
-        }
 
         // amp
         voices[voice].ampEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_A].Value());
@@ -103,49 +81,78 @@ void Katara::ProcessChanges() {
         voices[voice].ampEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_R].Value());
         voices[voice].ampEnv.SetSustainLevel(params[PARAM_S].Value());
     }
+
+    // filter
+    filtEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_FA].Value());
+    filtEnv.SetStageTime(AdsrEnv::STAGE_DECAY, params[PARAM_FD].Value());
+    filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
+    filtEnv.SetSustainLevel(params[PARAM_FS].Value());
+
+    syncEnv.SetStageTime(AhdEnv::STAGE_ATTACK, params[PARAM_TA].Value());
+    syncEnv.SetStageTime(AhdEnv::STAGE_HOLD, params[PARAM_TH].Value());
+    syncEnv.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_TD].Value());
+    syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
+    hpf.SetFrequency(params[PARAM_HPF].Value());
 }
 
-float Katara::Process() {
+float Korra::Process() {
+
+    klokCount = (klokCount + 1) % KORRA_KLOK_COUNT_LIMIT;
+    u8 k = 0;
+    switch (currentKlok) {
+        case 0: 
+            klokCount = 0;
+            break;
+        case 1:
+            k = klokCount % 2;
+            break;
+        case 2:
+            k = klokCount % 4;
+            break;
+        case 3:
+            k = klokCount % 8;
+            break;
+    }
+    if (k != 0) {
+        return 0;
+    }
 
     float left = 0;
     float right = 0;
 
     float trigEnvSignal = syncEnv.Process();
 
+    float signal = 0;
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         // oscillators
         voices[voice].multiOsc.Process();
-        float signal = params[PARAM_SAW].Value() * voices[voice].multiOsc.Saw();
-        signal += params[PARAM_PULSE].Value() * voices[voice].multiOsc.Pulse();
-        signal += params[PARAM_SUB].Value() * voices[voice].multiOsc.Sub();
-        signal += params[PARAM_SAW2].Value() * voices[voice].multiOsc.Saw2();
-
-        // filter
-        if (filterEnabled) {
-            float freq = params[PARAM_FREQ].Value();
-            freq += MAX_FREQ * params[PARAM_FENV].Value() * params[PARAM_FENV].Value() * voices[voice].filtEnv.Process();
-            freq += MAX_FREQ * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
-            voices[voice].svf.SetFreq(freq);
-            voices[voice].svf.SetRes(params[PARAM_RES].Value());
-            voices[voice].svf.Process(signal);
-            signal = voices[voice].svf.Low();
-        }
-
-        // amp
-        // left += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
-        left += signal * voices[voice].ampEnv.Process();
-        // right += voices[voice].velocity * signal * voices[voice].ampEnv.Process();
+        float oscSignal = params[PARAM_SAW].Value() * voices[voice].multiOsc.Saw();
+        oscSignal += params[PARAM_PULSE].Value() * voices[voice].multiOsc.Pulse();
+        oscSignal += params[PARAM_SUB].Value() * voices[voice].multiOsc.Sub();
+        oscSignal += params[PARAM_SAW2].Value() * voices[voice].multiOsc.Saw2();
+        // signal += voices[voice].velocity * oscSignal * voices[voice].ampEnv.Process();
+        signal += oscSignal * voices[voice].ampEnv.Process();
+        voices[voice].isPlaying = voices[voice].ampEnv.IsRunning();
     }
-    left = hpf.Process(left);
 
-    leftSignal = MIX_SCALE * left / voiceLimit;
-    // rightSignal = MIX_SCALE * right / voiceLimit;
+    // filter
+    float freq = params[PARAM_FREQ].Value();
+    freq += MAX_FREQ * params[PARAM_FENV].Value() * params[PARAM_FENV].Value() * filtEnv.Process();
+    freq += MAX_FREQ * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
+    svf.SetFreq(freq);
+    svf.SetRes(params[PARAM_RES].Value());
+    svf.Process(signal);
+    signal = svf.Low();
+
+    left = hpf.Process(signal);
+    leftSignal = left / voiceLimit;
     rightSignal = leftSignal;
 
     return leftSignal;
 }
 
-float Katara::GetOutput(u8 channel) {
+float Korra::GetOutput(u8 channel) {
+    return leftSignal;
     switch (channel) {
         case 0: return leftSignal * params[PARAM_OUT_12].Value();
         case 1: return rightSignal * params[PARAM_OUT_12].Value();
@@ -155,71 +162,96 @@ float Katara::GetOutput(u8 channel) {
     return 0;
 }
 
-void Katara::NoteOn(u8 note, float velocity) {
+void Korra::NoteOn(u8 note, float velocity) {
     float v = Utility::Limit(velocity);
     if (v == 0) {
         NoteOff(note);
         return;
     }
 
+    // look for a voice that isn't playing (incl env release)
     s8 assignedVoice = -1;
     for (u8 voice = 0; voice < voiceLimit; voice++) {
-        if (!voices[voice].gateOn) {
+        if (!voices[voice].isPlaying && !voices[voice].gateIsOn) {
             assignedVoice = voice;
         }
     }
 
+    // if nothing found, look for a voice that's just gated off
+    if (assignedVoice == -1) {
+        for (u8 vox = 0; vox < voiceLimit; vox++) {
+            if (!voices[vox].gateIsOn) {
+                assignedVoice = vox;
+            }
+        }
+    }
+
+    // otherwise just take the next voice
     if (assignedVoice == -1) {
         assignedVoice = nextVoice;
         nextVoice = (nextVoice + 1) % voiceLimit;
     }
-    if (voices[assignedVoice].gateOn) {
-        // should call noteoff, but have to tell it which voice
-        voices[assignedVoice].ampEnv.GateOff();
-        voices[assignedVoice].filtEnv.GateOff();
-        voices[assignedVoice].gateOn = false;
-    }
+
+    // if the voice is being used, take it over but do not retrigger (i.e. leave gates alone)
+    // if (voices[assignedVoice].isPlaying) {
+    //     // should call noteoff, but have to tell it which voice
+    //     voices[assignedVoice].isPlaying = false;
+    // }
+
+    // update klok here instead of ProcessUpdates so it changes on next noteOn
+    // (though of course klok rate affects all voices)
+    currentKlok = (int)params[PARAM_KLOK].Value();
 
     voices[assignedVoice].note = note;
-    u8 adjustedNote = note + (int)params[PARAM_OCTAVE].Value() * 12;
+    u8 adjustedNote = note + (int)params[PARAM_OCTAVE].Value() * 12 + currentKlok * 12;
     if (adjustedNote >= 0 && adjustedNote < 128) {
         voices[assignedVoice].multiOsc.SetFreq(mtof(adjustedNote));
-        voices[assignedVoice].multiOsc.Reset();
-        voices[assignedVoice].ampEnv.GateOn();
-        voices[assignedVoice].filtEnv.GateOn();
-        voices[assignedVoice].gateOn = true;
+        // voices[assignedVoice].multiOsc.Reset();
         voices[assignedVoice].velocity = v;
-    }
-}
 
-void Katara::NoteOff(u8 note) {
-    for (u8 voice = 0; voice < voiceLimit; voice++) {
-        if (note == voices[voice].note) {
-            voices[voice].ampEnv.GateOff();
-            voices[voice].filtEnv.GateOff();
-            voices[voice].gateOn = false;
+        // if the voice wasn't already playing, add a gate; if this is first gate, trigger envelopes
+        if (!voices[assignedVoice].gateIsOn) {
+            voices[assignedVoice].gateIsOn = true;
+            voices[assignedVoice].ampEnv.GateOn();
+            gates++;
+            if (gates == 1) {
+                filtEnv.GateOn();
+            }
         }
     }
 }
 
-void Katara::Clock(u8 measure, u8 step, u8 tick) {
+void Korra::NoteOff(u8 note) {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
+        if (note == voices[voice].note) {
+            voices[voice].gateIsOn = false;
+            voices[voice].ampEnv.GateOff();
+        }
+    }
+    gates--;
+    if (gates == 0) {
+        filtEnv.GateOff();
+    }
+}
+
+void Korra::Clock(u8 measure, u8 step, u8 tick) {
     syncEnv.Clock(measure, step, tick);
 }
 
-ParamPage *Katara::GetParamPage(u8 page) {
+ParamPage *Korra::GetParamPage(u8 page) {
     if (page < PAGE_COUNT) {
         return &pages[page];
     }
     return nullptr;
 }
 
-void Katara::ResetParams(u8 page) {
+void Korra::ResetParams(u8 page) {
     if (page < PAGE_COUNT) {
         paramSets[page].ResetParams();
     }
 }
 
-Param *Katara::GetParam(u8 index) { 
+Param *Korra::GetParam(u8 index) { 
     if (index < PARAM_COUNT) {
         return &params[index];
     }
