@@ -13,6 +13,9 @@
 using namespace daisy;
 using namespace daisysp;
 
+#define KORRA_MAX_KLOK 3
+#define KORRA_KLOK_COUNT_LIMIT 8
+
 class Korra: public ISynth {
 
     struct Voice {
@@ -34,7 +37,7 @@ class Korra: public ISynth {
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 26;  // total count of all params following
+        static const u8 PARAM_COUNT = 27;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -61,6 +64,7 @@ class Korra: public ISynth {
         static const u8 PARAM_OUT_12 = 23;
         static const u8 PARAM_OUT_3 = 24;
         static const u8 PARAM_OUT_4 = 25;
+        static const u8 PARAM_KLOK = 26;
 
         // constants
         static const u16 MAX_FREQ = 24000;
@@ -99,6 +103,8 @@ class Korra: public ISynth {
         u8 nextVoice = 0;
         u8 midiChannel = 1;
         u8 voiceLimit = VOICE_COUNT;
+        u8 klokCount = 0;
+        u8 currentKlok = 0;
 
         OnePole hpf;
         SyncEnv syncEnv;

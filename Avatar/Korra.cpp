@@ -36,12 +36,13 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_OUT_12].Init("1-2", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_3].Init("3", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_KLOK].Init("Klok", 0, 0, KORRA_MAX_KLOK, Parameter::LINEAR, 1);
 
     // assign nullptr to leave a slot blank
     pages[0].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
     pages[1].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
     pages[2].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], &params[PARAM_F_SENV]);
-    pages[3].Init(Name(), "Filt", &params[PARAM_HPF], nullptr, nullptr, nullptr);
+    pages[3].Init(Name(), "Filt2", &params[PARAM_HPF], &params[PARAM_KLOK], nullptr, nullptr);
     pages[4].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
     pages[5].Init(Name(), "SyncEnv", &params[PARAM_TA], &params[PARAM_TH], &params[PARAM_TD], &params[PARAM_SENV_STEPS]);
     pages[6].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
@@ -95,6 +96,26 @@ void Korra::ProcessChanges() {
 }
 
 float Korra::Process() {
+
+    klokCount = (klokCount + 1) % KORRA_KLOK_COUNT_LIMIT;
+    u8 k = 0;
+    switch (currentKlok) {
+        case 0: 
+            klokCount = 0;
+            break;
+        case 1:
+            k = klokCount % 2;
+            break;
+        case 2:
+            k = klokCount % 4;
+            break;
+        case 3:
+            k = klokCount % 8;
+            break;
+    }
+    if (k != 0) {
+        return 0;
+    }
 
     float left = 0;
     float right = 0;
@@ -177,8 +198,12 @@ void Korra::NoteOn(u8 note, float velocity) {
     //     voices[assignedVoice].isPlaying = false;
     // }
 
+    // update klok here instead of ProcessUpdates so it changes on next noteOn
+    // (though of course klok rate affects all voices)
+    currentKlok = (int)params[PARAM_KLOK].Value();
+
     voices[assignedVoice].note = note;
-    u8 adjustedNote = note + (int)params[PARAM_OCTAVE].Value() * 12;
+    u8 adjustedNote = note + (int)params[PARAM_OCTAVE].Value() * 12 + currentKlok * 12;
     if (adjustedNote >= 0 && adjustedNote < 128) {
         voices[assignedVoice].multiOsc.SetFreq(mtof(adjustedNote));
         // voices[assignedVoice].multiOsc.Reset();

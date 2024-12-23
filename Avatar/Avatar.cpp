@@ -36,8 +36,8 @@ int main(void) {
     // toph.GetParam(Toph::PARAM_OUT_3)->SetScaledValue(0.8);
     // toph.GetParam(Toph::PARAM_OUT_4)->SetScaledValue(0);
 
-    runner.Run(&katara, nullptr);
-    // runner.Run(&korra, nullptr);
+    // runner.Run(&katara, nullptr);
+    runner.Run(&korra, nullptr);
     // runner.Run(&toph, nullptr);
     // runner.Run(&katara, &toph);
 }
