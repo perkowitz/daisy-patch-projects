@@ -11,27 +11,18 @@ using namespace daisysp;
 class WaveSyncOsc {
 
     public:
-        void Init(float sampleRate);
+        void Init(float sampleRate, const char *sdPath);
         float Process();
         void Reset();
         void SetFreq(float frequency) { osc.SetFreq(frequency); }
-        void SetBuffer(float *buffer, u32 bufferSize) {
-            this->buffer = buffer;
-            this->bufferSize = bufferSize;
-        }
-        void SetStartSample(u32 startSample) {
-            if (startSample < bufferSize) {
-                this->startSample = startSample;
-            }
-        }
+        void SetFile(u8 index) { wavPlayer.Open(index); }
 
         float Saw() { return sawSignal; }
         float Wave() { return signal; }
 
     private:
         float sampleRate = 48000;
-        float *buffer;
-        u32 bufferSize;
+        WavPlayer wavPlayer;
         u32 currentSample = 0;
         u32 startSample = 0;
         Oscillator osc;

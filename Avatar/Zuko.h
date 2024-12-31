@@ -1,5 +1,5 @@
-#ifndef ASAMI_H
-#define ASAMI_H
+#ifndef ZUKO_H
+#define ZUKO_H
 
 #include "daisy_patch.h"
 #include "daisysp.h"
@@ -14,14 +14,14 @@
 using namespace daisy;
 using namespace daisysp;
 
-#define ASAMI_MAX_KLOK 3
-#define ASAMI_KLOK_COUNT_LIMIT 8
-#define ASAMI_BUFFER_SIZE 1024
+#define ZUKO_MAX_KLOK 3
+#define ZUKO_KLOK_COUNT_LIMIT 8
+#define ZUKO_BUFFER_SIZE 1024
 
-class Asami: public ISynth {
+class Zuko: public ISynth {
 
     struct Voice {
-        WaveSyncOsc waveSyncOsc;
+        SyncMultiOsc syncMultiOsc;
         AdsrEnv ampEnv;
         u8 note;
         u8 adjustedNote;
@@ -35,11 +35,11 @@ class Asami: public ISynth {
         static const u8 VOICE_COUNT = 8;
 
         // pages
-        static const u8 PAGE_COUNT = 7;
+        static const u8 PAGE_COUNT = 8;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 27;  // total count of all params following
+        static const u8 PARAM_COUNT = 30;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -54,6 +54,9 @@ class Asami: public ISynth {
         static const u8 PARAM_FENV = 11;
         static const u8 PARAM_SAMPLE_START = 12;
         static const u8 PARAM_SAW = 13;
+        static const u8 PARAM_OSC2_SAW = 14;
+        static const u8 PARAM_OSC2_PULSE = 15;
+        static const u8 PARAM_OSC2_SYNC = 16;
         static const u8 PARAM_HPF = 17;
         static const u8 PARAM_TA = 18;
         static const u8 PARAM_TH = 19;
@@ -64,16 +67,18 @@ class Asami: public ISynth {
         static const u8 PARAM_OUT_3 = 24;
         static const u8 PARAM_OUT_4 = 25;
         static const u8 PARAM_KLOK = 26;
+        static const u8 PARAM_OSC1_LEVEL = 27;
+        static const u8 PARAM_OSC2_LEVEL = 28;
+        static const u8 PARAM_OSC2_OCTAVE = 29;
 
         // constants
         static const u16 MAX_FREQ = 24000;
 
         void Init(float sampleRate);
-        void Init(float sampleRate, const char *sdPath);
-        void Init(float sampleRate, const char *sdPath, u8 voiceLimit);
+        void Init(float sampleRate, u8 voiceLimit);
         bool IsActive() { return active; }
-        std::string Name() { return "Asami"; }
-        std::string ShortName() { return "Asm"; }
+        std::string Name() { return "Zuko"; }
+        std::string ShortName() { return "Zu"; }
 
         float Process();
         float GetOutput(u8 channel);
@@ -106,7 +111,7 @@ class Asami: public ISynth {
         u8 klokCount = 0;
         u8 currentKlok = 0;
 
-        float waveSamples[ASAMI_BUFFER_SIZE];
+        float waveSamples[ZUKO_BUFFER_SIZE];
 
         OnePole hpf;
         SyncEnv syncEnv;

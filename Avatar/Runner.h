@@ -56,11 +56,17 @@ class Runner {
             meter.Init(samplerate, 128, 1.0f);
             screen.setDisplay(&hw.display);
             screen.DrawLine(0, 0, 60, 60, true);
+
+            // SdmmcHandler::Config sd_cfg;
+            // sd_cfg.Defaults();
+            // sdcard.Init(sd_cfg);
+            // fsi.Init(FatFSInterface::Config::MEDIA_SD);
+            // f_mount(&fsi.GetSDFileSystem(), "/", 1);
         }
 
-        void Run(ISynth *synth);
         void Run(ISynth *synth1, ISynth *synth2);
         float getSampleRate() { return samplerate; }
+        // const char *getSdPath() { return fsi.GetSDPath(); }
 
         static Runner *globalRunner;
         static void GlobalAudioCallback(AudioHandle::InputBuffer  in,
@@ -90,6 +96,8 @@ class Runner {
         Screen screen;
         CpuLoadMeter meter;
         // MidiUsbHandler usbMidi;
+        // SdmmcHandler   sdcard;
+        // FatFSInterface fsi;
 
         ISynth *synth1;
         ISynth *synth2;

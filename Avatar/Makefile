@@ -22,14 +22,15 @@ $(HACHILIB_DIR)/audio/Mixer.cpp \
 $(HACHILIB_DIR)/audio/MultiOsc.cpp \
 $(HACHILIB_DIR)/audio/Processing.cpp \
 $(HACHILIB_DIR)/audio/SyncMultiOsc.cpp \
-$(HACHILIB_DIR)/audio/WaveSyncOsc.cpp \
 Runner.cpp \
 Screen.cpp \
-Asami.cpp \
 Katara.cpp \
 Korra.cpp \
 Toph.cpp \
 Zuko.cpp
+
+# $(HACHILIB_DIR)/audio/WaveSyncOsc.cpp \
+# Asami.cpp \
 
 
 
@@ -38,6 +39,8 @@ Zuko.cpp
 #APP_TYPE=BOOT_QSPI
 
 OPT = -Os
+
+# USE_FATFS=1
 
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
