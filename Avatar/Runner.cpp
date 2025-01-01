@@ -5,21 +5,6 @@ using namespace daisysp;
 
 Runner* Runner::globalRunner = nullptr;
 
-void Runner::DrawPageTitle(std::string moduleName, std::string pageTitle) {
-    // Rectangle titleRect(0, HEIGHT - 20, WIDTH, 20);
-
-    // display->WriteStringAligned(pageTitle.c_str(), MENU_FONT, titleRect, Alignment::bottomLeft, true);
-    // display->WriteStringAligned(moduleName.c_str(), TITLE_FONT, titleRect, Alignment::bottomRight, true);
-
-    // display->SetCursor(2, HEIGHT - 20);
-    // if (moduleName == "") {
-    //     display->WriteString(pageTitle.c_str(), MENU_FONT, true);
-    // } else {
-    //     display->WriteString((moduleName + ":" + pageTitle).c_str(), MENU_FONT, true);
-    // }
-}
-
-
 // Display the available parameter names.
 void Runner::DisplayParamMenu() {
 

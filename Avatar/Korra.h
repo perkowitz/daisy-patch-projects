@@ -6,6 +6,7 @@
 #include "Filters/onepole.h"
 #include "lib/ParamSet.h"
 #include "lib/audio/AdsrEnv.h"
+#include "lib/audio/Drift.h"
 #include "lib/audio/MultiOsc.h"
 #include "lib/audio/SyncEnv.h"
 #include "ISynth.h"
@@ -15,6 +16,7 @@ using namespace daisysp;
 
 #define KORRA_MAX_KLOK 3
 #define KORRA_KLOK_COUNT_LIMIT 8
+#define KORRA_MAX_DRIFT_RATE 32
 
 class Korra: public ISynth {
 
@@ -33,11 +35,11 @@ class Korra: public ISynth {
         static const u8 VOICE_COUNT = 8;
 
         // pages
-        static const u8 PAGE_COUNT = 8;
+        static const u8 PAGE_COUNT = 9;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 27;  // total count of all params following
+        static const u8 PARAM_COUNT = 31;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -49,7 +51,7 @@ class Korra: public ISynth {
         static const u8 PARAM_FD = 8;
         static const u8 PARAM_FS = 9;
         static const u8 PARAM_FR = 10;
-        static const u8 PARAM_FENV = 11;
+        static const u8 PARAM_F_FENV = 11;
         static const u8 PARAM_SAW = 12;
         static const u8 PARAM_PULSE = 13;
         static const u8 PARAM_SUB = 14;
@@ -65,9 +67,15 @@ class Korra: public ISynth {
         static const u8 PARAM_OUT_3 = 24;
         static const u8 PARAM_OUT_4 = 25;
         static const u8 PARAM_KLOK = 26;
+        static const u8 PARAM_F_DRIFT = 27;
+        static const u8 PARAM_FRES_DRIFT = 28;
+        static const u8 PARAM_DRIFT_RATE = 29;
+        static const u8 PARAM_DRIFT_LOOP = 30;
 
         // constants
-        static const u16 MAX_FREQ = 24000;
+        static const u16 MAX_FREQUENCY = 24000;
+        static const u16 MIN_FILTER_FREQUENCY = 0;
+        static const u16 MAX_FILTER_FREQUENCY = 10000;
 
         void Init(float sampleRate);
         void Init(float sampleRate, u8 voiceLimit);
@@ -110,6 +118,7 @@ class Korra: public ISynth {
         SyncEnv syncEnv;
         Svf svf;
         AdsrEnv filtEnv;
+        Drift drift;
 
 };
 

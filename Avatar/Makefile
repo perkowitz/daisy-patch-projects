@@ -28,8 +28,7 @@ Screen.cpp \
 Asami.cpp \
 Katara.cpp \
 Korra.cpp \
-Toph.cpp \
-Zuko.cpp
+Toph.cpp 
 
 
 
