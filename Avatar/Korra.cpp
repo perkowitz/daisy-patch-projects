@@ -16,7 +16,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_SUB].Init("Sub", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_SAW2].Init("Sw2", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_PULSEWIDTH].Init("Width", 0.5, 0, 1, Parameter::LINEAR, 100);
-    params[PARAM_FREQ].Init("Freq", 1000, MIN_FILTER_FREQUENCY, MAX_FILTER_FREQUENCY, Parameter::EXPONENTIAL, 1);
+    params[PARAM_FREQ].Init("Freq", 10000, MIN_FILTER_FREQUENCY, MAX_FILTER_FREQUENCY, Parameter::EXPONENTIAL, 1);
     params[PARAM_RES].Init("Reso", 0, 0, 1, Parameter::LINEAR, 100);
     params[PARAM_F_FENV].Init("Env", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_F_SENV].Init("SEnv", 0, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -39,13 +39,18 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_OUT_3].Init("3", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_KLOK].Init("Klok", 0, 0, KORRA_MAX_KLOK, Parameter::LINEAR, 1);
-    params[PARAM_DRIFT_RATE].Init("Rate", 0, 0, KORRA_MAX_DRIFT_RATE, Parameter::LINEAR, 1);
-    params[PARAM_DRIFT_LOOP].Init("Loop", 0, 1, DRIFT_STEPS, Parameter::LINEAR, 1);
+    params[PARAM_DRIFT_RATE].Init("Rate", 8, 0, KORRA_MAX_DRIFT_RATE, Parameter::LINEAR, 1);
+    params[PARAM_DRIFT_LOOP].Init("Loop", 8, 1, DRIFT_STEPS, Parameter::LINEAR, 1);
+    params[PARAM_FOLD].Init("Fold", 0, 0, 25, Parameter::EXPONENTIAL, 4);
+    params[PARAM_WRAP].Init("Wrap", 0, 0, 25, Parameter::EXPONENTIAL, 4);
+    params[PARAM_SQUEEZE].Init("Sqz", 0, 0, 25, Parameter::EXPONENTIAL, 4);
+    params[PARAM_DR2FOLD].Init("Dr>Fo", 0, 0, 1, Parameter::EXPONENTIAL, 100);
 
     // assign nullptr to leave a slot blank
     u8 p = 0;
     pages[p++].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
     pages[p++].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
+    pages[p++].Init(Name(), "Osc", &params[PARAM_FOLD], &params[PARAM_WRAP], &params[PARAM_SQUEEZE], &params[PARAM_DR2FOLD]);
     pages[p++].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_HPF], &params[PARAM_KLOK]);
     pages[p++].Init(Name(), "Mod>Filt", &params[PARAM_F_FENV], &params[PARAM_F_SENV], &params[PARAM_F_DRIFT], &params[PARAM_FRES_DRIFT]);
     pages[p++].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
@@ -141,6 +146,9 @@ float Korra::Process() {
         oscSignal += params[PARAM_SUB].Value() * voices[voice].multiOsc.Sub();
         oscSignal += params[PARAM_SAW2].Value() * voices[voice].multiOsc.Saw2();
         // signal += voices[voice].velocity * oscSignal * voices[voice].ampEnv.Process();
+        oscSignal = Folding::Fold(oscSignal, params[PARAM_FOLD].Value() + params[PARAM_DR2FOLD].Value() * 25 * drift.Signal(2));
+        oscSignal = Folding::Wrap(oscSignal, params[PARAM_WRAP].Value());
+        oscSignal = Folding::Squeeze(oscSignal, params[PARAM_SQUEEZE].Value());
         signal += oscSignal * voices[voice].ampEnv.Process();
         voices[voice].isPlaying = voices[voice].ampEnv.IsRunning();
     }

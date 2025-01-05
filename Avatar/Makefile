@@ -20,7 +20,6 @@ $(HACHILIB_DIR)/audio/AdsrEnv.cpp \
 $(HACHILIB_DIR)/audio/AhdEnv.cpp \
 $(HACHILIB_DIR)/audio/Mixer.cpp \
 $(HACHILIB_DIR)/audio/MultiOsc.cpp \
-$(HACHILIB_DIR)/audio/Processing.cpp \
 $(HACHILIB_DIR)/audio/SyncMultiOsc.cpp \
 $(HACHILIB_DIR)/audio/WaveSyncOsc.cpp \
 Runner.cpp \

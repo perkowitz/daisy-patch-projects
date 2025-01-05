@@ -7,6 +7,7 @@
 #include "lib/ParamSet.h"
 #include "lib/audio/AdsrEnv.h"
 #include "lib/audio/Drift.h"
+#include "lib/audio/Folding.h"
 #include "lib/audio/MultiOsc.h"
 #include "lib/audio/SyncEnv.h"
 #include "ISynth.h"
@@ -35,11 +36,11 @@ class Korra: public ISynth {
         static const u8 VOICE_COUNT = 8;
 
         // pages
-        static const u8 PAGE_COUNT = 9;
+        static const u8 PAGE_COUNT = 10;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 31;  // total count of all params following
+        static const u8 PARAM_COUNT = 35;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -71,6 +72,10 @@ class Korra: public ISynth {
         static const u8 PARAM_FRES_DRIFT = 28;
         static const u8 PARAM_DRIFT_RATE = 29;
         static const u8 PARAM_DRIFT_LOOP = 30;
+        static const u8 PARAM_FOLD = 31;
+        static const u8 PARAM_WRAP = 32;
+        static const u8 PARAM_SQUEEZE = 33;
+        static const u8 PARAM_DR2FOLD = 34;
 
         // constants
         static const u16 MAX_FREQUENCY = 24000;

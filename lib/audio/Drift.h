@@ -4,7 +4,6 @@
 #include <ctime>
 #include "daisy_patch.h"
 #include "daisysp.h"
-#include "AhdEnv.h"
 
 using namespace daisy;
 using namespace daisysp;
