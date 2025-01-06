@@ -102,6 +102,8 @@ class Korra: public ISynth {
         void SetMidiChannel(u8 channel) { midiChannel = channel; }
         virtual u8 GetMidiChanel() { return midiChannel; }
 
+        float GetDrift(u8 step) { return drift.Value(step); }
+
     private:
         bool active = false;
         float leftSignal = 0;

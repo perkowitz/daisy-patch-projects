@@ -1,4 +1,5 @@
 #include "Runner.h"
+#include "Korra.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -43,6 +44,14 @@ void Runner::DisplayKnobValues() {
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
     }
+
+    // Korra *korra = (Korra*)currentSynth;
+    // screen.DrawRect(0, 31, 127, 63, false, true);
+    // for (u8 step = 0; step < 8; step++) {
+    //     u8 value = (int)(korra->GetDrift(step) * 32);
+    //     screen.DrawLine(step * 16, 63 - value, step * 16 + 8, 63 - value, true);
+    // }
+
 }
 
 void Runner::DrawScreen(bool clearFirst) {

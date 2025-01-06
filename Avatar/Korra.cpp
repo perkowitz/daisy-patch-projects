@@ -80,7 +80,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     syncEnv.SetCurve(2);
 
     drift.Init();
-    drift.SetLoopLength(4);
+    drift.SetLoopLength(8);
     drift.SetRate(8);
 }
 
@@ -108,6 +108,9 @@ void Korra::ProcessChanges() {
     syncEnv.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_TD].Value());
     syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
     hpf.SetFrequency(params[PARAM_HPF].Value());
+
+    drift.SetLoopLength(params[PARAM_DRIFT_LOOP].Value());
+    drift.SetRate(params[PARAM_DRIFT_RATE].Value());
 }
 
 float Korra::Process() {

@@ -41,6 +41,10 @@ class Drift {
             return currentValues[step];
         }
 
+        float Value(s8 step) {
+            return currentValues[step];
+        }
+
         // Trigger a new step.
         void Trigger() { 
             currentStep = (currentStep + 1) % loopLength;
