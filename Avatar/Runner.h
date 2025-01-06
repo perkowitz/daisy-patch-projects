@@ -23,7 +23,7 @@ using namespace daisysp;
 #define MENU_PATCH 3
 #define MIDIMAP_SIZE 16
 #define AUDIO_PASSTHRU false
-#define SHOW_CPU true
+#define SHOW_CPU false
 
 #define CURRENT_VERSION 0
 #define PATCH_SIZE 7
@@ -58,7 +58,6 @@ class Runner {
             screen.DrawLine(0, 0, 60, 60, true);
         }
 
-        void Run(ISynth *synth);
         void Run(ISynth *synth1, ISynth *synth2);
         float getSampleRate() { return samplerate; }
 
@@ -69,7 +68,6 @@ class Runner {
 
 
     private:
-        void DrawPageTitle(std::string moduleName, std::string pageTitle);
         void DisplayParamMenu();
         void DisplayKnobValues();
         void DrawScreen(bool clearFirst);

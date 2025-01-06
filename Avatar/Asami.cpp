@@ -1,69 +1,67 @@
-#include "Korra.h"
+#include "Asami.h"
+#include <ctime>
 
 using namespace daisy;
 using namespace daisysp;
 
 
-void Korra::Init(float sampleRate) {
+void Asami::Init(float sampleRate) {
     Init(sampleRate, VOICE_COUNT);
 }
 
-void Korra::Init(float sampleRate, u8 voiceLimit) {
-    // set up the params and arrange them in pages
+void Asami::Init(float sampleRate, u8 voiceLimit) {
+    // osc1
     params[PARAM_OCTAVE].Init("Oct", 0, -3, 3, Parameter::LINEAR, 1);
-    params[PARAM_SAW].Init("Saw", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_PULSE].Init("Pulse", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_SUB].Init("Sub", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_SAW2].Init("Sw2", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_PULSEWIDTH].Init("Width", 0.5, 0, 1, Parameter::LINEAR, 100);
-    params[PARAM_FREQ].Init("Freq", 10000, MIN_FILTER_FREQUENCY, MAX_FILTER_FREQUENCY, Parameter::EXPONENTIAL, 1);
+    params[PARAM_SAMPLE_START].Init("Start", 0, 0, 1, Parameter::LINEAR, 100);
+    params[PARAM_SAW].Init("Saw", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    // filter
+    params[PARAM_FREQ].Init("Freq", MAX_FREQ, 0, MAX_FREQ, Parameter::EXPONENTIAL, 1);
     params[PARAM_RES].Init("Reso", 0, 0, 1, Parameter::LINEAR, 100);
-    params[PARAM_F_FENV].Init("Env", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_FENV].Init("Env", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_F_SENV].Init("SEnv", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_F_DRIFT].Init("Drft", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_FRES_DRIFT].Init("D>Res", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_HPF].Init("HPF", 0, 0, 0.2, Parameter::CUBE, 500);
-    params[PARAM_A].Init("A", 0, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
-    params[PARAM_D].Init("D", 0.02, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
-    params[PARAM_S].Init("S", 0.8, 0.0, 1.0, Parameter::LINEAR, 100);
-    params[PARAM_R].Init("R", 0.3, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_FA].Init("A", 0, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_FD].Init("D", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_FS].Init("S", 0, 0.0, 1.0, Parameter::LINEAR, 100);
     params[PARAM_FR].Init("R", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_KLOK].Init("Klok", 0, 0, ASAMI_MAX_KLOK, Parameter::LINEAR, 1);
+    // modulators
+    params[PARAM_A].Init("A", 0, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_D].Init("D", 0.02, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_S].Init("S", 0.8, 0.0, 1.0, Parameter::LINEAR, 100);
+    params[PARAM_R].Init("R", 0.3, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_TA].Init("A", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_TH].Init("H", 0, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_TD].Init("D", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_SENV_STEPS].Init("16ths", 16, 0, 128, Parameter::LINEAR, 1);
+    // output
     params[PARAM_OUT_12].Init("1-2", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_3].Init("3", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_KLOK].Init("Klok", 0, 0, KORRA_MAX_KLOK, Parameter::LINEAR, 1);
-    params[PARAM_DRIFT_RATE].Init("Rate", 8, 0, KORRA_MAX_DRIFT_RATE, Parameter::LINEAR, 1);
-    params[PARAM_DRIFT_LOOP].Init("Loop", 8, 1, DRIFT_STEPS, Parameter::LINEAR, 1);
-    params[PARAM_FOLD].Init("Fold", 0, 0, 25, Parameter::EXPONENTIAL, 4);
-    params[PARAM_WRAP].Init("Wrap", 0, 0, 25, Parameter::EXPONENTIAL, 4);
-    params[PARAM_SQUEEZE].Init("Sqz", 0, 0, 25, Parameter::EXPONENTIAL, 4);
-    params[PARAM_DR2FOLD].Init("Dr>Fo", 0, 0, 1, Parameter::EXPONENTIAL, 100);
 
     // assign nullptr to leave a slot blank
-    u8 p = 0;
-    pages[p++].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
-    pages[p++].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], nullptr, nullptr);
-    pages[p++].Init(Name(), "Osc", &params[PARAM_FOLD], &params[PARAM_WRAP], &params[PARAM_SQUEEZE], &params[PARAM_DR2FOLD]);
-    pages[p++].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_HPF], &params[PARAM_KLOK]);
-    pages[p++].Init(Name(), "Mod>Filt", &params[PARAM_F_FENV], &params[PARAM_F_SENV], &params[PARAM_F_DRIFT], &params[PARAM_FRES_DRIFT]);
-    pages[p++].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
-    pages[p++].Init(Name(), "SyncEnv", &params[PARAM_TA], &params[PARAM_TH], &params[PARAM_TD], &params[PARAM_SENV_STEPS]);
-    pages[p++].Init(Name(), "Drift", &params[PARAM_DRIFT_RATE], &params[PARAM_DRIFT_LOOP], nullptr, nullptr);
-    pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
-    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
+    pages[0].Init(Name(), "Osc1", &params[PARAM_OCTAVE], &params[PARAM_SAMPLE_START], &params[PARAM_SAW], nullptr);
+    pages[1].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], &params[PARAM_F_SENV]);
+    pages[2].Init(Name(), "Mix", &params[PARAM_HPF], &params[PARAM_KLOK], nullptr, nullptr);
+    pages[3].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
+    pages[4].Init(Name(), "SyncEnv", &params[PARAM_TA], &params[PARAM_TH], &params[PARAM_TD], &params[PARAM_SENV_STEPS]);
+    pages[5].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
+    pages[6].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
+
+    srand (static_cast <unsigned> (time(0)));
+    for (u32 s = 0; s < ASAMI_BUFFER_SIZE; s++) {
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX + 1);
+        // waveSamples[s] = r * 2 - 1;
+        float sample = (float)s / (float)ASAMI_BUFFER_SIZE;
+        waveSamples[s] = (sample + r) * 2 - 1;
+    }
 
     if (voiceLimit > 0 && voiceLimit < VOICE_COUNT) {
         this->voiceLimit = voiceLimit;
     }
     for (u8 voice = 0; voice < voiceLimit; voice++) {
-        voices[voice].multiOsc.Init(sampleRate);
+        voices[voice].waveSyncOsc.Init(sampleRate);
+        voices[voice].waveSyncOsc.SetBuffer((float*)&waveSamples, ASAMI_BUFFER_SIZE);
         voices[voice].ampEnv.Init(sampleRate);
         voices[voice].ampEnv.SetCurve(1);
     }
@@ -78,17 +76,13 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     
     syncEnv.Init(sampleRate);
     syncEnv.SetCurve(2);
-
-    drift.Init();
-    drift.SetLoopLength(8);
-    drift.SetRate(8);
 }
 
-void Korra::ProcessChanges() {
+void Asami::ProcessChanges() {
 
     for (u8 voice = 0; voice < voiceLimit; voice++) {
-        // oscillator
-        voices[voice].multiOsc.SetPulsewidth(params[PARAM_PULSEWIDTH].Value());
+        // osc1
+        voices[voice].waveSyncOsc.SetStartSample((u32)(params[PARAM_SAMPLE_START].Value() * ASAMI_BUFFER_SIZE));
 
         // amp
         voices[voice].ampEnv.SetStageTime(AdsrEnv::STAGE_ATTACK, params[PARAM_A].Value());
@@ -108,14 +102,11 @@ void Korra::ProcessChanges() {
     syncEnv.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_TD].Value());
     syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
     hpf.SetFrequency(params[PARAM_HPF].Value());
-
-    drift.SetLoopLength(params[PARAM_DRIFT_LOOP].Value());
-    drift.SetRate(params[PARAM_DRIFT_RATE].Value());
 }
 
-float Korra::Process() {
+float Asami::Process() {
 
-    klokCount = (klokCount + 1) % KORRA_KLOK_COUNT_LIMIT;
+    klokCount = (klokCount + 1) % ASAMI_KLOK_COUNT_LIMIT;
     u8 k = 0;
     switch (currentKlok) {
         case 0: 
@@ -142,28 +133,21 @@ float Korra::Process() {
 
     float signal = 0;
     for (u8 voice = 0; voice < voiceLimit; voice++) {
-        // oscillators
-        voices[voice].multiOsc.Process();
-        float oscSignal = params[PARAM_SAW].Value() * voices[voice].multiOsc.Saw();
-        oscSignal += params[PARAM_PULSE].Value() * voices[voice].multiOsc.Pulse();
-        oscSignal += params[PARAM_SUB].Value() * voices[voice].multiOsc.Sub();
-        oscSignal += params[PARAM_SAW2].Value() * voices[voice].multiOsc.Saw2();
-        // signal += voices[voice].velocity * oscSignal * voices[voice].ampEnv.Process();
-        oscSignal = Folding::Fold(oscSignal, params[PARAM_FOLD].Value() + params[PARAM_DR2FOLD].Value() * 25 * drift.Signal(2));
-        oscSignal = Folding::Wrap(oscSignal, params[PARAM_WRAP].Value());
-        oscSignal = Folding::Squeeze(oscSignal, params[PARAM_SQUEEZE].Value());
-        signal += oscSignal * voices[voice].ampEnv.Process();
+        // osc1
+        float osc1Signal = voices[voice].waveSyncOsc.Process();
+        osc1Signal += params[PARAM_SAW].Value() * voices[voice].waveSyncOsc.Saw();
+        // mix
+        float envSignal = voices[voice].ampEnv.Process();
+        signal += osc1Signal * envSignal;
         voices[voice].isPlaying = voices[voice].ampEnv.IsRunning();
     }
 
     // filter
     float freq = params[PARAM_FREQ].Value();
-
-    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_FENV].Value() * params[PARAM_F_FENV].Value() * filtEnv.Process();
-    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
-    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_DRIFT].Value() * drift.Signal();
+    freq += MAX_FREQ * params[PARAM_FENV].Value() * params[PARAM_FENV].Value() * filtEnv.Process();
+    freq += MAX_FREQ * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
     svf.SetFreq(freq);
-    svf.SetRes(params[PARAM_RES].Value() + params[PARAM_FRES_DRIFT].Value() * drift.Signal(1));
+    svf.SetRes(params[PARAM_RES].Value());
     svf.Process(signal);
     signal = svf.Low();
 
@@ -174,7 +158,7 @@ float Korra::Process() {
     return leftSignal;
 }
 
-float Korra::GetOutput(u8 channel) {
+float Asami::GetOutput(u8 channel) {
     return leftSignal;
     switch (channel) {
         case 0: return leftSignal * params[PARAM_OUT_12].Value();
@@ -185,7 +169,7 @@ float Korra::GetOutput(u8 channel) {
     return 0;
 }
 
-void Korra::NoteOn(u8 note, float velocity) {
+void Asami::NoteOn(u8 note, float velocity) {
     float v = Utility::Limit(velocity);
     if (v == 0) {
         NoteOff(note);
@@ -215,23 +199,15 @@ void Korra::NoteOn(u8 note, float velocity) {
         nextVoice = (nextVoice + 1) % voiceLimit;
     }
 
-    // if the voice is being used, take it over but do not retrigger (i.e. leave gates alone)
-    // if (voices[assignedVoice].isPlaying) {
-    //     // should call noteoff, but have to tell it which voice
-    //     voices[assignedVoice].isPlaying = false;
-    // }
-
     // update klok here instead of ProcessUpdates so it changes on next noteOn
     // (though of course klok rate affects all voices)
     currentKlok = (int)params[PARAM_KLOK].Value();
 
     voices[assignedVoice].note = note;
-    u8 adjustedNote = note + (int)params[PARAM_OCTAVE].Value() * 12 + currentKlok * 12;
-    if (adjustedNote >= 0 && adjustedNote < 128) {
-        voices[assignedVoice].multiOsc.SetFreq(mtof(adjustedNote));
-        // voices[assignedVoice].multiOsc.Reset();
+    u8 adjustedNote1 = note + (int)params[PARAM_OCTAVE].Value() * 12 + currentKlok * 12;
+    if (adjustedNote1 >= 0 && adjustedNote1 < 128) {
+        voices[assignedVoice].waveSyncOsc.SetFreq(mtof(adjustedNote1));
         voices[assignedVoice].velocity = v;
-        drift.Trigger();
 
         // if the voice wasn't already playing, add a gate; if this is first gate, trigger envelopes
         if (!voices[assignedVoice].gateIsOn) {
@@ -245,7 +221,7 @@ void Korra::NoteOn(u8 note, float velocity) {
     }
 }
 
-void Korra::NoteOff(u8 note) {
+void Asami::NoteOff(u8 note) {
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         if (note == voices[voice].note) {
             voices[voice].gateIsOn = false;
@@ -258,24 +234,24 @@ void Korra::NoteOff(u8 note) {
     }
 }
 
-void Korra::Clock(u8 measure, u8 step, u8 tick) {
+void Asami::Clock(u8 measure, u8 step, u8 tick) {
     syncEnv.Clock(measure, step, tick);
 }
 
-ParamPage *Korra::GetParamPage(u8 page) {
+ParamPage *Asami::GetParamPage(u8 page) {
     if (page < PAGE_COUNT) {
         return &pages[page];
     }
     return nullptr;
 }
 
-void Korra::ResetParams(u8 page) {
+void Asami::ResetParams(u8 page) {
     if (page < PAGE_COUNT) {
         paramSets[page].ResetParams();
     }
 }
 
-Param *Korra::GetParam(u8 index) { 
+Param *Asami::GetParam(u8 index) { 
     if (index < PARAM_COUNT) {
         return &params[index];
     }

@@ -1,4 +1,5 @@
 #include "Runner.h"
+#include "Asami.h"
 #include "Katara.h"
 #include "Korra.h"
 #include "Toph.h"
@@ -7,6 +8,7 @@ using namespace daisy;
 using namespace daisysp;
 
 
+// Asami asami;
 Katara katara;
 Korra korra;
 Toph toph;
@@ -30,6 +32,12 @@ int main(void) {
     korra.GetParam(Katara::PARAM_OUT_3)->SetScaledValue(0);
     korra.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
 
+    // asami.Init(sampleRate, 4);
+    // asami.SetMidiChannel(4); // zero-indexed
+    // asami.GetParam(Katara::PARAM_OUT_12)->SetScaledValue(0.8);
+    // asami.GetParam(Katara::PARAM_OUT_3)->SetScaledValue(0);
+    // asami.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
+
     // toph.Init(sampleRate);
     // toph.SetMidiChannel(5); // zero-indexed
     // toph.GetParam(Toph::PARAM_OUT_12)->SetScaledValue(0);
@@ -38,6 +46,7 @@ int main(void) {
 
     // runner.Run(&katara, nullptr);
     runner.Run(&korra, nullptr);
+    // runner.Run(&asami, nullptr);
     // runner.Run(&toph, nullptr);
     // runner.Run(&katara, &toph);
 }
