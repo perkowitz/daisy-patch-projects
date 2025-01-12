@@ -1,5 +1,6 @@
 #include "Runner.h"
 #include "Asami.h"
+#include "Eska.h"
 #include "Katara.h"
 #include "Korra.h"
 #include "Toph.h"
@@ -46,6 +47,7 @@ int main(void) {
 
     // runner.Run(&katara, nullptr);
     runner.Run(&korra, nullptr);
+    // runner.Run(&eska, nullptr);
     // runner.Run(&asami, nullptr);
     // runner.Run(&toph, nullptr);
     // runner.Run(&katara, &toph);

@@ -332,9 +332,6 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
         return;
     }
 
-    // hw.display.Fill(false);
-    screen.OledMessage("Runner1", 4);
-
     this->synth1 = synth1;
     this->synth2 = synth2;
     currentSynth = this->synth1;

@@ -68,8 +68,9 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
         voices[voice].ampEnv.SetCurve(1);
     }
 
-    svf.Init(sampleRate);
-    svf.SetDrive(0);
+    vcf.Init(sampleRate);
+    vcf.SetFilterMode(LadderFilter::FilterMode::LP24);
+    vcf.SetInputDrive(0.5);
     filtEnv.Init(sampleRate);
     filtEnv.SetCurve(1);
     hpf.Init();
@@ -162,10 +163,9 @@ float Korra::Process() {
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_FENV].Value() * params[PARAM_F_FENV].Value() * filtEnv.Process();
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_DRIFT].Value() * drift.Signal();
-    svf.SetFreq(freq);
-    svf.SetRes(params[PARAM_RES].Value() + params[PARAM_FRES_DRIFT].Value() * drift.Signal(1));
-    svf.Process(signal);
-    signal = svf.Low();
+    vcf.SetFreq(freq);
+    vcf.SetRes(params[PARAM_RES].Value() + params[PARAM_FRES_DRIFT].Value() * drift.Signal(1));
+    signal = vcf.Process(signal);
 
     left = hpf.Process(signal);
     leftSignal = left / voiceLimit;

@@ -55,7 +55,6 @@ class Runner {
             samplerate = hw.AudioSampleRate();
             meter.Init(samplerate, 128, 1.0f);
             screen.setDisplay(&hw.display);
-            screen.DrawLine(0, 0, 60, 60, true);
         }
 
         void Run(ISynth *synth1, ISynth *synth2);
@@ -68,6 +67,7 @@ class Runner {
 
 
     private:
+        void InitDisplay();
         void DisplayParamMenu();
         void DisplayKnobValues();
         void DrawScreen(bool clearFirst);
