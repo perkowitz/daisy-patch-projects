@@ -25,7 +25,6 @@ $(HACHILIB_DIR)/audio/WaveSyncOsc.cpp \
 Runner.cpp \
 Screen.cpp \
 Asami.cpp \
-Eska.cpp \
 Katara.cpp \
 Korra.cpp \
 Toph.cpp 

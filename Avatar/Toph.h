@@ -3,9 +3,11 @@
 
 #include "daisy_patch.h"
 #include "daisysp.h"
+#include "Filters/ladder.h"
 #include "lib/ParamSet.h"
 #include "lib/audio/AdsrEnv.h"
 #include "lib/audio/MultiOsc.h"
+#include "lib/audio/SyncEnv.h"
 #include "ISynth.h"
 
 using namespace daisy;
@@ -15,11 +17,11 @@ class Toph: public ISynth {
 
     public:
         // pages
-        static const u8 PAGE_COUNT = 6;
+        static const u8 PAGE_COUNT = 8;
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 20;  // total count of all params following
+        static const u8 PARAM_COUNT = 32;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -40,9 +42,23 @@ class Toph: public ISynth {
         static const u8 PARAM_OUT_12 = 17;
         static const u8 PARAM_OUT_3 = 18;
         static const u8 PARAM_OUT_4 = 19;
+        static const u8 PARAM_SENV_A = 20;
+        static const u8 PARAM_SENV_H = 21;
+        static const u8 PARAM_SENV_D = 22;
+        static const u8 PARAM_SENV_STEPS = 23;
+        static const u8 PARAM_PITCH_SENV = 24;
+        static const u8 PARAM_SENV2_A = 25;
+        static const u8 PARAM_SENV2_H = 26;
+        static const u8 PARAM_SENV2_D = 27;
+        static const u8 PARAM_SENV2_STEPS = 28;
+        static const u8 PARAM_FILT_SENV2 = 29;
+        static const u8 PARAM_LFO_RATE = 30;
+        static const u8 PARAM_PITCH_LFO = 31;
 
         // constants
         static const u16 MAX_FREQ = 24000;
+        static const u16 MIN_FILTER_FREQUENCY = 0;
+        static const u16 MAX_FILTER_FREQUENCY = 10000;
 
         void Init(float sampleRate);
         bool IsActive() { return active; }
@@ -66,6 +82,7 @@ class Toph: public ISynth {
     private:
         bool active = false;
         float velocity = 0;
+        u8 note;
         float leftSignal = 0;
         float rightSignal = 0;
         u8 activeGates = 0;
@@ -78,10 +95,14 @@ class Toph: public ISynth {
         u8 midiChannel = 1;
 
         MultiOsc multiOsc;
-        Svf svf;
-        Svf svf2;
+        // Svf svf;
+        // Svf svf2;
+        LadderFilter vcf;
         AdsrEnv ampEnv;
         AdsrEnv filtEnv;
+        SyncEnv syncEnv1;
+        SyncEnv syncEnv2;
+        Oscillator lfo;
 
 };
 

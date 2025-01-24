@@ -67,7 +67,7 @@ void Runner::DrawScreen(bool clearFirst) {
 
 void Runner::ProcessEncoder() {
 
-    bool redraw = false;
+    // bool redraw = false;
     bool screenOn = false;
 
     // Encoder turn
@@ -120,10 +120,10 @@ void Runner::ProcessEncoder() {
             redraw = true;
         }
     }
-    if (redraw) {
-        DrawScreen(true);
-        hw.display.Update();        
-    }
+    // if (redraw) {
+    //     DrawScreen(true);
+    //     hw.display.Update();        
+    // }
 }
 
 // Process the current knob values and update model params accordingly.
@@ -166,7 +166,9 @@ void Runner::ProcessControls() {
 
 void Runner::AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
     meter.OnBlockStart();
+    
     ProcessControls();
+
     for(size_t i = 0; i < size; i++) {
         // cycle = (cycle + 1) % clockRange;
         // // if (cycle < clockThreshold) {
@@ -362,6 +364,12 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
     u32 clock = 0;
     for(;;)
     {
+        if (redraw) {
+            DrawScreen(true);
+            hw.display.Update();        
+            redraw = false;
+        }
+
         hw.midi.Listen();
         while(hw.midi.HasEvents())
         {

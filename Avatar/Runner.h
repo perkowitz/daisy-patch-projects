@@ -46,6 +46,7 @@ using namespace daisysp;
 #define MIDICC_PARAM_4 96
 
 
+
 class Runner {
     public:
 
@@ -67,7 +68,6 @@ class Runner {
 
 
     private:
-        void InitDisplay();
         void DisplayParamMenu();
         void DisplayKnobValues();
         void DrawScreen(bool clearFirst);
@@ -119,6 +119,7 @@ class Runner {
         u8 cycle = 0;
         u8 cycleLength = 8;
         float savedSignal = 0.0f;
+        bool redraw = false;
 
         u8 clockRange = 8;
         u8 clockThreshold = 8;
