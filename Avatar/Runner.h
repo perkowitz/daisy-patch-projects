@@ -46,6 +46,7 @@ using namespace daisysp;
 #define MIDICC_PARAM_4 96
 
 
+
 class Runner {
     public:
 
@@ -55,7 +56,6 @@ class Runner {
             samplerate = hw.AudioSampleRate();
             meter.Init(samplerate, 128, 1.0f);
             screen.setDisplay(&hw.display);
-            screen.DrawLine(0, 0, 60, 60, true);
         }
 
         void Run(ISynth *synth1, ISynth *synth2);
@@ -119,6 +119,7 @@ class Runner {
         u8 cycle = 0;
         u8 cycleLength = 8;
         float savedSignal = 0.0f;
+        bool redraw = false;
 
         u8 clockRange = 8;
         u8 clockThreshold = 8;

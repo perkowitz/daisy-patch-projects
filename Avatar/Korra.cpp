@@ -35,9 +35,6 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_TH].Init("H", 0, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_TD].Init("D", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_SENV_STEPS].Init("16ths", 16, 0, 128, Parameter::LINEAR, 1);
-    params[PARAM_OUT_12].Init("1-2", 0.8, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_OUT_3].Init("3", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_OUT_4].Init("4", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_KLOK].Init("Klok", 0, 0, KORRA_MAX_KLOK, Parameter::LINEAR, 1);
     params[PARAM_DRIFT_RATE].Init("Rate", 8, 0, KORRA_MAX_DRIFT_RATE, Parameter::LINEAR, 1);
     params[PARAM_DRIFT_LOOP].Init("Loop", 8, 1, DRIFT_STEPS, Parameter::LINEAR, 1);
@@ -45,6 +42,9 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_WRAP].Init("Wrap", 0, 0, 25, Parameter::EXPONENTIAL, 4);
     params[PARAM_SQUEEZE].Init("Sqz", 0, 0, 25, Parameter::EXPONENTIAL, 4);
     params[PARAM_DR2FOLD].Init("Dr>Fo", 0, 0, 1, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_12].Init("1-2", 0.8, 0, 2, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_3].Init("3", 0, 0, 2, Parameter::EXPONENTIAL, 100);
+    params[PARAM_OUT_4].Init("4", 0, 0, 2, Parameter::EXPONENTIAL, 100);
 
     // assign nullptr to leave a slot blank
     u8 p = 0;
@@ -68,8 +68,9 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
         voices[voice].ampEnv.SetCurve(1);
     }
 
-    svf.Init(sampleRate);
-    svf.SetDrive(0);
+    vcf.Init(sampleRate);
+    vcf.SetFilterMode(LadderFilter::FilterMode::LP24);
+    vcf.SetInputDrive(0.5);
     filtEnv.Init(sampleRate);
     filtEnv.SetCurve(1);
     hpf.Init();
@@ -138,7 +139,7 @@ float Korra::Process() {
     float left = 0;
     float right = 0;
 
-    float trigEnvSignal = syncEnv.Process();
+    float syncEnvSignal = syncEnv.Process();
 
     float signal = 0;
     for (u8 voice = 0; voice < voiceLimit; voice++) {
@@ -158,17 +159,16 @@ float Korra::Process() {
 
     // filter
     float freq = params[PARAM_FREQ].Value();
-
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_FENV].Value() * params[PARAM_F_FENV].Value() * filtEnv.Process();
-    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * trigEnvSignal;
+    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * syncEnvSignal;
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_DRIFT].Value() * drift.Signal();
-    svf.SetFreq(freq);
-    svf.SetRes(params[PARAM_RES].Value() + params[PARAM_FRES_DRIFT].Value() * drift.Signal(1));
-    svf.Process(signal);
-    signal = svf.Low();
+    vcf.SetFreq(freq);
+    vcf.SetRes(params[PARAM_RES].Value() + params[PARAM_FRES_DRIFT].Value() * drift.Signal(1));
+    signal = vcf.Process(signal);
 
-    left = hpf.Process(signal);
-    leftSignal = left / voiceLimit;
+    // left = hpf.Process(signal);
+    // leftSignal = left / voiceLimit;
+    leftSignal = hpf.Process(signal);
     rightSignal = leftSignal;
 
     return leftSignal;

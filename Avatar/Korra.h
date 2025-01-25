@@ -3,6 +3,7 @@
 
 #include "daisy_patch.h"
 #include "daisysp.h"
+#include "Filters/ladder.h"
 #include "Filters/onepole.h"
 #include "lib/ParamSet.h"
 #include "lib/audio/AdsrEnv.h"
@@ -123,7 +124,7 @@ class Korra: public ISynth {
 
         OnePole hpf;
         SyncEnv syncEnv;
-        Svf svf;
+        LadderFilter vcf;
         AdsrEnv filtEnv;
         Drift drift;
 
