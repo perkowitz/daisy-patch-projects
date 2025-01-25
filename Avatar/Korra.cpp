@@ -16,7 +16,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_SUB].Init("Sub", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_SAW2].Init("Sw2", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_PULSEWIDTH].Init("Width", 0.5, 0, 1, Parameter::LINEAR, 100);
-    params[PARAM_FREQ].Init("Freq", 10000, MIN_FILTER_FREQUENCY, MAX_FILTER_FREQUENCY, Parameter::EXPONENTIAL, 1);
+    params[PARAM_FREQ].Init("Freq", 1000, MIN_FILTER_FREQUENCY, MAX_FILTER_FREQUENCY, Parameter::EXPONENTIAL, 1);
     params[PARAM_RES].Init("Reso", 0, 0, 1, Parameter::LINEAR, 100);
     params[PARAM_F_FENV].Init("Env", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_F_SENV].Init("SEnv", 0, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -31,9 +31,9 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_FD].Init("D", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_FS].Init("S", 0, 0.0, 1.0, Parameter::LINEAR, 100);
     params[PARAM_FR].Init("R", 0.2, 0.0, 5.0, Parameter::EXPONENTIAL, 1000);
-    params[PARAM_TA].Init("A", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
-    params[PARAM_TH].Init("H", 0, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
-    params[PARAM_TD].Init("D", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_SENV_DELAY].Init("Del", 0, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_SENV_A].Init("A", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
+    params[PARAM_SENV_DECAY].Init("D", 0.5, 0.0, 10.0, Parameter::EXPONENTIAL, 1000);
     params[PARAM_SENV_STEPS].Init("16ths", 16, 0, 128, Parameter::LINEAR, 1);
     params[PARAM_KLOK].Init("Klok", 0, 0, KORRA_MAX_KLOK, Parameter::LINEAR, 1);
     params[PARAM_DRIFT_RATE].Init("Rate", 8, 0, KORRA_MAX_DRIFT_RATE, Parameter::LINEAR, 1);
@@ -54,7 +54,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     pages[p++].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_HPF], &params[PARAM_KLOK]);
     pages[p++].Init(Name(), "Mod>Filt", &params[PARAM_F_FENV], &params[PARAM_F_SENV], &params[PARAM_F_DRIFT], &params[PARAM_FRES_DRIFT]);
     pages[p++].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
-    pages[p++].Init(Name(), "SyncEnv", &params[PARAM_TA], &params[PARAM_TH], &params[PARAM_TD], &params[PARAM_SENV_STEPS]);
+    pages[p++].Init(Name(), "SyncEnv", &params[PARAM_SENV_DELAY], &params[PARAM_SENV_A], &params[PARAM_SENV_DECAY], &params[PARAM_SENV_STEPS]);
     pages[p++].Init(Name(), "Drift", &params[PARAM_DRIFT_RATE], &params[PARAM_DRIFT_LOOP], nullptr, nullptr);
     pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
@@ -104,9 +104,10 @@ void Korra::ProcessChanges() {
     filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
     filtEnv.SetSustainLevel(params[PARAM_FS].Value());
 
-    syncEnv.SetStageTime(AhdEnv::STAGE_ATTACK, params[PARAM_TA].Value());
-    syncEnv.SetStageTime(AhdEnv::STAGE_HOLD, params[PARAM_TH].Value());
-    syncEnv.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_TD].Value());
+    syncEnv.SetStageTime(DahdEnv::STAGE_ATTACK, params[PARAM_SENV_A].Value());
+    syncEnv.SetStageTime(DahdEnv::STAGE_HOLD, 0);
+    syncEnv.SetStageTime(DahdEnv::STAGE_DELAY, params[PARAM_SENV_DELAY].Value());
+    syncEnv.SetStageTime(DahdEnv::STAGE_DECAY, params[PARAM_SENV_DECAY].Value());
     syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
     hpf.SetFrequency(params[PARAM_HPF].Value());
 

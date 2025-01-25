@@ -60,9 +60,9 @@ class Korra: public ISynth {
         static const u8 PARAM_SAW2 = 15;
         static const u8 PARAM_PULSEWIDTH = 16;
         static const u8 PARAM_HPF = 17;
-        static const u8 PARAM_TA = 18;
-        static const u8 PARAM_TH = 19;
-        static const u8 PARAM_TD = 20;
+        static const u8 PARAM_SENV_A = 18;
+        static const u8 PARAM_SENV_DELAY = 19;
+        static const u8 PARAM_SENV_DECAY = 20;
         static const u8 PARAM_SENV_STEPS = 21;
         static const u8 PARAM_F_SENV = 22;
         static const u8 PARAM_OUT_12 = 23;

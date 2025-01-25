@@ -18,6 +18,7 @@ $(HACHILIB_DIR)/ParamPage.cpp \
 $(HACHILIB_DIR)/ParamSet.cpp \
 $(HACHILIB_DIR)/audio/AdsrEnv.cpp \
 $(HACHILIB_DIR)/audio/AhdEnv.cpp \
+$(HACHILIB_DIR)/audio/DahdEnv.cpp \
 $(HACHILIB_DIR)/audio/Mixer.cpp \
 $(HACHILIB_DIR)/audio/MultiOsc.cpp \
 $(HACHILIB_DIR)/audio/SyncMultiOsc.cpp \

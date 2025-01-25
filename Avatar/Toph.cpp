@@ -79,15 +79,15 @@ void Toph::Init(float sampleRate) {
 
 float Toph::Process() {
 
-    syncEnv1.SetStageTime(AhdEnv::STAGE_ATTACK, params[PARAM_SENV_A].Value());
-    syncEnv1.SetStageTime(AhdEnv::STAGE_HOLD, params[PARAM_SENV_H].Value());
-    syncEnv1.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_SENV_D].Value());
+    syncEnv1.SetStageTime(DahdEnv::STAGE_ATTACK, params[PARAM_SENV_A].Value());
+    syncEnv1.SetStageTime(DahdEnv::STAGE_HOLD, params[PARAM_SENV_H].Value());
+    syncEnv1.SetStageTime(DahdEnv::STAGE_DECAY, params[PARAM_SENV_D].Value());
     syncEnv1.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
     float syncEnv1Signal = syncEnv1.Process();
 
-    syncEnv2.SetStageTime(AhdEnv::STAGE_ATTACK, params[PARAM_SENV2_A].Value());
-    syncEnv2.SetStageTime(AhdEnv::STAGE_HOLD, params[PARAM_SENV2_H].Value());
-    syncEnv2.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_SENV2_D].Value());
+    syncEnv2.SetStageTime(DahdEnv::STAGE_ATTACK, params[PARAM_SENV2_A].Value());
+    syncEnv2.SetStageTime(DahdEnv::STAGE_HOLD, params[PARAM_SENV2_H].Value());
+    syncEnv2.SetStageTime(DahdEnv::STAGE_DECAY, params[PARAM_SENV2_D].Value());
     syncEnv2.SetSyncSteps((int)params[PARAM_SENV2_STEPS].Value());
     float syncEnv2Signal = syncEnv2.Process();
 

@@ -97,9 +97,9 @@ void Asami::ProcessChanges() {
     filtEnv.SetStageTime(AdsrEnv::STAGE_RELEASE, params[PARAM_FR].Value());
     filtEnv.SetSustainLevel(params[PARAM_FS].Value());
 
-    syncEnv.SetStageTime(AhdEnv::STAGE_ATTACK, params[PARAM_TA].Value());
-    syncEnv.SetStageTime(AhdEnv::STAGE_HOLD, params[PARAM_TH].Value());
-    syncEnv.SetStageTime(AhdEnv::STAGE_DECAY, params[PARAM_TD].Value());
+    syncEnv.SetStageTime(DahdEnv::STAGE_ATTACK, params[PARAM_TA].Value());
+    syncEnv.SetStageTime(DahdEnv::STAGE_HOLD, params[PARAM_TH].Value());
+    syncEnv.SetStageTime(DahdEnv::STAGE_DECAY, params[PARAM_TD].Value());
     syncEnv.SetSyncSteps((int)params[PARAM_SENV_STEPS].Value());
     hpf.SetFrequency(params[PARAM_HPF].Value());
 }

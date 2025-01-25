@@ -3,7 +3,7 @@
 
 #include "daisy_patch.h"
 #include "daisysp.h"
-#include "AhdEnv.h"
+#include "DahdEnv.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -14,7 +14,7 @@ class SyncEnv {
         void Init(float sampleRate) { env.Init(sampleRate); }
         float Process() { return env.Process(); }
         void Trigger() { env.Trigger(); }
-        AhdEnv *GetEnv() { return &env; }
+        DahdEnv *GetEnv() { return &env; }
         void SetStageTime(u8 stage, float seconds) { env.SetStageTime(stage, seconds); }
         void SetCurve(u8 curve) { env.SetCurve(curve); }
         void SetSyncSteps(u8 syncSteps) { this->syncSteps = syncSteps; }
@@ -38,7 +38,7 @@ class SyncEnv {
         }
 
     private:
-        AhdEnv env;
+        DahdEnv env;
         u8 syncSteps = 16;
         u8 stepCount = 0;
 };
