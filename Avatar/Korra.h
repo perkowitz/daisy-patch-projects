@@ -73,10 +73,10 @@ class Korra: public ISynth {
         static const u8 PARAM_FRES_DRIFT = 28;
         static const u8 PARAM_DRIFT_RATE = 29;
         static const u8 PARAM_DRIFT_LOOP = 30;
-        static const u8 PARAM_FOLD = 31;
-        static const u8 PARAM_WRAP = 32;
-        static const u8 PARAM_SQUEEZE = 33;
-        static const u8 PARAM_DR2FOLD = 34;
+        static const u8 PARAM_WRAP = 31;
+        static const u8 PARAM_SQUEEZE = 32;
+        static const u8 PARAM_SENV2WRAP = 33;
+        static const u8 PARAM_DR2WRAP = 34;
 
         // constants
         static const u16 MAX_FREQUENCY = 24000;
