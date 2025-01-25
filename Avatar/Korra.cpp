@@ -231,7 +231,6 @@ void Korra::NoteOn(u8 note, float velocity) {
         voices[assignedVoice].multiOsc.SetFreq(mtof(adjustedNote));
         // voices[assignedVoice].multiOsc.Reset();
         voices[assignedVoice].velocity = v;
-        drift.Trigger();
 
         // if the voice wasn't already playing, add a gate; if this is first gate, trigger envelopes
         if (!voices[assignedVoice].gateIsOn) {
@@ -240,6 +239,7 @@ void Korra::NoteOn(u8 note, float velocity) {
             gates++;
             if (gates == 1) {
                 filtEnv.GateOn();
+                drift.Trigger();
             }
         }
     }
