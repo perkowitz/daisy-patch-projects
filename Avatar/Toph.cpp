@@ -13,7 +13,7 @@ void Toph::Init(float sampleRate) {
     params[PARAM_PULSEWIDTH].Init("Width", 0.5, 0, 1, Parameter::LINEAR, 100);
     params[PARAM_PITCH_SENV].Init("SEn1", 0, 0, 1, Parameter::EXPONENTIAL, 100);
     params[PARAM_PITCH_LFO].Init("Vib", 0, 0, 1, Parameter::EXPONENTIAL, 100);
-    params[PARAM_LFO_RATE].Init("Rate", 00.05, 0.05, 100, Parameter::EXPONENTIAL, 100);
+    params[PARAM_LFO_RATE].Init("Rate", 6.66, 0.05, 100, Parameter::EXPONENTIAL, 100);
     params[PARAM_FREQ].Init("Freq", 10000, MIN_FILTER_FREQUENCY, MAX_FILTER_FREQUENCY, Parameter::EXPONENTIAL, 1);
     params[PARAM_RES].Init("Reso", 0, 0, 1, Parameter::LINEAR, 100);
     params[PARAM_FENV].Init("Env", 0, 0, 1, Parameter::EXPONENTIAL, 100);
@@ -96,7 +96,7 @@ float Toph::Process() {
 
     // oscillators
     // multiOsc.SetFreq(mtof(note) * (1 + (params[PARAM_PITCH_SENV].Value() * syncEnvSignal)));
-    multiOsc.SetFreq(mtof(note) + 100 * params[PARAM_PITCH_LFO].Value() * lfoSignal);
+    multiOsc.SetFreq(mtof(note) + 20 * params[PARAM_PITCH_LFO].Value() * lfoSignal);
     multiOsc.SetPulsewidth(params[PARAM_PULSEWIDTH].Value());
     multiOsc.Process();
     float signal = params[PARAM_SAW].Value() * multiOsc.Saw();

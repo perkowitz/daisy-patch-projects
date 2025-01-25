@@ -67,7 +67,6 @@ void Runner::DrawScreen(bool clearFirst) {
 
 void Runner::ProcessEncoder() {
 
-    // bool redraw = false;
     bool screenOn = false;
 
     // Encoder turn
@@ -120,10 +119,7 @@ void Runner::ProcessEncoder() {
             redraw = true;
         }
     }
-    // if (redraw) {
-    //     DrawScreen(true);
-    //     hw.display.Update();        
-    // }
+    // check redraw in the main loop and redraw there, not here in audio loop
 }
 
 // Process the current knob values and update model params accordingly.
