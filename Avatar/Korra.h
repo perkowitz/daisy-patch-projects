@@ -60,9 +60,9 @@ class Korra: public ISynth {
         static const u8 PARAM_SAW2 = 15;
         static const u8 PARAM_PULSEWIDTH = 16;
         static const u8 PARAM_HPF = 17;
-        static const u8 PARAM_TA = 18;
-        static const u8 PARAM_TH = 19;
-        static const u8 PARAM_TD = 20;
+        static const u8 PARAM_SENV_A = 18;
+        static const u8 PARAM_SENV_DELAY = 19;
+        static const u8 PARAM_SENV_DECAY = 20;
         static const u8 PARAM_SENV_STEPS = 21;
         static const u8 PARAM_F_SENV = 22;
         static const u8 PARAM_OUT_12 = 23;
@@ -73,10 +73,10 @@ class Korra: public ISynth {
         static const u8 PARAM_FRES_DRIFT = 28;
         static const u8 PARAM_DRIFT_RATE = 29;
         static const u8 PARAM_DRIFT_LOOP = 30;
-        static const u8 PARAM_FOLD = 31;
-        static const u8 PARAM_WRAP = 32;
-        static const u8 PARAM_SQUEEZE = 33;
-        static const u8 PARAM_DR2FOLD = 34;
+        static const u8 PARAM_WRAP = 31;
+        static const u8 PARAM_SQUEEZE = 32;
+        static const u8 PARAM_SENV2WRAP = 33;
+        static const u8 PARAM_DR2WRAP = 34;
 
         // constants
         static const u16 MAX_FREQUENCY = 24000;
