@@ -114,8 +114,8 @@ void Screen::ScreensaveEvent(u8 note, bool on) {
     if (screenOn) { return; }
 
     // show notes with horizontal wipe
-    if (on) {
-        note = Utility::LimitInt(note, 0, HEIGHT);
+    if (on && note >=24 && note <= 24 + HEIGHT) {
+        note = HEIGHT - (note - 24);
         u8 x = sweepX % (WIDTH + 1);
         if (x > 5 && x < WIDTH + 1) {
             display->DrawPixel(x - 4, note, true);
