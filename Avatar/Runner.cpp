@@ -221,8 +221,34 @@ void Runner::MidiSend(MidiEvent m) {
             hw.midi.SendMessage(data3, 2);
             break;
         }
+        case SystemRealTime: {
+            u8 data1[1];
+            switch (m.srt_type) {
+                case Start: {
+                    data1[0] = MIDI_BYTE_START;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                case Continue: {
+                    data1[0] = MIDI_BYTE_CONTINUE;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                case Stop: {
+                    data1[0] = MIDI_BYTE_STOP;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                case TimingClock: {
+                    data1[0] = MIDI_BYTE_CLOCK;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                
+            }            
+            break;
+        }
     }
-
 }
 
 void Runner::HandleMidiRealtime(MidiEvent m) {
@@ -277,9 +303,7 @@ void Runner::HandleMidiNote(ISynth *synth, u8 note, u8 velocity) {
 // Typical Switch case for Message Type.
 void Runner::HandleMidiMessage(MidiEvent m) {
 
-    // screen.OledMessage("M:" + std::to_string(m.type), 2);
-    // will pass it through if it can
-    // MidiSend(m);
+    MidiSend(m);
 
     switch(m.type) {
         case NoteOn: {

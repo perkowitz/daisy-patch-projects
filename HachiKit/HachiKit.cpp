@@ -1,11 +1,12 @@
 #include "Runner.h"
-#include "sounds/Bd8.h"
-#include "sounds/Clap.h"
-#include "sounds/ClickSource.h"
-#include "sounds/DigiClap.h"
-#include "sounds/Sd8.h"
+#include "sounds/Ch.h"
+#include "sounds/Clave8.h"
+#include "sounds/Cow8.h"
+#include "sounds/Cy.h"
+#include "sounds/FmDrum.h"
+#include "sounds/HhSource68.h"
+#include "sounds/Oh.h"
 #include "sounds/SdNoise.h"
-#include "sounds/Tom.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -22,64 +23,57 @@ IDrum *sources[1];
 IDrum *midiMap[MIDIMAP_SIZE];
 DrumWrapper drumWrappers[KIT_DRUM_COUNT];
 
-// sounds
-Bd8 bd;
-SdNoise rs;
-Sd8 sd;
-Clap cp;
-DigiClap sd2;
-Tom lt, mt, ht;
+
+Ch ch;
+Oh oh;
+SdNoise ma;
+Cy cy;
+Cow8 cb;
+FmDrum fm1, fm2;
+Clave8 cl;
 
 // Shared sound sources
-ClickSource clickSource;
+HhSource68 source68;
 
 
 void InitKit(float samplerate) {
 
     // Init any sound sources
-    clickSource.Init("", samplerate, 1500, 191, 116);
-    sources[0] = &clickSource;
+    source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
+    sources[0] = &source68;
 
     // Init all drum sounds
-    bd.Init("BD", samplerate, 64, 0.001, 2, 0.001, 0.15, 125);
-    rs.Init("RS", samplerate, 0.001, 0.5, 4);
-    sd.Init("SD", samplerate);
-    cp.Init("CP", samplerate, 0.012, 0.8);
-    sd2.Init("S2", samplerate, 0.012, 0.8, 3000, 0);
-
-    lt.Init("LT", samplerate, 80, &clickSource);
-    mt.Init("MT", samplerate, 91, &clickSource);
-    ht.Init("HT", samplerate, 106, &clickSource);
+    ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
+    oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
+    ma.Init("MA", samplerate, 0, 0.2, 8);
+    cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
+    cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
+    fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);
+    fm2.Init("HC", samplerate, 131, 3.3, 2.2, 0.001, 0.101, -50);
+    cl.Init("CL", samplerate, 2000, 0.375);
 
     // Assign sounds to kit
-    drums[0] = &bd;
-    drums[1] = &rs;
-    drums[2] = &sd;
-    drums[3] = &cp;
-    drums[4] = &sd2;
-    drums[5] = &lt;
-    drums[6] = &mt;
-    drums[7] = &ht;
-
-    for (u8 i = 0; i < drumCount; i++) {
-        if (drums[i] != nullptr) {
-            drumWrappers[i].Init(drums[i]);
-            drums[i] = &drumWrappers[i];
-        }
-    }
+    drums[0] = &ch;
+    drums[1] = &ma;
+    drums[2] = &oh;
+    drums[3] = &fm1;
+    drums[4] = &fm2;
+    drums[5] = &cy;
+    drums[6] = &cl;
+    drums[7] = &cb;
 
     // set notes we're not using to nullptr
     for (u8 i = 0; i < MIDIMAP_SIZE; i++) {
         midiMap[i] = nullptr;
     }
-    midiMap[0] = drums[0];
-    midiMap[1] = drums[1];
-    midiMap[2] = drums[2];
-    midiMap[3] = drums[3];
-    midiMap[4] = drums[4];
-    midiMap[5] = drums[5];
-    midiMap[7] = drums[6];
-    midiMap[9] = drums[7];
+    midiMap[6] = drums[0];
+    midiMap[8] = drums[1];
+    midiMap[10] = drums[2];
+    midiMap[11] = drums[3];
+    midiMap[12] = drums[4];
+    midiMap[13] = drums[5];
+    midiMap[14] = drums[6];
+    midiMap[15] = drums[7];
 
 }
 
