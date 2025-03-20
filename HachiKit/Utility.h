@@ -16,6 +16,12 @@ typedef unsigned long  u32;
 typedef unsigned short u16;
 typedef unsigned char  u8;
 
+#define MIDI_BYTE_START 0xFA
+#define MIDI_BYTE_CONTINUE 0xFB
+#define MIDI_BYTE_STOP 0xFC
+#define MIDI_BYTE_CLOCK 0xF8
+
+
 
 #define MAX_ENV_TIME 20
 

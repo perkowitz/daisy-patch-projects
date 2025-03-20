@@ -27,7 +27,7 @@ int main(void) {
     // katara.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
 
     korra.Init(sampleRate, 8);
-    korra.SetMidiChannel(7); // zero-indexed
+    korra.SetMidiChannel(6); // zero-indexed
     korra.GetParam(Katara::PARAM_OUT_12)->SetScaledValue(0.8);
     korra.GetParam(Katara::PARAM_OUT_3)->SetScaledValue(0);
     korra.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
@@ -39,7 +39,7 @@ int main(void) {
     // asami.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
 
     toph.Init(sampleRate);
-    toph.SetMidiChannel(8); // zero-indexed
+    toph.SetMidiChannel(7); // zero-indexed
     toph.GetParam(Toph::PARAM_OUT_12)->SetScaledValue(0.8);
     toph.GetParam(Toph::PARAM_OUT_3)->SetScaledValue(0.8);
     toph.GetParam(Toph::PARAM_OUT_4)->SetScaledValue(0);

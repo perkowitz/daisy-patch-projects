@@ -6,6 +6,7 @@
 #include "util/CpuLoadMeter.h"
 #include <string>
 #include "lib/audio/Mixer.h"
+#include "lib/Utility.h"
 #include "Screen.h"
 #include "ISynth.h"
 

@@ -454,6 +454,33 @@ void Runner::MidiSend(MidiEvent m) {
             hw.midi.SendMessage(data3, 2);
             break;
         }
+        case SystemRealTime: {
+            u8 data1[1];
+            switch (m.srt_type) {
+                case Start: {
+                    data1[0] = MIDI_BYTE_START;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                case Continue: {
+                    data1[0] = MIDI_BYTE_CONTINUE;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                case Stop: {
+                    data1[0] = MIDI_BYTE_STOP;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                case TimingClock: {
+                    data1[0] = MIDI_BYTE_CLOCK;
+                    hw.midi.SendMessage(data1, 1);
+                    break;
+                }
+                
+            }            
+            break;
+        }
     }
 
 }
