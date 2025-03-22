@@ -25,6 +25,7 @@ class ISynth {
         virtual float GetOutput(u8 channel) = 0;
         virtual void NoteOn(u8 note, float velocity) = 0;
         virtual void NoteOff(u8 note) = 0;
+        // TODO: add AllNotesOff()
         virtual void Clock(u8 measure, u8 step, u8 tick) = 0;
 
         virtual u8 PageCount() = 0;
@@ -34,7 +35,7 @@ class ISynth {
         virtual void ProcessChanges() = 0;
 
         virtual void SetMidiChannel(u8 channel) = 0;    // zero-indexed
-        virtual u8 GetMidiChanel() = 0;                 // zero-indexed
+        virtual u8 GetMidiChannel() = 0;                // zero-indexed
 
 };
 

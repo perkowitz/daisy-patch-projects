@@ -309,20 +309,20 @@ void Runner::HandleMidiMessage(MidiEvent m) {
         case NoteOn: {
             NoteOnEvent event = m.AsNoteOn();
             // screen.OledMessage("Note:" + std::to_string(event.channel) + ":" + std::to_string(event.note), 3);
-            if (event.channel == synth1->GetMidiChanel()) {
+            if (event.channel == synth1->GetMidiChannel()) {
                 HandleMidiNote(synth1, event.note, event.velocity);
             }
-            if (synth2 != nullptr && event.channel == synth2->GetMidiChanel()) {
+            if (synth2 != nullptr && event.channel == synth2->GetMidiChannel()) {
                 HandleMidiNote(synth2, event.note, event.velocity);
             }
             break;
         }
         case NoteOff: {
             NoteOffEvent event = m.AsNoteOff();
-            if (event.channel == synth1->GetMidiChanel()) {
+            if (event.channel == synth1->GetMidiChannel()) {
                 synth1->NoteOff(event.note);
             }
-            if (synth2 != nullptr && event.channel == synth2->GetMidiChanel()) {
+            if (synth2 != nullptr && event.channel == synth2->GetMidiChannel()) {
                 synth2->NoteOff(event.note);
             }
             screen.ScreensaveEvent(event.note, false);

@@ -45,6 +45,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_OUT_12].Init("1-2", 0.8, 0, 2, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_3].Init("3", 0, 0, 2, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 2, Parameter::EXPONENTIAL, 100);
+    params[PARAM_MIDI_CHANNEL].Init("Midi", 7, 1, 16, Parameter::LINEAR, 1);
 
     // assign nullptr to leave a slot blank
     u8 p = 0;
@@ -57,7 +58,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     pages[p++].Init(Name(), "SyncEnv", &params[PARAM_SENV_DELAY], &params[PARAM_SENV_A], &params[PARAM_SENV_DECAY], &params[PARAM_SENV_STEPS]);
     pages[p++].Init(Name(), "Drift", &params[PARAM_DRIFT_RATE], &params[PARAM_DRIFT_LOOP], nullptr, nullptr);
     pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
-    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
+    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], &params[PARAM_MIDI_CHANNEL]);
 
     if (voiceLimit > 0 && voiceLimit < VOICE_COUNT) {
         this->voiceLimit = voiceLimit;
@@ -86,6 +87,11 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
 }
 
 void Korra::ProcessChanges() {
+
+    if (lastMidiChannel != (int)params[PARAM_MIDI_CHANNEL].Value()) {
+        AllVoicesOff();
+        lastMidiChannel = (int)params[PARAM_MIDI_CHANNEL].Value();
+    }
 
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         // oscillator
@@ -248,11 +254,27 @@ void Korra::NoteOn(u8 note, float velocity) {
     }
 }
 
+void Korra::VoiceOff(u8 voice) {
+    if (voice < voiceLimit) {
+        voices[voice].gateIsOn = false;
+        voices[voice].ampEnv.GateOff();
+    }
+}
+
+void Korra::AllVoicesOff() {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
+        VoiceOff(voice);
+    }
+}
+
+void Korra::AllNotesOff() {
+    AllVoicesOff();
+}
+
 void Korra::NoteOff(u8 note) {
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         if (note == voices[voice].note) {
-            voices[voice].gateIsOn = false;
-            voices[voice].ampEnv.GateOff();
+            VoiceOff(voice);
         }
     }
     gates--;
