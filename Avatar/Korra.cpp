@@ -184,7 +184,6 @@ float Korra::Process() {
 }
 
 float Korra::GetOutput(u8 channel) {
-    return leftSignal;
     switch (channel) {
         case 0: return leftSignal * params[PARAM_OUT_12].Value();
         case 1: return rightSignal * params[PARAM_OUT_12].Value();
