@@ -45,9 +45,9 @@ void Toph::Init(float sampleRate) {
     pages[p++].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], &params[PARAM_PITCH_LFO], &params[PARAM_LFO_RATE]);
     pages[p++].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], &params[PARAM_FILT_SENV2]);
     pages[p++].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
+    pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[p++].Init(Name(), "SyncEnv1", &params[PARAM_SENV_A], &params[PARAM_SENV_H], &params[PARAM_SENV_D], &params[PARAM_SENV_STEPS]);
     pages[p++].Init(Name(), "SyncEnv2", &params[PARAM_SENV2_A], &params[PARAM_SENV2_H], &params[PARAM_SENV2_D], &params[PARAM_SENV2_STEPS]);
-    pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
 
     // audio settings -- only set the values that are not set in Process()
