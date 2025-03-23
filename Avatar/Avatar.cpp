@@ -44,8 +44,8 @@ int main(void) {
     toph.GetParam(Toph::PARAM_OUT_3)->SetScaledValue(0.8);
     toph.GetParam(Toph::PARAM_OUT_4)->SetScaledValue(0);
 
-    runner.Run(&korra, nullptr);
-    // runner.Run(&korra, &toph);
+    // runner.Run(&korra, nullptr);
+    runner.Run(&korra, &toph);
     // runner.Run(&katara, nullptr);
     // runner.Run(&eska, nullptr);
     // runner.Run(&asami, nullptr);

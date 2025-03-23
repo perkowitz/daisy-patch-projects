@@ -37,6 +37,7 @@ void Toph::Init(float sampleRate) {
     params[PARAM_OUT_12].Init("1-2", 0, 0, 2, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_3].Init("3", 0.8, 0, 2, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 2, Parameter::EXPONENTIAL, 100);
+    params[PARAM_MIDI_CHANNEL].Init("Midi", 8, 1, 16, Parameter::LINEAR, 1);
 
     // assign nullptr to leave a slot blank
     u8 p = 0;
@@ -48,7 +49,7 @@ void Toph::Init(float sampleRate) {
     pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[p++].Init(Name(), "SyncEnv1", &params[PARAM_SENV_A], &params[PARAM_SENV_H], &params[PARAM_SENV_D], &params[PARAM_SENV_STEPS]);
     pages[p++].Init(Name(), "SyncEnv2", &params[PARAM_SENV2_A], &params[PARAM_SENV2_H], &params[PARAM_SENV2_D], &params[PARAM_SENV2_STEPS]);
-    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
+    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], &params[PARAM_MIDI_CHANNEL]);
 
     // audio settings -- only set the values that are not set in Process()
     // oscillators
@@ -78,6 +79,11 @@ void Toph::Init(float sampleRate) {
 }
 
 float Toph::Process() {
+
+    if (lastMidiChannel != (int)params[PARAM_MIDI_CHANNEL].Value()) {
+        NoteOff(0);
+        lastMidiChannel = (int)params[PARAM_MIDI_CHANNEL].Value();
+    }
 
     syncEnv1.SetStageTime(DahdEnv::STAGE_ATTACK, params[PARAM_SENV_A].Value());
     syncEnv1.SetStageTime(DahdEnv::STAGE_HOLD, params[PARAM_SENV_H].Value());
