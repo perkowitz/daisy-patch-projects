@@ -45,6 +45,7 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     params[PARAM_OUT_12].Init("1-2", 0.8, 0, 2, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_3].Init("3", 0, 0, 2, Parameter::EXPONENTIAL, 100);
     params[PARAM_OUT_4].Init("4", 0, 0, 2, Parameter::EXPONENTIAL, 100);
+    params[PARAM_MIDI_CHANNEL].Init("Midi", 7, 1, 16, Parameter::LINEAR, 1);
 
     // assign nullptr to leave a slot blank
     u8 p = 0;
@@ -54,10 +55,10 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
     pages[p++].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_HPF], &params[PARAM_KLOK]);
     pages[p++].Init(Name(), "Mod>Filt", &params[PARAM_F_FENV], &params[PARAM_F_SENV], &params[PARAM_F_DRIFT], &params[PARAM_FRES_DRIFT]);
     pages[p++].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
+    pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
     pages[p++].Init(Name(), "SyncEnv", &params[PARAM_SENV_DELAY], &params[PARAM_SENV_A], &params[PARAM_SENV_DECAY], &params[PARAM_SENV_STEPS]);
     pages[p++].Init(Name(), "Drift", &params[PARAM_DRIFT_RATE], &params[PARAM_DRIFT_LOOP], nullptr, nullptr);
-    pages[p++].Init(Name(), "AEnv", &params[PARAM_A], &params[PARAM_D], &params[PARAM_S], &params[PARAM_R]);
-    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], nullptr);
+    pages[p++].Init(Name(), "Out", &params[PARAM_OUT_12], &params[PARAM_OUT_3], &params[PARAM_OUT_4], &params[PARAM_MIDI_CHANNEL]);
 
     if (voiceLimit > 0 && voiceLimit < VOICE_COUNT) {
         this->voiceLimit = voiceLimit;
@@ -86,6 +87,11 @@ void Korra::Init(float sampleRate, u8 voiceLimit) {
 }
 
 void Korra::ProcessChanges() {
+
+    if (lastMidiChannel != (int)params[PARAM_MIDI_CHANNEL].Value()) {
+        AllVoicesOff();
+        lastMidiChannel = (int)params[PARAM_MIDI_CHANNEL].Value();
+    }
 
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         // oscillator
@@ -178,7 +184,6 @@ float Korra::Process() {
 }
 
 float Korra::GetOutput(u8 channel) {
-    return leftSignal;
     switch (channel) {
         case 0: return leftSignal * params[PARAM_OUT_12].Value();
         case 1: return rightSignal * params[PARAM_OUT_12].Value();
@@ -240,7 +245,7 @@ void Korra::NoteOn(u8 note, float velocity) {
             voices[assignedVoice].gateIsOn = true;
             voices[assignedVoice].ampEnv.GateOn();
             gates++;
-            if (gates == 1) {
+            if (gates >= 1) {
                 filtEnv.GateOn();
                 drift.Trigger();
             }
@@ -248,11 +253,30 @@ void Korra::NoteOn(u8 note, float velocity) {
     }
 }
 
+void Korra::VoiceOff(u8 voice) {
+    if (voice < voiceLimit) {
+        voices[voice].gateIsOn = false;
+        voices[voice].ampEnv.GateOff();
+    }
+    // TODO: do we need to check if the voice was on and if so subtract a gate?
+}
+
+void Korra::AllVoicesOff() {
+    for (u8 voice = 0; voice < voiceLimit; voice++) {
+        VoiceOff(voice);
+    }
+    gates = 0;
+    filtEnv.GateOff();
+}
+
+void Korra::AllNotesOff() {
+    AllVoicesOff();
+}
+
 void Korra::NoteOff(u8 note) {
     for (u8 voice = 0; voice < voiceLimit; voice++) {
         if (note == voices[voice].note) {
-            voices[voice].gateIsOn = false;
-            voices[voice].ampEnv.GateOff();
+            VoiceOff(voice);
         }
     }
     gates--;

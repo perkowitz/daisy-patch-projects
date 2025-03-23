@@ -41,7 +41,7 @@ class Korra: public ISynth {
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 35;  // total count of all params following
+        static const u8 PARAM_COUNT = 36;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -77,6 +77,7 @@ class Korra: public ISynth {
         static const u8 PARAM_SQUEEZE = 32;
         static const u8 PARAM_SENV2WRAP = 33;
         static const u8 PARAM_DR2WRAP = 34;
+        static const u8 PARAM_MIDI_CHANNEL = 35;
 
         // constants
         static const u16 MAX_FREQUENCY = 24000;
@@ -93,6 +94,7 @@ class Korra: public ISynth {
         float GetOutput(u8 channel);
         void NoteOn(u8 note, float velocity);
         void NoteOff(u8 note);
+        void AllNotesOff();
         void Clock(u8 measure, u8 step, u8 tick);
 
         ParamPage *GetParamPage(u8 page);
@@ -100,8 +102,8 @@ class Korra: public ISynth {
         void ResetParams(u8 page);
         void ProcessChanges();
 
-        void SetMidiChannel(u8 channel) { midiChannel = channel; }
-        virtual u8 GetMidiChanel() { return midiChannel; }
+        void SetMidiChannel(u8 channel) { params[PARAM_MIDI_CHANNEL].SetScaledValue(channel + 1); }
+        virtual u8 GetMidiChannel() { return (int)params[PARAM_MIDI_CHANNEL].Value() - 1; }
 
         float GetDrift(u8 step) { return drift.Value(step); }
 
@@ -117,7 +119,7 @@ class Korra: public ISynth {
 
         Voice voices[VOICE_COUNT];
         u8 nextVoice = 0;
-        u8 midiChannel = 1;
+        u8 lastMidiChannel = 1;
         u8 voiceLimit = VOICE_COUNT;
         u8 klokCount = 0;
         u8 currentKlok = 0;
@@ -127,6 +129,10 @@ class Korra: public ISynth {
         LadderFilter vcf;
         AdsrEnv filtEnv;
         Drift drift;
+
+        void VoiceOff(u8 voice);
+        void AllVoicesOff();
+
 
 };
 

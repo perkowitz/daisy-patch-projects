@@ -21,7 +21,7 @@ class Toph: public ISynth {
         u8 PageCount() { return PAGE_COUNT; }
 
         // params
-        static const u8 PARAM_COUNT = 32;  // total count of all params following
+        static const u8 PARAM_COUNT = 33;  // total count of all params following
         static const u8 PARAM_OCTAVE = 0;
         static const u8 PARAM_FREQ = 1;
         static const u8 PARAM_RES = 2;
@@ -54,6 +54,7 @@ class Toph: public ISynth {
         static const u8 PARAM_FILT_SENV2 = 29;
         static const u8 PARAM_LFO_RATE = 30;
         static const u8 PARAM_PITCH_LFO = 31;
+        static const u8 PARAM_MIDI_CHANNEL = 32;
 
         // constants
         static const u16 MAX_FREQ = 24000;
@@ -76,8 +77,8 @@ class Toph: public ISynth {
         void ResetParams(u8 page);
         void ProcessChanges() { }
 
-        void SetMidiChannel(u8 channel) { midiChannel = channel; }
-        virtual u8 GetMidiChanel() { return midiChannel; }
+        void SetMidiChannel(u8 channel) { params[PARAM_MIDI_CHANNEL].SetScaledValue(channel + 1); }
+        virtual u8 GetMidiChannel() { return (int)params[PARAM_MIDI_CHANNEL].Value() - 1; }
 
     private:
         bool active = false;
@@ -92,7 +93,7 @@ class Toph: public ISynth {
         Param params[PARAM_COUNT];
         ParamSet paramSets[PAGE_COUNT];
         ParamPage pages[PAGE_COUNT];
-        u8 midiChannel = 1;
+        u8 lastMidiChannel = 1;
 
         MultiOsc multiOsc;
         // Svf svf;

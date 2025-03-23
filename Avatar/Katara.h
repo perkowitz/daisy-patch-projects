@@ -85,7 +85,7 @@ class Katara: public ISynth {
         void ProcessChanges();
 
         void SetMidiChannel(u8 channel) { midiChannel = channel; }
-        virtual u8 GetMidiChanel() { return midiChannel; }
+        virtual u8 GetMidiChannel() { return midiChannel; }
 
     private:
         bool active = false;
