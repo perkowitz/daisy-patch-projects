@@ -131,4 +131,9 @@ void FmDrum::SetParam(uint8_t param, float scaled) {
                 // TODO: set the curve
                 break;
         }
-    }}
+    }
+}
+
+void FmDrum::LoadPreset(u8 preset) {
+
+}

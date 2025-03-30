@@ -102,3 +102,7 @@ float Clave8::SetParam(uint8_t param, float value, bool isRaw) {
 
     return 0.0f;
 }
+
+void Clave8::LoadPreset(u8 preset) {
+
+}

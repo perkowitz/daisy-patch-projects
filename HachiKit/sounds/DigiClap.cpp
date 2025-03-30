@@ -4,6 +4,19 @@
 using namespace daisy;
 using namespace daisysp;
 
+float DigiClap::presets[][DigiClap::PARAM_COUNT] = {
+    // spread, decay, freq, mod
+    {0.011, 3.386, 5547, 2471},
+    {0.009, 3.736, 2328, 1538},
+    {0.002, 4.724, 1597, -455},
+    {0.002, 1.037, 3922, 3765},
+    {0.005, 4.850, 317, 1004},
+    {0.012, 2.125, 5290, -141},
+    {0.017, 4.643, 7616, -5064},
+    {0.011, 0.746, 1542, 800}
+};
+
+
 void DigiClap::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.012f, 1.0f, 3000.0f, 0);
 }
@@ -124,4 +137,12 @@ float DigiClap::SetParam(uint8_t param, float value, bool isRaw) {
     }
 
     return 0.0f;
+}
+
+void DigiClap::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param], false);   // isRaw=false will directly set to the provided value
+        }
+    } 
 }

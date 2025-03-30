@@ -5,6 +5,19 @@ using namespace daisy;
 using namespace daisysp;
 
 
+float Tom::presets[][Tom::PARAM_COUNT] = {
+    // freq, adcy, pmod, lpf-mod, hpf, lpf 
+    {80, 1.100, 60, 116, 1500, 191},
+    {197, 1.297, 160, 168, 154, 230},
+    {298, 0.593, 81, 259, 1646, 191},
+    {495, 0.579, 62, 349, 1417, 359},
+    {77, 1.926, 245, 364, 195, 191},
+    {506, 1.812, 131, 364, 1079, 191},
+    {171, 0.682, 2, 263, 482, 191},
+    {954, 0.449, 2, 2, 773, 900}
+};
+
+
 void Tom::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 80, NULL);
 }
@@ -106,7 +119,7 @@ float Tom::UpdateParam(uint8_t param, float raw) {
     if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
-                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 20, 1000, Parameter::EXPONENTIAL));
+                scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 20, 2000, Parameter::EXPONENTIAL));
                 break;
             case PARAM_AMP_DECAY: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
@@ -160,4 +173,31 @@ void Tom::SetParam(uint8_t param, float scaled) {
                 break;
         }
     }
+}
+
+void Tom::LoadPreset(u8 preset) {
+    float ratio = 1.0;
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            if (param == PARAM_FREQUENCY) {
+                if (Slot() == "MT") {
+                    ratio = 6.0 / 5.0;
+                    if (param % 2 == 1) {
+                        ratio = 5.0 / 4.0;
+                    }
+                    SetParam(param, presets[preset][param] * ratio);
+                } else if (Slot() == "HT") {
+                    ratio = 3.0 / 2.0;
+                    if (param % 2 == 1) {
+                        ratio = 4.0 / 3.0;
+                    }
+                    SetParam(param, presets[preset][param] * ratio);
+                } else { // if LT
+                    SetParam(param, presets[preset][param]);
+                }
+            } else {
+                SetParam(param, presets[preset][param]);
+            }
+        }
+    } 
 }

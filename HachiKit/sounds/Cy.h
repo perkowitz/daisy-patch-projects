@@ -48,6 +48,8 @@ class Cy: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Hpf", "Lpf" };
         std::string slot;
@@ -62,6 +64,8 @@ class Cy: public IDrum {
         // float buffer[BUFFER_SIZE];
         // bool bufferValid = false;
         // u16 bufferIndex = 0;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

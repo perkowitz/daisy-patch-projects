@@ -163,3 +163,7 @@ void HhSource68::SetParam(uint8_t param, float scaled) {
         }
     }
 }
+
+void HhSource68::LoadPreset(u8 preset) {
+
+}

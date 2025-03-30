@@ -47,6 +47,8 @@ class Cow8: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Hpf", "Lpf" };
         std::string slot;
@@ -57,6 +59,8 @@ class Cow8: public IDrum {
         HhSource68 *source = NULL;
         AdEnv env;
         Svf hpf, lpf;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

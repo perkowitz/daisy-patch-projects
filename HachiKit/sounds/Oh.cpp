@@ -145,3 +145,7 @@ void Oh::SetParam(uint8_t param, float scaled) {
         }
     }
 }
+
+void Oh::LoadPreset(u8 preset) {
+
+}

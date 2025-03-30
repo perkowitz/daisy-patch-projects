@@ -114,3 +114,7 @@ void ClickSource::SetParam(uint8_t param, float scaled) {
         }
     }
 }
+
+void ClickSource::LoadPreset(u8 preset) {
+
+}

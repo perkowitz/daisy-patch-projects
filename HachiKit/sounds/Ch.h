@@ -43,6 +43,8 @@ class Ch: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Mrph", "Hpf", "Lpf" };
         std::string slot;
@@ -53,6 +55,8 @@ class Ch: public IDrum {
         HhSource68 *source = NULL;
         AdEnv env;
 
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+        
 };
 
 

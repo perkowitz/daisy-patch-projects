@@ -38,11 +38,15 @@ class Bd8: public IDrum {
         std::string GetParamString(uint8_t param);
         float UpdateParam(uint8_t param, float value);
         void SetParam(uint8_t param, float value);
+        float SetParam(uint8_t param, float value, bool isRaw);
         void ResetParams();
 
         std::string Name() { return "Bd8"; }
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
+
+        void LoadPreset(u8 preset);
+
 
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "Mod", "aDcy", "pDcy", "aAtk", "pAtk", "aCrv" };
@@ -54,7 +58,7 @@ class Bd8: public IDrum {
         AhdEnv pitchEnv;
         float velocity;
 
-        float SetParam(uint8_t param, float value, bool isRaw);
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

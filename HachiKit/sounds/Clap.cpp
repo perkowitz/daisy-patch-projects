@@ -4,7 +4,19 @@
 using namespace daisy;
 using namespace daisysp;
 
-void Clap::Init(std::string slot, float sample_rate) {
+float Clap::presets[][Clap::PARAM_COUNT] = {
+    // spread, decay
+    {0.012, 0.800},
+    {0.008, 0.440},
+    {0.023, 0.490},
+    {0.014, 1.689},
+    {0.010, 0.694},
+    {0.012, 0.102},
+    {0.016, 0.954},
+    {0.010, 1.515}
+};
+
+    void Clap::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.012, 1.0);
 }
 
@@ -102,4 +114,12 @@ float Clap::SetParam(uint8_t param, float value, bool isRaw) {
     }
 
     return 0.0f;
+}
+
+void Clap::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param], false);   // isRaw=false will directly set to the provided value
+        }
+    }
 }

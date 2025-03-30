@@ -143,3 +143,8 @@ void Cow8::SetParam(uint8_t param, float scaled) {
                 break;
         }
     }}
+
+void Cow8::LoadPreset(u8 preset) {
+
+}
+    

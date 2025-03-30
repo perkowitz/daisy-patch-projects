@@ -78,3 +78,7 @@ void Blank::SetParam(uint8_t param, float value) {
         parameters[param].SetScaledValue(value);
     }
 }
+
+void Blank::LoadPreset(u8 preset) {
+
+}

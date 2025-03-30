@@ -153,4 +153,10 @@ void Cy::SetParam(uint8_t param, float scaled) {
                 lpf.SetFreq(scaled);
                 break;
         }
-    }}
+    }
+}
+
+void Cy::LoadPreset(u8 preset) {
+
+}
+    

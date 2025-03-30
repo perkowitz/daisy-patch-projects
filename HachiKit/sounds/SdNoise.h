@@ -39,6 +39,8 @@ class SdNoise: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Crv" };
         std::string slot;
@@ -48,8 +50,8 @@ class SdNoise: public IDrum {
         WhiteNoise noise;
         AhdEnv env;
 
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+
 };
-
-
 
 #endif

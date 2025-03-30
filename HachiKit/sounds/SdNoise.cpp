@@ -4,6 +4,19 @@
 using namespace daisy;
 using namespace daisysp;
 
+float SdNoise::presets[][SdNoise::PARAM_COUNT] = {
+    // atk, decay, curve
+    {0, 0.550, 5},
+    {0.061, 0.005, 2},
+    {0, 0.141, 4},
+    {0, 0.897, 7},
+    {0, 0.048, 0},
+    {0, 0.232, 0},
+    {0.4, 0.005, 1},
+    {0, 0.469, 3}
+};
+
+
 void SdNoise::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.01, 0.237, -30.0f);
 }
@@ -95,4 +108,12 @@ void SdNoise::SetParam(uint8_t param, float scaled) {
                 break;
         }
     }    
+}
+
+void SdNoise::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param]);
+        }
+    }
 }

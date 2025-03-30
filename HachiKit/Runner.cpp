@@ -637,10 +637,17 @@ void Runner::Run(Kit *kit) {
             HandleMidiMessage(hw.midi.PopEvent());
         }
         if (saveTo >= 0 && saveTo < PATCH_COUNT) {
-            Save(saveTo, kit, savedKits[saveTo]);
+            // Save(saveTo, kit, savedKits[saveTo]);
             saveTo = -1;
         } else if (loadFrom >= 0 && loadFrom < PATCH_COUNT) {
-            Load(loadFrom, kit, savedKits[loadFrom]);
+            // Load(loadFrom, kit, savedKits[loadFrom]);
+            if (loadFrom < IDRUM_PRESET_COUNT) {
+                for (u8 drum = 0; drum < kit->drumCount; drum++) {
+                    if (kit->drums[drum] != nullptr) {
+                        kit->drums[drum]->LoadPreset(loadFrom);
+                    }
+                }
+            }
             loadFrom = -1;
         }
 

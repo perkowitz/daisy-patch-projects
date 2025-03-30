@@ -39,6 +39,8 @@ class Clap: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Sprd", "Dcy" };
         std::string slot;
@@ -49,6 +51,8 @@ class Clap: public IDrum {
         // audio objects
         WhiteNoise noise;
         AdEnv env;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
         float SetParam(uint8_t param, float value, bool isRaw);
 

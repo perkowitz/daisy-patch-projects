@@ -60,6 +60,8 @@ class HhSource68: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         static const float freqs606[];
         static const float freqs808[];
@@ -77,6 +79,8 @@ class HhSource68: public IDrum {
         Oscillator* oscs[OSC_COUNT];
         Oscillator osc0, osc1, osc2, osc3, osc4, osc5;
         Svf hpf, lpf;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
         void SetMorph(float morph);
 

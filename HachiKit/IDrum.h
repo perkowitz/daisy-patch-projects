@@ -9,6 +9,7 @@ using namespace daisysp;
 #include "Utility.h"
 #include <string>
 
+#define IDRUM_PRESET_COUNT 8
 
 class IDrum {
 
@@ -75,6 +76,7 @@ class IDrum {
         */
         virtual std::string GetParamString(uint8_t param) = 0;
 
+        virtual void LoadPreset(u8 preset) = 0;
 };
 
 
