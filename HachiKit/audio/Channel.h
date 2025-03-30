@@ -27,8 +27,8 @@ class Channel {
         u8 ParamCount() { return PARAM_COUNT; }
 
         Channel() {
-            params[0].Init("Lvl", 1, 0, 3, Parameter::EXPONENTIAL, 100);
-            params[1].Init("FxA", 1, 0, 2, Parameter::EXPONENTIAL, 100);
+            params[0].Init("Lvl", 2, 0, 3, Parameter::EXPONENTIAL, 100);
+            params[1].Init("FxA", 0, 0, 2, Parameter::EXPONENTIAL, 100);
             params[2].Init("", 0, 0, 2, Parameter::EXPONENTIAL, 100);   // send B
             params[3].Init("", 0, -1, 1, Parameter::LINEAR, 10);        // Pan
             paramSet.Init(PARAM_COUNT, params);

@@ -573,17 +573,25 @@ void Runner::Run(Kit *kit) {
     currentMenuIndex = 0;
     mixerSections = kit->drumCount / 4;
 
-    // send the toms out the send1
-    mixer.SetChannelParam(2, Channel::PARAM_SEND1, 0.5);
-    mixer.SetChannelParam(5, Channel::PARAM_SEND1, 0.5);
-    mixer.SetChannelParam(7, Channel::PARAM_SEND1, 0.5);
-    mixer.SetChannelParam(9, Channel::PARAM_SEND1, 0.5);
-
-    // send percussion out send2
-    mixer.SetChannelParam(11, Channel::PARAM_SEND2, 1);
-    mixer.SetChannelParam(12, Channel::PARAM_SEND2, 1);
-    mixer.SetChannelParam(14, Channel::PARAM_SEND2, 1);
-    mixer.SetChannelParam(15, Channel::PARAM_SEND2, 1);
+    // set level and send for particular drums
+    for (u8 drum = 0; drum < kit->drumCount; drum++) {
+        float level = 2.0;
+        float send1 = 0.0;
+        if (kit->drums[drum]->Slot() == "BD" ||
+            kit->drums[drum]->Slot() == "SD" ||
+            kit->drums[drum]->Slot() == "CH" ||
+            kit->drums[drum]->Slot() == "OH") {
+                level = 3.0;
+        }
+        if (kit->drums[drum]->Slot() == "LT" ||
+            kit->drums[drum]->Slot() == "MT" ||
+            kit->drums[drum]->Slot() == "HT" ||
+            kit->drums[drum]->Slot() == "CB") {
+                send1 = 0.8;
+        }
+        mixer.SetChannelParam(drum, Channel::PARAM_LEVEL, level);
+        mixer.SetChannelParam(drum, Channel::PARAM_SEND1, send1);
+    }
 
     // fill the menu
     for (u8 drum = 0; drum < kit->drumCount; drum++) {
