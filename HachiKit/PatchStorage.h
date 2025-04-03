@@ -26,13 +26,14 @@ class PatchStorage {
         u8 ParamCount() { return PARAM_COUNT; }
 
         static const uint8_t OPERATION_NOP = 0;
-        static const uint8_t OPERATION_LOAD = 1;
-        static const uint8_t OPERATION_SAVE = 2;
+        static const uint8_t OPERATION_PRESET = 1;
+        static const uint8_t OPERATION_LOAD = 2;
+        static const uint8_t OPERATION_SAVE = 3;
 
         PatchStorage() {
-            params[0].Init("Curr", 0, 0, 7, Parameter::LINEAR, 1); // should use PATCH_COUNT
-            params[1].Init("Oper", 0, 0, 2, Parameter::LINEAR, 1);
-            params[2].Init("Targ", 0, 0, 7, Parameter::LINEAR, 1);
+            params[0].Init("Curr", 0, 0, IDRUM_PRESET_COUNT-1, Parameter::LINEAR, 1);
+            params[1].Init("Oper", 1, 0, 3, Parameter::LINEAR, 1);
+            params[2].Init("Targ", 0, 0, IDRUM_PRESET_COUNT-1, Parameter::LINEAR, 1);
             paramSet.Init(PARAM_COUNT, params);
         }
 
@@ -41,7 +42,9 @@ class PatchStorage {
             switch (op) {
                 case OPERATION_NOP:
                     return "---";
-                case OPERATION_LOAD:
+                    case OPERATION_PRESET:
+                    return "Prset";
+                    case OPERATION_LOAD:
                     return "Load";
                 case OPERATION_SAVE:
                     return "Save";

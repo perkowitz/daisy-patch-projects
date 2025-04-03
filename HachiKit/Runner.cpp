@@ -229,10 +229,14 @@ void Runner::ProcessEncoder() {
                 u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
                 u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
                 switch (operation) {
+                    case PatchStorage::OPERATION_PRESET:
+                        patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                        loadFrom = target;
+                        break;
                     case PatchStorage::OPERATION_LOAD:
                         currentPatch = target;
                         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-                        loadFrom = target;
+                        loadFrom = target;   // only using presets for now
                         break;
                     case PatchStorage::OPERATION_SAVE:
                         currentPatch = target;
@@ -651,7 +655,7 @@ void Runner::Run(Kit *kit) {
             saveTo = -1;
         } else if (loadFrom >= 0 && loadFrom < PATCH_COUNT) {
             // Load(loadFrom, kit, savedKits[loadFrom]);
-            if (loadFrom < IDRUM_PRESET_COUNT) {
+            if (loadFrom < IDRUM_PRESET_COUNT) {       // only using presets for now
                 for (u8 drum = 0; drum < kit->drumCount; drum++) {
                     if (kit->drums[drum] != nullptr) {
                         kit->drums[drum]->LoadPreset(loadFrom);
