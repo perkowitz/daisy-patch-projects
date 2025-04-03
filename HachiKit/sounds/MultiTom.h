@@ -38,6 +38,8 @@ class MultiTom: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "Dcy" };
         std::string slot;

@@ -229,10 +229,14 @@ void Runner::ProcessEncoder() {
                 u8 target = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_TARGET_PATCH);
                 u8 operation = (u8)patchStorage.GetParamSet()->GetParamValue(PatchStorage::PARAM_OPERATION);
                 switch (operation) {
+                    case PatchStorage::OPERATION_PRESET:
+                        patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
+                        loadFrom = target;
+                        break;
                     case PatchStorage::OPERATION_LOAD:
                         currentPatch = target;
                         patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, target);
-                        loadFrom = target;
+                        loadFrom = target;   // only using presets for now
                         break;
                     case PatchStorage::OPERATION_SAVE:
                         currentPatch = target;
@@ -573,17 +577,27 @@ void Runner::Run(Kit *kit) {
     currentMenuIndex = 0;
     mixerSections = kit->drumCount / 4;
 
-    // send the toms out the send1
-    mixer.SetChannelParam(2, Channel::PARAM_SEND1, 0.5);
-    mixer.SetChannelParam(5, Channel::PARAM_SEND1, 0.5);
-    mixer.SetChannelParam(7, Channel::PARAM_SEND1, 0.5);
-    mixer.SetChannelParam(9, Channel::PARAM_SEND1, 0.5);
-
-    // send percussion out send2
-    mixer.SetChannelParam(11, Channel::PARAM_SEND2, 1);
-    mixer.SetChannelParam(12, Channel::PARAM_SEND2, 1);
-    mixer.SetChannelParam(14, Channel::PARAM_SEND2, 1);
-    mixer.SetChannelParam(15, Channel::PARAM_SEND2, 1);
+    // set level and send for particular drums
+    for (u8 drum = 0; drum < kit->drumCount; drum++) {
+        float level = 2.4;
+        float send1 = 0.0;
+        if (kit->drums[drum]->Slot() == "BD" ||
+            kit->drums[drum]->Slot() == "SD" ||
+            kit->drums[drum]->Slot() == "CH" ||
+            kit->drums[drum]->Slot() == "OH") {
+                level = 3.0;
+        }
+        if (kit->drums[drum]->Slot() == "LT" ||
+            kit->drums[drum]->Slot() == "MT" ||
+            kit->drums[drum]->Slot() == "HT" ||
+            kit->drums[drum]->Slot() == "LC" ||
+            kit->drums[drum]->Slot() == "HC" ||
+            kit->drums[drum]->Slot() == "CB") {
+                send1 = 0.8;
+        }
+        mixer.SetChannelParam(drum, Channel::PARAM_LEVEL, level);
+        mixer.SetChannelParam(drum, Channel::PARAM_SEND1, send1);
+    }
 
     // fill the menu
     for (u8 drum = 0; drum < kit->drumCount; drum++) {
@@ -637,10 +651,17 @@ void Runner::Run(Kit *kit) {
             HandleMidiMessage(hw.midi.PopEvent());
         }
         if (saveTo >= 0 && saveTo < PATCH_COUNT) {
-            Save(saveTo, kit, savedKits[saveTo]);
+            // Save(saveTo, kit, savedKits[saveTo]);
             saveTo = -1;
         } else if (loadFrom >= 0 && loadFrom < PATCH_COUNT) {
-            Load(loadFrom, kit, savedKits[loadFrom]);
+            // Load(loadFrom, kit, savedKits[loadFrom]);
+            if (loadFrom < IDRUM_PRESET_COUNT) {       // only using presets for now
+                for (u8 drum = 0; drum < kit->drumCount; drum++) {
+                    if (kit->drums[drum] != nullptr) {
+                        kit->drums[drum]->LoadPreset(loadFrom);
+                    }
+                }
+            }
             loadFrom = -1;
         }
 

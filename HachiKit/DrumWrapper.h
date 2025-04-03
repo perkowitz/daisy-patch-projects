@@ -34,6 +34,8 @@ class DrumWrapper: public IDrum {
         std::string Slot() { return drum->Slot(); }
         std::string GetParamName(uint8_t param) { return drum->GetParamName(param); }
 
+        void LoadPreset(u8 preset) { drum->LoadPreset(preset); }
+        
     private:
         IDrum *drum;
         u32 cycleCount = 0;

@@ -4,6 +4,19 @@
 using namespace daisy;
 using namespace daisysp;
 
+float Bd8::presets[][Bd8::PARAM_COUNT] = {
+    // freq, mod, adcy, pdcy, aatk, patk, curv 
+    {68, 231, 2.174, 0.02, 0, 0, 4},
+    {58, 1932, 3.473, 0.01, 0, 0, 4},
+    {72, 340, 1.355, 0.073, 0, 0, 3},
+    {75, 577, 3.120, 0.032, 0, 0, 5},
+    {66, 1691, 0.954, 0.02, 0, 0, 4},
+    {46, 53, 0.943, 0.412, 0, 0, 1},
+    {285, 40, 0.183, 0.02, 0, 0, 1},
+    {69, 1934, 5.105, 0.02, 0, 0, 6}
+};
+
+
 void Bd8::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 78, 1.01, 4.0, 1.01, 0.1, 0.95);
 }
@@ -108,7 +121,7 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
                 break;
             case PARAM_AMP_DECAY: 
                 if (isRaw) {
-                  scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 10, Parameter::EXPONENTIAL));
+                  scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.001, 10, Parameter::EXPONENTIAL));
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
@@ -126,7 +139,7 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
                 break;
             case PARAM_PITCH_DECAY: 
                 if (isRaw) {
-                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.01, 10, Parameter::EXPONENTIAL));
+                    scaled = parameters[param].Update(value, Utility::ScaleFloat(value, 0.001, 10, Parameter::EXPONENTIAL));
                 } else {
                     parameters[param].SetScaledValue(value);
                 }
@@ -153,5 +166,13 @@ float Bd8::SetParam(uint8_t param, float value, bool isRaw) {
     }
 
     return 0.0f;
+}
+
+void Bd8::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param], false);   // isRaw=false will directly set to the provided value
+        }
+    }
 }
 

@@ -4,6 +4,32 @@
 using namespace daisy;
 using namespace daisysp;
 
+
+float FmDrum::presets[][FmDrum::PARAM_COUNT] = {
+    // freq, ratio, mod_amt, dcy, atk, curve
+    {98, 3.330, 2.220, 0.101, 0.005, -50},
+    {98, 1.191, 0.350, 0.101, 0.005, -50},
+    {932, 1.140, 0.460, 0.131, 0.005, -50},
+    {340, 1.123, 0.13, 0.220, 0.005, -50},
+    {196, 71714, 0.410, 0.040, 0.165, -50},
+    {25, 0.31, 0.31, 1.172, 0.005, -50},
+    {26, 0.13, 0.20, 1.559, 0.005, -50},
+    {123, 0.60, 0.60, 1.1134, 0.088, -50}
+};
+
+float FmDrum::hcPresets[][FmDrum::PARAM_COUNT] = {
+    // freq, ratio, mod_amt, dcy, atk, curve
+    {131, 3.330, 2.220, 0.101, 0.005, -50},
+    {131, 2.202, 0.330, 0.101, 0.005, -50},
+    {1667, 0.75, 0.37, 0.069, 0.005, -50},
+    {424, 0.59, 0.50, 0.234, 0.005, -50},
+    {254, 5.556, 0.61, 0.020, 0.195, -50},
+    {2077, 0.13, 0.39, 0.577, 0.005, -50},
+    {4727, 0.16, 1.144, 0.05, 0.101, -50},
+    {169, 0.41, 0.39, 0.886, 0.005, -50}
+};
+
+
 void FmDrum::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 68, 3.3, 2.2, 0.001, 0.043, -50);
 }
@@ -131,4 +157,17 @@ void FmDrum::SetParam(uint8_t param, float scaled) {
                 // TODO: set the curve
                 break;
         }
-    }}
+    }
+}
+
+void FmDrum::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            if (Slot() == "HC") {
+                SetParam(param, hcPresets[preset][param]);
+            } else {
+                SetParam(param, presets[preset][param]);
+            }
+        }
+    }
+}

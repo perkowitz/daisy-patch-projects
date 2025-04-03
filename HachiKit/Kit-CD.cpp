@@ -6,7 +6,7 @@
 #include "sounds/FmDrum.h"
 #include "sounds/HhSource68.h"
 #include "sounds/Oh.h"
-#include "sounds/SdNoise.h"
+#include "sounds/Sd8.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -23,10 +23,10 @@ IDrum *sources[1];
 IDrum *midiMap[MIDIMAP_SIZE];
 DrumWrapper drumWrappers[KIT_DRUM_COUNT];
 
-
+// sounds
 Ch ch;
 Oh oh;
-SdNoise ma;
+Sd8 ma;
 Cy cy;
 Cow8 cb;
 FmDrum fm1, fm2;
@@ -43,9 +43,9 @@ void InitKit(float samplerate) {
     sources[0] = &source68;
 
     // Init all drum sounds
-    ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);
-    ma.Init("MA", samplerate, 0, 0.2, 8);
+    ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 3000, 16000);
+    oh.Init("OH", samplerate, 0.001, 0.13, 0.001, &source68, HhSource68::MORPH_808_VALUE, 3000, 16000);
+    ma.Init("MA", samplerate);
     cy.Init("CY", samplerate, 0.001, 3.5, &source68, 1700, 2400);
     cb.Init("CB", samplerate, 0.005, 0.5, &source68, 1700, 2400);
     fm1.Init("LC", samplerate, 98, 3.3, 2.2, 0.001, 0.101, -50);

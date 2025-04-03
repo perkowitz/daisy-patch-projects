@@ -44,6 +44,8 @@ class Tom: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "aDcy", "pMod", "fMod", "Hpf", "Lpf" };
         std::string slot;
@@ -54,8 +56,8 @@ class Tom: public IDrum {
         AdEnv ampEnv, pitchEnv;
         ClickSource *clickSource;
 
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+
 };
-
-
 
 #endif

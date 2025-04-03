@@ -3,6 +3,19 @@
 using namespace daisy;
 using namespace daisysp;
 
+float Clave8::presets[][Clave8::PARAM_COUNT] = {
+    // freq, dcy
+    {2000, 0.375},
+    {1400, 0.462},
+    {499, 0.278},
+    {2680, 0.199},
+    {195, 1.885},
+    {1128, 2.714},
+    {1071, 0.471},
+    {759, 0.122},
+};
+
+
 void Clave8::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 2000, 0.375);
 }
@@ -101,4 +114,12 @@ float Clave8::SetParam(uint8_t param, float value, bool isRaw) {
     }
 
     return 0.0f;
+}
+
+void Clave8::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param], false);  // isRaw=false will directly set to the provided value
+        }
+    }
 }

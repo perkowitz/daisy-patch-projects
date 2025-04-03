@@ -21,7 +21,6 @@ class Cy: public IDrum {
         // This is the order params will appear in the UI.
         static const uint8_t PARAM_ATTACK = 0;
         static const uint8_t PARAM_DECAY = 1;
-        // These are pass-thru params that belong to the sound source and aren't tracked in Ch
         static const uint8_t PARAM_HPF = 2;
         static const uint8_t PARAM_LPF = 3;
         u8 ParamCount() { return PARAM_COUNT; }
@@ -48,6 +47,8 @@ class Cy: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Dcy", "Hpf", "Lpf" };
         std::string slot;
@@ -62,6 +63,8 @@ class Cy: public IDrum {
         // float buffer[BUFFER_SIZE];
         // bool bufferValid = false;
         // u16 bufferIndex = 0;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

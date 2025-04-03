@@ -131,3 +131,7 @@ float MultiTomSource::SetParam(uint8_t param, float value, bool isRaw) {
 
     return 0.0f;
 }
+
+void MultiTomSource::LoadPreset(u8 preset) {
+
+}

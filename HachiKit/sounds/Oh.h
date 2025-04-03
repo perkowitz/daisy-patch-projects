@@ -45,6 +45,8 @@ class Oh: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Atk", "Hold", "Dcy", "Lpf", "Mrph", "Hpf" };
         std::string slot;
@@ -53,6 +55,9 @@ class Oh: public IDrum {
         float velocity;
         HhSource68 *source = NULL;
         AhdEnv1 env;
+
+        // OH presets don't track the source params that CH already tracks (so only 3 params)
+        static float presets[IDRUM_PRESET_COUNT][3];
 
 };
 

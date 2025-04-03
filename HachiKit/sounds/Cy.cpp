@@ -11,6 +11,19 @@ const float Cy::LPF_MAX = 18000;
 const float Cy::LPF_MIN = 100;
 
 
+float Cy::presets[][Cy::PARAM_COUNT] = {
+    // atk, dcy, hpf, lpf
+    {0.005, 3.500, 1700, 2400},
+    {0.005, 2.300, 2406, 3955},
+    {0.100, 7.686, 3553, 1919},
+    {0.320, 4.181, 732, 1137},
+    {0.005, 5.800, 5391, 5068},
+    {1.909, 0.004, 1005, 6039},
+    {0.005, 5.820, 1019, 1630},
+    {0.505, 0.505, 573, 3696}
+};
+
+
 void Cy::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.001, 3.5, NULL, 1700, 2300);
 }
@@ -153,4 +166,14 @@ void Cy::SetParam(uint8_t param, float scaled) {
                 lpf.SetFreq(scaled);
                 break;
         }
-    }}
+    }
+}
+
+void Cy::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param]);
+        }
+    }
+}
+    

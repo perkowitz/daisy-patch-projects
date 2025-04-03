@@ -5,6 +5,19 @@ using namespace daisy;
 using namespace daisysp;
 
 
+float Ch::presets[][Ch::PARAM_COUNT] = {
+    // atk, dcy, morph, hpf, lpf
+    {0.005, 0.500, 0.65, 2500, 16000},
+    {0.005, 0.239, 0.37, 2200, 16000},
+    {0.005, 0.646, 0.71, 1634, 16000},
+    {0.005, 0.584, 0.25, 1839, 2650},
+    {0.2, 0.947, 0.03, 1864, 7900},
+    {0.005, 0.396, 0.89, 1240, 13000},
+    {0.1, 0.200, 0.45, 1900, 10000},
+    {0.005, 0.716, 0.58, 2700, 15044}
+};
+
+
 void Ch::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.001, 0.5, NULL, 0.5, 2000, 5000);
 }
@@ -135,4 +148,14 @@ void Ch::SetParam(uint8_t param, float scaled) {
                 source->SetParam(HhSource68::PARAM_LPF, scaled);
                 break;
         }
-    }}
+    }
+}
+
+void Ch::LoadPreset(u8 preset) {
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param]);
+        }
+    }
+}
+    

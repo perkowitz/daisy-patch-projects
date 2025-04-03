@@ -41,6 +41,8 @@ class Sd8: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         static const std::string paramNames[PARAM_COUNT];
         std::string slot;
@@ -51,6 +53,9 @@ class Sd8: public IDrum {
         AdEnv oscEnv;
         WhiteNoise noise;
         AdEnv noiseEnv;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+        static float maPresets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

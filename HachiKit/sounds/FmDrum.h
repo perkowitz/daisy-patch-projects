@@ -41,6 +41,8 @@ class FmDrum: public IDrum {
         std::string Slot() { return slot; }
         std::string GetParamName(uint8_t param) { return param < PARAM_COUNT ? paramNames[param] : ""; }
 
+        void LoadPreset(u8 preset);
+
     private:
         std::string paramNames[PARAM_COUNT] = { "Freq", "Ratio", "Mod", "Dcy", "Atk", "Curve" };
         std::string slot;
@@ -49,6 +51,9 @@ class FmDrum: public IDrum {
         float velocity;
         Fm2 fm;
         AdEnv ampEnv;
+
+        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+        static float hcPresets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 
