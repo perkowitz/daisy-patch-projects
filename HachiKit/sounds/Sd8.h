@@ -55,6 +55,7 @@ class Sd8: public IDrum {
         AdEnv noiseEnv;
 
         static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+        static float maPresets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

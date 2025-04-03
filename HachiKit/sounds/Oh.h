@@ -56,7 +56,8 @@ class Oh: public IDrum {
         HhSource68 *source = NULL;
         AhdEnv1 env;
 
-        static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+        // OH presets don't track the source params that CH already tracks (so only 3 params)
+        static float presets[IDRUM_PRESET_COUNT][3];
 
 };
 

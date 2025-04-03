@@ -5,6 +5,20 @@ using namespace daisy;
 using namespace daisysp;
 
 
+// OH presets don't track the source params that CH already tracks (so only 3 params)
+float Oh::presets[][3] = {
+    // atk, hold, dcy
+    {0.005, 0.130, 0.05},
+    {0.080, 0, 0.200},
+    {0.005, 0.130, 0.05},
+    {0.005, 0.130, 0.05},
+    {0.005, 0.130, 0.05},
+    {0.005, 0.130, 0.05},
+    {0.005, 0.130, 0.05},
+    {0.005, 0.130, 0.05}
+};
+
+
 void Oh::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.001, 0.13f, 0.05f, NULL, 0.5, 2000, 5000);
 }
@@ -146,6 +160,11 @@ void Oh::SetParam(uint8_t param, float scaled) {
     }
 }
 
+// OH presets don't track the source params that CH already tracks (so only 3 params)
 void Oh::LoadPreset(u8 preset) {
-
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < 3; param++) {
+            SetParam(param, presets[preset][param]);
+        }
+    }
 }

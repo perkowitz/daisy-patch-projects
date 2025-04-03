@@ -53,6 +53,7 @@ class FmDrum: public IDrum {
         AdEnv ampEnv;
 
         static float presets[IDRUM_PRESET_COUNT][PARAM_COUNT];
+        static float hcPresets[IDRUM_PRESET_COUNT][PARAM_COUNT];
 
 };
 

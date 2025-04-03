@@ -11,6 +11,19 @@ const float Cow8::LPF_MAX = 18000;
 const float Cow8::LPF_MIN = 100;
 
 
+float Cow8::presets[][Cow8::PARAM_COUNT] = {
+    // atk, dcy, hpf, lpf
+    {0.005, 0.500, 901, 1681},
+    {0.005, 1.417, 266, 2029},
+    {0.300, 0.005, 814, 7000},
+    {0.005, 0.878, 1862, 2675},
+    {0.265, 0.240, 937, 4505},
+    {0.020, 4.524, 410, 1126},
+    {0.005, 1.816, 1834, 3309},
+    {0.005, 1.605, 215, 9107}
+};
+
+
 void Cow8::Init(std::string slot, float sample_rate) {
     Init(slot, sample_rate, 0.001, 3.5, NULL, 1700, 2300);
 }
@@ -145,6 +158,10 @@ void Cow8::SetParam(uint8_t param, float scaled) {
     }}
 
 void Cow8::LoadPreset(u8 preset) {
-
+    if (preset < IDRUM_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            SetParam(param, presets[preset][param]);
+        }
+    }
 }
     

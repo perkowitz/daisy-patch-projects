@@ -575,7 +575,7 @@ void Runner::Run(Kit *kit) {
 
     // set level and send for particular drums
     for (u8 drum = 0; drum < kit->drumCount; drum++) {
-        float level = 2.0;
+        float level = 2.4;
         float send1 = 0.0;
         if (kit->drums[drum]->Slot() == "BD" ||
             kit->drums[drum]->Slot() == "SD" ||
@@ -586,6 +586,8 @@ void Runner::Run(Kit *kit) {
         if (kit->drums[drum]->Slot() == "LT" ||
             kit->drums[drum]->Slot() == "MT" ||
             kit->drums[drum]->Slot() == "HT" ||
+            kit->drums[drum]->Slot() == "LC" ||
+            kit->drums[drum]->Slot() == "HC" ||
             kit->drums[drum]->Slot() == "CB") {
                 send1 = 0.8;
         }
