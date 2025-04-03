@@ -113,6 +113,7 @@ class Runner {
         void DisplayParamMenu();
         void DisplayKnobValues();
         void DrawScreen(bool clearFirst);
+        void UpdateFromEncoder();
         void ProcessEncoder();
         void ProcessKnobs();
         void ProcessControls();
@@ -140,6 +141,9 @@ class Runner {
 
         u8 currentMenu = 0; 
         u8 currentMenuIndex = 0;
+        u8 newMenuIndex = 0;
+        bool redrawScreen = false;
+        bool turnScreenOn = false;   
         uint8_t currentDrum = 0;
         uint8_t currentKnobRow = 0;
         u8 currentKnob = 0;
