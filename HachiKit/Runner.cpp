@@ -164,16 +164,11 @@ void Runner::DrawScreen(bool clearFirst) {
     hw.display.Update();        
 }
 
-void Runner::ProcessEncoder() {
+// Make changes that need to be made as a result of encoder changes.
+// This is called outside the audio loop, so can include updates that
+// may be costly & can happen more slowly (e.g. updating the screen)
+void Runner::UpdateFromEncoder() {
 
-    bool redraw = false;
-    bool screenOn = false;
-
-    int inc = hw.encoder.Increment();
-    if (inc != 0) {
-        screenOn = true;
-    }
-    u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, menuSize-1);
     if (newMenuIndex != currentMenuIndex && screen.IsScreenOn()) {
         if (newMenuIndex < kit->drumCount) {
             currentMenu = MENU_SOUNDS;
@@ -197,12 +192,37 @@ void Runner::ProcessEncoder() {
         }
 
         currentMenuIndex = newMenuIndex;
-        redraw = true;
+        redrawScreen = true;
         // hw.display.Fill(false);
     }
 
+    if (turnScreenOn) {
+        lastScreenTime = System::GetNow();
+        if (!screen.IsScreenOn()) {
+            screen.SetScreenOn(true);
+            redrawScreen = true;
+        }
+    }
+    if (redrawScreen) {
+        DrawScreen(true);
+        hw.display.Update();        
+    }
+
+    redrawScreen = false;
+    turnScreenOn = false;
+}
+
+// Check the encoder for push/turn and respond accordingly.
+void Runner::ProcessEncoder() {
+
+    int inc = hw.encoder.Increment();
+    if (inc != 0) {
+        turnScreenOn = true;
+    }
+    newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, menuSize-1);
+
     if (hw.encoder.RisingEdge() || hw.encoder.FallingEdge()) {
-        screenOn = true;
+        turnScreenOn = true;
     }
     if (hw.encoder.RisingEdge() && screen.IsScreenOn()) {
         lastEncoderTime = System::GetNow();
@@ -213,16 +233,16 @@ void Runner::ProcessEncoder() {
         } else {
             if (currentMenu == MENU_SOUNDS) {
                 currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-                redraw = true;
+                redrawScreen = true;
                 if (kit->drums[currentDrum] != nullptr) {
                     kit->drums[currentDrum]->ResetParams();
                 }
-                screenOn = true;
+                turnScreenOn = true;
             } else if (currentMenu == MENU_MIXER) {
                 currentKnobRow = (currentKnobRow + 1) % MENU_ROWS;
-                redraw = true;
+                redrawScreen = true;
                 // reset params for mixer row?
-                screenOn = true;
+                turnScreenOn = true;
             } else if (currentMenu == MENU_MIXER_MAIN) {
                 // nothing happens
             } else if (currentMenu == MENU_PATCH) {
@@ -246,18 +266,6 @@ void Runner::ProcessEncoder() {
                 }
             }
         }
-    }
-
-    if (screenOn) {
-        lastScreenTime = System::GetNow();
-        if (!screen.IsScreenOn()) {
-            screen.SetScreenOn(true);
-            redraw = true;
-        }
-    }
-    if (redraw) {
-        DrawScreen(true);
-        hw.display.Update();        
     }
 }
 
@@ -675,6 +683,8 @@ void Runner::Run(Kit *kit) {
             DisplayKnobValues();
             hw.display.Update();
         }
+
+        UpdateFromEncoder();
 
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
