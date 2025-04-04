@@ -245,8 +245,8 @@ void Korra::NoteOn(u8 note, float velocity) {
             voices[assignedVoice].gateIsOn = true;
             voices[assignedVoice].ampEnv.GateOn();
             gates++;
-            if (gates >= 1) {
-                filtEnv.GateOn();
+            if (gates >= 1) {      // by using ">=" instead of "==" env will always retrigger
+                filtEnv.GateOn();  // but with "==" env would sometimes get stuck off
                 drift.Trigger();
             }
         }
