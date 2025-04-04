@@ -65,6 +65,12 @@ void Runner::DrawScreen(bool clearFirst) {
     hw.display.Update();        
 }
 
+// Make changes that need to be made as a result of encoder changes.
+// This is called outside the audio loop, so can include updates that
+// may be costly & can happen more slowly (e.g. updating the screen)
+void Runner::UpdateFromEncoder() {
+}
+
 void Runner::ProcessEncoder() {
 
     bool screenOn = false;
@@ -116,10 +122,9 @@ void Runner::ProcessEncoder() {
         lastScreenTime = System::GetNow();
         if (!screen.IsScreenOn()) {
             screen.SetScreenOn(true);
-            redraw = true;
+            redraw = true;  // redraw will happen in the outer loop, not here in the audio loop
         }
     }
-    // check redraw in the main loop and redraw there, not here in audio loop
 }
 
 // Process the current knob values and update model params accordingly.
