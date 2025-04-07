@@ -3,6 +3,8 @@
 using namespace daisy;
 using namespace daisysp;
 
+u8 Toph::ctrlParams[MIDI_CC_COUNT] = { PARAM_SAW, PARAM_PULSE, PARAM_SUB, PARAM_SAW2, PARAM_FREQ, PARAM_RES, PARAM_FENV, PARAM_FD };
+
 void Toph::Init(float sampleRate) {
     // set up the params and arrange them in pages
     params[PARAM_OCTAVE].Init("Oct", 0, -3, 3, Parameter::LINEAR, 1);
@@ -42,7 +44,6 @@ void Toph::Init(float sampleRate) {
     // assign nullptr to leave a slot blank
     u8 p = 0;
     pages[p++].Init(Name(), "Osc", &params[PARAM_SAW], &params[PARAM_PULSE], &params[PARAM_SUB], &params[PARAM_SAW2]);
-    // pages[p++].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], &params[PARAM_PITCH_SENV], nullptr);
     pages[p++].Init(Name(), "Osc", &params[PARAM_OCTAVE], &params[PARAM_PULSEWIDTH], &params[PARAM_PITCH_LFO], &params[PARAM_LFO_RATE]);
     pages[p++].Init(Name(), "Filt", &params[PARAM_FREQ], &params[PARAM_RES], &params[PARAM_FENV], &params[PARAM_FILT_SENV2]);
     pages[p++].Init(Name(), "FEnv", &params[PARAM_FA], &params[PARAM_FD], &params[PARAM_FS], &params[PARAM_FR]);
@@ -200,3 +201,14 @@ Param *Toph::GetParam(u8 index) {
     }
     return nullptr;
 }
+
+void Toph::MidiController(u8 cc, u8 value) { 
+    if (cc >= FIRST_MIDI_CC && cc < FIRST_MIDI_CC + MIDI_CC_COUNT) {
+        float fvalue = (float)value / 127.0;
+        u8 param = ctrlParams[cc - FIRST_MIDI_CC];
+        if (param < PARAM_COUNT) {
+            params[param].Update(fvalue, true);
+        }
+    }
+}
+

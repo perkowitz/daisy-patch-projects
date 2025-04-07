@@ -116,10 +116,9 @@ void Runner::ProcessEncoder() {
         lastScreenTime = System::GetNow();
         if (!screen.IsScreenOn()) {
             screen.SetScreenOn(true);
-            redraw = true;
+            redraw = true;  // redraw will happen in the outer loop, not here in the audio loop
         }
     }
-    // check redraw in the main loop and redraw there, not here in audio loop
 }
 
 // Process the current knob values and update model params accordingly.
@@ -329,11 +328,17 @@ void Runner::HandleMidiMessage(MidiEvent m) {
             break;
         }
         case ControlChange: {
-            // ControlChangeEvent event = m.AsControlChange();
-            // if (event.channel == midiChannel) {
-            //     float sig = (float)event.value / 127;
-            //     // send to synth
-            // }
+            ControlChangeEvent event = m.AsControlChange();
+            // screen.OledMessage("Ct:" + std::to_string(event.channel))
+            // float sig = (float)event.value / 127;
+            if (event.channel == synth1->GetMidiChannel()) {
+                synth1->MidiController(event.control_number, event.value);
+            }
+            if (synth2 != nullptr && event.channel == synth2->GetMidiChannel()) {
+                synth2->MidiController(event.control_number, event.value);
+            }
+
+            // send to synth
             break;
         }
         case ProgramChange: {

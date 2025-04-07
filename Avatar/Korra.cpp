@@ -4,6 +4,8 @@ using namespace daisy;
 using namespace daisysp;
 
 
+u8 Korra::ctrlParams[MIDI_CC_COUNT] = { PARAM_SAW, PARAM_PULSE, PARAM_SUB, PARAM_SAW2, PARAM_FREQ, PARAM_RES, PARAM_F_FENV, PARAM_FD  };
+
 void Korra::Init(float sampleRate) {
     Init(sampleRate, VOICE_COUNT);
 }
@@ -307,4 +309,14 @@ Param *Korra::GetParam(u8 index) {
         return &params[index];
     }
     return nullptr;
+}
+
+void Korra::MidiController(u8 cc, u8 value) { 
+    if (cc >= FIRST_MIDI_CC && cc < FIRST_MIDI_CC + MIDI_CC_COUNT) {
+        float fvalue = (float)value / 127.0;
+        u8 param = ctrlParams[cc - FIRST_MIDI_CC];
+        if (param < PARAM_COUNT) {
+            params[param].Update(fvalue, true);
+        }
+    }
 }
