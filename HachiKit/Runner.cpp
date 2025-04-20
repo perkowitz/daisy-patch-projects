@@ -629,6 +629,9 @@ void Runner::Run(Kit *kit) {
 
     DrawScreen(true);
 
+    // initially load preset 0
+    loadFrom = 0;
+
     // set up patch save/load
     KitPatch defaultKitPatch;
     SaveToKitPatch(kit, &defaultKitPatch);
