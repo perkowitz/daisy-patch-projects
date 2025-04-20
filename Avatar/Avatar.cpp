@@ -40,7 +40,7 @@ int main(void) {
 
     toph.Init(sampleRate);
     toph.SetMidiChannel(7); // zero-indexed
-    toph.GetParam(Toph::PARAM_OUT_12)->SetScaledValue(0.8);
+    toph.GetParam(Toph::PARAM_OUT_12)->SetScaledValue(0);
     toph.GetParam(Toph::PARAM_OUT_3)->SetScaledValue(0.8);
     toph.GetParam(Toph::PARAM_OUT_4)->SetScaledValue(0);
 

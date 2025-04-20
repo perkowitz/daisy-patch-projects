@@ -60,6 +60,9 @@ class Toph: public ISynth {
         static const u16 MAX_FREQ = 24000;
         static const u16 MIN_FILTER_FREQUENCY = 0;
         static const u16 MAX_FILTER_FREQUENCY = 10000;
+        static const u8 FIRST_MIDI_CC = 16;  // will respond to 8 CCs starting with this one
+
+        static u8 ctrlParams[MIDI_CC_COUNT];
 
         void Init(float sampleRate);
         bool IsActive() { return active; }
@@ -76,6 +79,8 @@ class Toph: public ISynth {
         Param *GetParam(u8 index);
         void ResetParams(u8 page);
         void ProcessChanges() { }
+
+        void MidiController(u8 cc, u8 value);
 
         void SetMidiChannel(u8 channel) { params[PARAM_MIDI_CHANNEL].SetScaledValue(channel + 1); }
         virtual u8 GetMidiChannel() { return (int)params[PARAM_MIDI_CHANNEL].Value() - 1; }
@@ -94,6 +99,8 @@ class Toph: public ISynth {
         ParamSet paramSets[PAGE_COUNT];
         ParamPage pages[PAGE_COUNT];
         u8 lastMidiChannel = 1;
+
+        // which param numbers to route midi CCs 1-8 to
 
         MultiOsc multiOsc;
         // Svf svf;

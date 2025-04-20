@@ -10,6 +10,8 @@ using namespace daisysp;
 #include <string>
 
 
+#define MIDI_CC_COUNT 8
+
 class ISynth {
 
     public:
@@ -33,6 +35,7 @@ class ISynth {
         virtual Param *GetParam(u8 index) = 0;
         virtual void ResetParams(u8 page) = 0;
         virtual void ProcessChanges() = 0;
+        virtual void MidiController(u8 cc, u8 value) = 0; // assumes Runner does channel filtering
 
         virtual void SetMidiChannel(u8 channel) = 0;    // zero-indexed
         virtual u8 GetMidiChannel() = 0;                // zero-indexed
