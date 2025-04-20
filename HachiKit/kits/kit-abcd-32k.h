@@ -12,8 +12,6 @@
 #include "../sounds/DigiClap.h"
 #include "../sounds/FmDrum.h"
 #include "../sounds/HhSource68.h"
-#include "../sounds/MultiTomSource.h"
-#include "../sounds/MultiTom.h"
 #include "../sounds/Oh.h"
 #include "../sounds/Sd8.h"
 #include "../sounds/SdNoise.h"
@@ -35,7 +33,6 @@ Sd8 sd;
 Clap cp;
 DigiClap sd2;
 Tom lt, mt, ht;
-// MultiTom lt, mt, ht;
 Ch ch;
 Oh oh;
 SdNoise ma;
@@ -47,7 +44,6 @@ Clave8 cl;
 // Shared sound sources
 HhSource68 source68;
 ClickSource clickSource;
-// MultiTomSource multiTomSource;
 
 
 void InitKit(float samplerate) {
@@ -55,7 +51,6 @@ void InitKit(float samplerate) {
     // Init any sound sources
     source68.Init("", samplerate, HhSource68::MORPH_808_VALUE);
     clickSource.Init("", samplerate, 1500, 191, 116);
-    // multiTomSource.Init("", samplerate, 500, &clickSource);
     sources[0] = &source68;
     sources[1] = &clickSource;
 
@@ -69,9 +64,6 @@ void InitKit(float samplerate) {
     lt.Init("LT", samplerate, 80, &clickSource);
     mt.Init("MT", samplerate, 91, &clickSource);
     ht.Init("HT", samplerate, 106, &clickSource);
-    // lt.Init("LT", samplerate, 80, 0.8, &multiTomSource, 0);
-    // mt.Init("MT", samplerate, 91, 0.8, &multiTomSource, 1);
-    // ht.Init("HT", samplerate, 106, 0.8, &multiTomSource, 2);
 
 
     ch.Init("CH", samplerate, 0.001, 0.5, &source68, HhSource68::MORPH_808_VALUE, 6000, 16000);

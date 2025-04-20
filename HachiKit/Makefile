@@ -23,9 +23,8 @@ sounds/Cow8.cpp \
 sounds/Cy.cpp \
 sounds/DigiClap.cpp \
 sounds/FmDrum.cpp \
+sounds/FmTom.cpp \
 sounds/HhSource68.cpp \
-sounds/MultiTom.cpp \
-sounds/MultiTomSource.cpp \
 sounds/Oh.cpp \
 sounds/Sd8.cpp \
 sounds/SdNoise.cpp \

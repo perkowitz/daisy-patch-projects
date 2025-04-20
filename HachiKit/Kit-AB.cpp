@@ -1,11 +1,10 @@
 #include "Runner.h"
 #include "sounds/Bd8.h"
 #include "sounds/Clap.h"
-#include "sounds/ClickSource.h"
 #include "sounds/DigiClap.h"
 #include "sounds/Sd8.h"
 #include "sounds/SdNoise.h"
-#include "sounds/Tom.h"
+#include "sounds/FmTom.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -17,7 +16,7 @@ SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::SampleRate::S
 
 u8 drumCount = KIT_DRUM_COUNT;
 IDrum *drums[KIT_DRUM_COUNT];
-u8 sourceCount = 1;
+u8 sourceCount = 0;
 IDrum *sources[1];
 IDrum *midiMap[MIDIMAP_SIZE];
 DrumWrapper drumWrappers[KIT_DRUM_COUNT];
@@ -28,17 +27,10 @@ SdNoise rs;
 Sd8 sd;
 Clap cp;
 DigiClap sd2;
-Tom lt, mt, ht;
-
-// Shared sound sources
-ClickSource clickSource;
+FmTom lt, mt, ht;
 
 
 void InitKit(float samplerate) {
-
-    // Init any sound sources
-    clickSource.Init("", samplerate, 1500, 191, 116);
-    sources[0] = &clickSource;
 
     // Init all drum sounds
     bd.Init("BD", samplerate, 64, 0.001, 2, 0.001, 0.15, 125);
@@ -47,9 +39,9 @@ void InitKit(float samplerate) {
     cp.Init("CP", samplerate, 0.012, 0.8);
     sd2.Init("S2", samplerate, 0.012, 0.8, 3000, 0);
 
-    lt.Init("LT", samplerate, 80, &clickSource);
-    mt.Init("MT", samplerate, 91, &clickSource);
-    ht.Init("HT", samplerate, 106, &clickSource);
+    lt.Init("LT", samplerate, 80);
+    mt.Init("MT", samplerate, 91);
+    ht.Init("HT", samplerate, 106);
 
     // Assign sounds to kit
     drums[0] = &bd;
