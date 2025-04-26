@@ -12,13 +12,16 @@ void Runner::DisplayParamMenu() {
     // display labels for the parameters edited by the knobs
     std::string sc = "";
     std::string rc = "";
-    ParamPage *paramPage = currentSynth->GetParamPage(currentSynthPage);
+    ParamPage *paramPage;
+    if (currentMenuIndex < currentSynth->PageCount()) {
+        paramPage = currentSynth->GetParamPage(currentSynthPage);
+    } else {
+        paramPage = &presetPage;
+    }
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         sc = "";
         rc = "";
-        if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
-            sc = paramPage->GetParamName(knob);
-        }
+        sc = paramPage->GetParamName(knob);
         Rectangle rect2(knob * 32, 12, 31, 12);
         screen.DrawButton(rect2, sc, false, false, true);
     }
@@ -35,7 +38,12 @@ void Runner::DisplayKnobValues() {
     screen.DrawRect(0, 0, 127, 11, false, true);
 
     u8 index;
-    ParamPage *paramPage = currentSynth->GetParamPage(currentSynthPage);
+    ParamPage *paramPage;
+    if (currentMenuIndex < currentSynth->PageCount()) {
+        paramPage = currentSynth->GetParamPage(currentSynthPage);
+    } else {
+        paramPage = &presetPage;
+    }
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         std::string sc = "";
         Rectangle rect(knob * 32, 0, 32, 8);
@@ -44,14 +52,6 @@ void Runner::DisplayKnobValues() {
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
     }
-
-    // Korra *korra = (Korra*)currentSynth;
-    // screen.DrawRect(0, 31, 127, 63, false, true);
-    // for (u8 step = 0; step < 8; step++) {
-    //     u8 value = (int)(korra->GetDrift(step) * 32);
-    //     screen.DrawLine(step * 16, 63 - value, step * 16 + 8, 63 - value, true);
-    // }
-
 }
 
 void Runner::DrawScreen(bool clearFirst) {
@@ -65,12 +65,6 @@ void Runner::DrawScreen(bool clearFirst) {
     hw.display.Update();        
 }
 
-// Make changes that need to be made as a result of encoder changes.
-// This is called outside the audio loop, so can include updates that
-// may be costly & can happen more slowly (e.g. updating the screen)
-void Runner::UpdateFromEncoder() {
-}
-
 void Runner::ProcessEncoder() {
 
     bool screenOn = false;
@@ -80,16 +74,22 @@ void Runner::ProcessEncoder() {
     if (inc != 0) {
         screenOn = true;
     }
-    menuSize = currentSynth->PageCount();
+
+    // menus = synth pages + preset page
+    u8 menuSize = currentSynth->PageCount() + 1;
     u8 newMenuIndex = Utility::LimitInt(currentMenuIndex + inc, 0, menuSize-1);
     if (newMenuIndex != currentMenuIndex && screen.IsScreenOn()) {
-        currentSynthPage = newMenuIndex;
-        if (currentSynth == synth1) {
-            synth1Page = currentSynthPage;
-        } else if (currentSynth == synth2) {
-            synth2Page = currentSynthPage;
+        if (newMenuIndex < currentSynth->PageCount()) {
+            currentSynthPage = newMenuIndex;
+            if (currentSynth == synth1) {
+                synth1Page = currentSynthPage;
+            } else if (currentSynth == synth2) {
+                synth2Page = currentSynthPage;
+            }
+            currentSynth->GetParamPage(currentSynthPage)->ResetParams();
+        } else if (newMenuIndex == currentSynth->PageCount()) {
+            presetPage.ResetParams();
         }
-        currentSynth->GetParamPage(currentSynthPage)->ResetParams();
         currentMenuIndex = newMenuIndex;
         redraw = true;
     }
@@ -102,9 +102,8 @@ void Runner::ProcessEncoder() {
         lastEncoderTime = System::GetNow();
     }
     if (hw.encoder.FallingEdge() && screen.IsScreenOn()) {
-        if (System::GetNow() - lastEncoderTime > LONG_PRESS_MILLIS) {
-            // saveTo = currentPatch;
-        } else {
+        if (currentMenuIndex < currentSynth->PageCount()) {
+            // normally, clicking the encoder switches synths
             if (currentSynth == synth1 && synth2 != nullptr) {
                 currentSynth = synth2;
                 currentSynthPage = currentMenuIndex = synth2Page;
@@ -115,6 +114,13 @@ void Runner::ProcessEncoder() {
                 redraw = true;
             }
             currentSynth->GetParamPage(currentSynthPage)->ResetParams();
+        } else if (currentMenuIndex == currentSynth->PageCount()) {
+            // if on preset page, then load a preset
+            if (currentSynth == synth1) {
+                synth1LoadFrom = (int)presetParam.Value();
+            } else if (currentSynth == synth2 && synth2 != nullptr) {
+                synth2LoadFrom = (int)presetParam.Value();
+            }
         }
     }
 
@@ -135,8 +141,10 @@ void Runner::ProcessKnobs() {
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         bool changed = false;
         float sig = hw.controls[knob].Value();
-        if (currentMenu ==  MENU_SYNTH) {
+        if (currentMenuIndex < currentSynth->PageCount()) {
             changed = currentSynth->GetParamPage(currentSynthPage)->UpdateParam(knob, sig);
+        } else {
+            changed = presetPage.UpdateParam(knob, sig);
         }
         if (changed) {
             lastKnobValue[knob] = sig;
@@ -368,10 +376,6 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
     this->synth1 = synth1;
     this->synth2 = synth2;
     currentSynth = this->synth1;
-    menuSize = synth1->PageCount();
-    if (synth2 != nullptr) {
-        menuSize += synth2->PageCount();
-    }
 
     // initialize the knob tracking
     for (u8 i = 0; i < KNOB_COUNT; i++) {
@@ -379,6 +383,10 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
     }
 
     DrawScreen(true);
+
+    // initially load preset 0
+    // synth1LoadFrom = 0;
+    // synth2LoadFrom = 0;
 
     // MidiUsbHandler::Config midi_cfg;
     // midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
@@ -405,6 +413,16 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
         while(hw.midi.HasEvents())
         {
             HandleMidiMessage(hw.midi.PopEvent());
+        }
+        if (synth1LoadFrom >= 0 && synth1LoadFrom < ISYNTH_PRESET_COUNT) {
+            synth1->LoadPreset(synth1LoadFrom);
+            synth1LoadFrom = -1;
+        }
+        if (synth2LoadFrom >= 0 && synth2LoadFrom < ISYNTH_PRESET_COUNT) {
+            if (synth2 != nullptr) {
+                synth2->LoadPreset(synth2LoadFrom);
+            }
+            synth2LoadFrom = -1;
         }
 
         // usbMidi.Listen();

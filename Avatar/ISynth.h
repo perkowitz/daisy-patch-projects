@@ -11,6 +11,7 @@ using namespace daisysp;
 
 
 #define MIDI_CC_COUNT 8
+#define ISYNTH_PRESET_COUNT 8
 
 class ISynth {
 
@@ -40,6 +41,7 @@ class ISynth {
         virtual void SetMidiChannel(u8 channel) = 0;    // zero-indexed
         virtual u8 GetMidiChannel() = 0;                // zero-indexed
 
+        virtual void LoadPreset(u8 preset) = 0;
 };
 
 

@@ -85,7 +85,9 @@ class Toph: public ISynth {
         void SetMidiChannel(u8 channel) { params[PARAM_MIDI_CHANNEL].SetScaledValue(channel + 1); }
         virtual u8 GetMidiChannel() { return (int)params[PARAM_MIDI_CHANNEL].Value() - 1; }
 
-    private:
+        void LoadPreset(u8 preset);
+
+        private:
         bool active = false;
         float velocity = 0;
         u8 note;
@@ -112,6 +114,7 @@ class Toph: public ISynth {
         SyncEnv syncEnv2;
         Oscillator lfo;
 
+        static float presets[ISYNTH_PRESET_COUNT][PARAM_COUNT];
 };
 
 
