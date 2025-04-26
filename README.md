@@ -3,6 +3,8 @@
 Projects for the [Daisy Patch](https://electro-smith.com/products/patch), 
 derived from the [Daisy Examples](https://github.com/electro-smith/DaisyExamples) repo.
 
+For general guidance on using the Daisy Patch, see those resources.
+
 ## Install
 
 - `git submodule update --init --recursive`
