@@ -6,6 +6,129 @@ using namespace daisysp;
 
 u8 Korra::ctrlParams[MIDI_CC_COUNT] = { PARAM_SAW, PARAM_PULSE, PARAM_SUB, PARAM_SAW2, PARAM_FREQ, PARAM_RES, PARAM_F_FENV, PARAM_FD  };
 
+float Korra::presets[][Korra::PARAM_COUNT] = {        // params are in order of PARAM constant in .h
+    {
+        1, 1000, 0.00,                      // oct, freq, res
+        0.000, 0.200, 0.80, 0.300,          // a, d, s, r
+        0.000, 0.200, 0.00, 0.300,          // fa, fd, fs, fr
+        0.55,                               // fenv
+        0.80, 0.00, 0.00, 0.10,             // saw, pulse, sub, saw2
+        0.50, 0.0,                          // pw, hpf
+        0.500, 0.000, 0.800, 16,            // senv a, senv del, senv dcy, senv steps
+        0.00,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        0,                                  // klok
+        0.25, 0.20, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 3, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        0, 2153, 0.13,                      // oct, freq, res
+        0.000, 0.249, 0.00, 0.116,          // a, d, s, r
+        0.000, 0.200, 0.00, 0.300,          // fa, fd, fs, fr
+        0.37,                               // fenv
+        0.38, 0.68, 0.00, 0.00,             // saw, pulse, sub, saw2
+        0.49, 0.006,                        // pw, hpf
+        0.500, 0.000, 0.800, 16,            // senv a, senv del, senv dcy, senv steps
+        0.00,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        0,                                  // klok
+        0.36, 0.13, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 0, 0.00, 0.08,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        0, 1598, 0.00,                      // oct, freq, res
+        0.000, 0.249, 0.72, 0.518,          // a, d, s, r
+        0.000, 0.261, 0.00, 0.544,          // fa, fd, fs, fr
+        0.47,                               // fenv
+        0.80, 0.00, 0.00, 0.00,             // saw, pulse, sub, saw2
+        0.50, 0.0,                          // pw, hpf
+        0.000, 0.000, 5.988, 32,            // senv a, senv del, senv dcy, senv steps
+        0.00,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        0,                                  // klok
+        0.00, 0.00, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 3, 0.21, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        0, 55, 0.23,                        // oct, freq, res
+        0.000, 0.161, 0.00, 0.114,          // a, d, s, r
+        0.000, 0.085, 0.00, 0.048,          // fa, fd, fs, fr
+        0.46,                               // fenv
+        0.80, 0.39, 0.00, 0.14,             // saw, pulse, sub, saw2
+        0.56, 0.02,                         // pw, hpf
+        0.500, 0.000, 2.941, 16,            // senv a, senv del, senv dcy, senv steps
+        0.75,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        1,                                  // klok
+        0.00, 0.00, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 0, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        0, 4975, 0.35,                      // oct, freq, res
+        0.000, 0.058, 0.63, 0.145,          // a, d, s, r
+        0.000, 0.059, 0.00, 0.474,          // fa, fd, fs, fr
+        0.81,                               // fenv
+        0.27, 0.58, 0.00, 0.21,             // saw, pulse, sub, saw2
+        0.50, 0.038,                        // pw, hpf
+        0.273, 0.000, 0.110, 16,            // senv a, senv del, senv dcy, senv steps
+        0.00,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        3,                                  // klok
+        0.14, 0.20, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 0, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        1, 93, 0.08,                        // oct, freq, res
+        0.000, 0.164, 0.67, 0.660,          // a, d, s, r
+        0.000, 0.170, 0.00, 0.474,          // fa, fd, fs, fr
+        0.22,                               // fenv
+        0.40, 0.00, 0.71, 0.00,             // saw, pulse, sub, saw2
+        0.52, 0.0,                          // pw, hpf
+        0.450, 0.000, 0.063, 5,             // senv a, senv del, senv dcy, senv steps
+        0.64,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        0,                                  // klok
+        0.12, 0.22, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 0, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        0, 125, 0.00,                       // oct, freq, res
+        0.000, 0.306, 0.77, 0.053,          // a, d, s, r
+        0.000, 0.197, 0.00, 0.340,          // fa, fd, fs, fr
+        0.12,                               // fenv
+        0.96, 0.00, 0.00, 0.00,             // saw, pulse, sub, saw2
+        0.50, 0.0,                          // pw, hpf
+        3.024, 1.646, 0.799, 32,            // senv a, senv del, senv dcy, senv steps
+        0.14,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        0,                                  // klok
+        0.35, 0.77, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 0, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    {
+        0, 46, 0.16,                        // oct, freq, res
+        0.000, 0.231, 0.72, 0.658,          // a, d, s, r
+        0.000, 0.063, 0.00, 0.107,          // fa, fd, fs, fr
+        0.15,                               // fenv
+        0.00, 0.71, 0.29, 0.13,             // saw, pulse, sub, saw2
+        0.25, 0.0,                          // pw, hpf
+        2.519, 0.000, 0.351, 16,            // senv a, senv del, senv dcy, senv steps
+        0.46,                               // senv-freq
+        0.90, 0.00, 0.00,                   // out12, out3, out4
+        0,                                  // klok
+        0.47, 0.28, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0, 9, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
+        1,                                  // midi channel [unused]
+    },
+    };
+
 void Korra::Init(float sampleRate) {
     Init(sampleRate, VOICE_COUNT);
 }
@@ -317,6 +440,16 @@ void Korra::MidiController(u8 cc, u8 value) {
         u8 param = ctrlParams[cc - FIRST_MIDI_CC];
         if (param < PARAM_COUNT) {
             params[param].Update(fvalue, true);
+        }
+    }
+}
+
+void Korra::LoadPreset(u8 preset) { 
+    if (preset < ISYNTH_PRESET_COUNT) {
+        for (u8 param = 0; param < PARAM_COUNT; param++) {
+            if (param != PARAM_MIDI_CHANNEL) {
+                params[param].SetScaledValue(presets[preset][param]);
+            }            
         }
     }
 }

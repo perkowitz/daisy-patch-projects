@@ -57,6 +57,9 @@ class Runner {
             samplerate = hw.AudioSampleRate();
             meter.Init(samplerate, 128, 1.0f);
             screen.setDisplay(&hw.display);
+
+            presetParam.Init("Preset", 0, 0, 7, Parameter::LINEAR, 1);
+            presetPage.Init("", "Sv/Ld", &presetParam, nullptr, nullptr, nullptr);
         }
 
         void Run(ISynth *synth1, ISynth *synth2);
@@ -96,6 +99,7 @@ class Runner {
         u8 synth1Page = 0;
         u8 synth2Page = 0;
         u8 currentSynthPage = 0;
+        bool onSaveLoadPage = false;
 
         u8 *midiChannels;
         Mixer mixer;
@@ -115,8 +119,6 @@ class Runner {
         u8 midiChannel = 4;  // 0-indexed
         u8 midiCcOffset = 0;
 
-        u8 menuSize = Screen::MENU_SIZE;
-
         u8 cycle = 0;
         u8 cycleLength = 8;
         float savedSignal = 0.0f;
@@ -126,6 +128,11 @@ class Runner {
         u8 clockThreshold = 8;
         float mainGain = 1;
 
+        Param presetParam;
+        ParamPage presetPage;
+
+        s8 synth1LoadFrom = -1;
+        s8 synth2LoadFrom = -1;
         u32 lastEncoderTime = 0;
         u32 lastScreenTime = 0;
 };

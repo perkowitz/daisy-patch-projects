@@ -90,6 +90,8 @@ class Asami: public ISynth {
         void SetMidiChannel(u8 channel) { midiChannel = channel; }
         virtual u8 GetMidiChannel() { return midiChannel; }
 
+        void LoadPreset(u8 preset) { }
+
     private:
         bool active = false;
         float leftSignal = 0;
