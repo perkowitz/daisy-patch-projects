@@ -112,9 +112,9 @@ class Korra: public ISynth {
 
         float GetDrift(u8 step) { return drift.Value(step); }
 
-        void LoadPreset(u8 preset) { }
+        void LoadPreset(u8 preset);
 
-        private:
+    private:
         bool active = false;
         float leftSignal = 0;
         float rightSignal = 0;
@@ -140,7 +140,7 @@ class Korra: public ISynth {
         void VoiceOff(u8 voice);
         void AllVoicesOff();
 
-
+        static float presets[ISYNTH_PRESET_COUNT][PARAM_COUNT];
 };
 
 
