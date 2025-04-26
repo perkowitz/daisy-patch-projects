@@ -385,8 +385,8 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
     DrawScreen(true);
 
     // initially load preset 0
-    // synth1LoadFrom = 0;
-    // synth2LoadFrom = 0;
+    synth1LoadFrom = 0;
+    synth2LoadFrom = 0;
 
     // MidiUsbHandler::Config midi_cfg;
     // midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
