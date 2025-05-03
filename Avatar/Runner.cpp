@@ -356,6 +356,13 @@ void Runner::HandleMidiMessage(MidiEvent m) {
             break;
         }
         case ProgramChange: {
+            ProgramChangeEvent event = m.AsProgramChange();
+            if (event.channel == synth1->GetMidiChannel() && event.program < PATCH_COUNT) {
+                synth1LoadFrom = event.program - START_PROGRAM_CHANGE;
+            }
+            if (event.channel == synth2->GetMidiChannel() && event.program < PATCH_COUNT) {
+                synth2LoadFrom = event.program - START_PROGRAM_CHANGE;
+            }
             break;
         }
         case SystemRealTime: {

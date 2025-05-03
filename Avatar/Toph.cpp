@@ -5,7 +5,7 @@ using namespace daisysp;
 
 u8 Toph::ctrlParams[MIDI_CC_COUNT] = { PARAM_SAW, PARAM_PULSE, PARAM_SUB, PARAM_SAW2, PARAM_FREQ, PARAM_RES, PARAM_FENV, PARAM_FD };
 
-float Toph::presets[][Toph::PARAM_COUNT] = {
+float Toph::presets[][Toph::PARAM_COUNT] = {        // params are in order of PARAM constant in .h
     { 0, 404, 0,                  // oct, freq, res
         0, 0.02, 0.8, 0.300,        // a, d, s, r
         0, 0.212, 0, 0.200,         // fa, fd, fs, fr
@@ -42,12 +42,12 @@ float Toph::presets[][Toph::PARAM_COUNT] = {
         0.500, 0, 0.500, 16, 0,     // senv a, senv h, senv d, senv steps, pitch-senv
         1.607, 0, 0.686, 32, 0.47,  // senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
         6.66, 0, 1 },               // lfo rate, pitch-lfo, midi channel [UNUSED]
-    { 1, 2680, 0,                 // oct, freq, res
+    { 1, 2000, 0,                 // oct, freq, res
         0, 0.315, 0.9, 0.522,       // a, d, s, r
         0, 0.347, 0, 0.200,         // fa, fd, fs, fr
         0.69,                       // fenv
-        0.0, 0.53, 0.99, 0.26,      // saw, pulse, sub, saw2
-        0.75, 0.31, 0.9, 0,         // pw, out12, out3, out4
+        0.0, 0.39, 0.62, 0.16,      // saw, pulse, sub, saw2
+        0.75, 0.11, 0.7, 0,         // pw, out12, out3, out4
         0.500, 0, 0.500, 16, 0,     // senv a, senv h, senv d, senv steps, pitch-senv
         0.268, 0.042, 0.206, 8, 0.73,// senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
         1430, 0.09, 1 },            // lfo rate, pitch-lfo, midi channel [UNUSED]
@@ -59,7 +59,7 @@ float Toph::presets[][Toph::PARAM_COUNT] = {
         0.95, 0, 0.9, 0,            // pw, out12, out3, out4
         0.500, 0, 0.500, 16, 0,     // senv a, senv h, senv d, senv steps, pitch-senv
         0.83, 0.379, 0.332, 16, 0.71,// senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
-        10.52, 13, 1 },             // lfo rate, pitch-lfo, midi channel [UNUSED]
+        10.52, 0.13, 1 },             // lfo rate, pitch-lfo, midi channel [UNUSED]
     { 0, 621, 0.09,               // oct, freq, res
         0, 0.326, 0.77, 0.441,      // a, d, s, r
         0, 0.481, 0, 0.093,         // fa, fd, fs, fr
