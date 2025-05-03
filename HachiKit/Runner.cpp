@@ -560,7 +560,6 @@ void Runner::HandleMidiMessage(MidiEvent m)
                 currentPatch = event.program - START_PROGRAM_CHANGE;
                 patchStorage.GetParamSet()->SetParam(PatchStorage::PARAM_CURRENT_PATCH, event.program - START_PROGRAM_CHANGE);
                 loadFrom = event.program - START_PROGRAM_CHANGE;
-                Load(loadFrom, kit, savedKits[loadFrom]);
             }
             break;
         }
