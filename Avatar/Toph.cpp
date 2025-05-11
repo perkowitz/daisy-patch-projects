@@ -33,14 +33,14 @@ float Toph::presets[][Toph::PARAM_COUNT] = {        // params are in order of PA
         0.500, 0, 0.500, 16, 0,     // senv a, senv h, senv d, senv steps, pitch-senv
         0.064, 0.164, 0.474, 17, 0.46,// senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
         6.66, 0, 1 },               // lfo rate, pitch-lfo, midi channel [UNUSED]
-    { 0, 1346, 0,                   // oct, freq, res
+    { 0, 337, 0,                   // oct, freq, res
         0, 0.306, 0.9, 0.328,       // a, d, s, r
-        0, 0.439, 0, 0.119,         // fa, fd, fs, fr
+        0, 0.294, 0, 0.119,         // fa, fd, fs, fr
         0.42,                       // fenv
         0.0, 0.15, 0.57, 0.43,      // saw, pulse, sub, saw2
         0.79, 0, 0.92, 0,           // pw, out12, out3, out4
         0.500, 0, 0.500, 16, 0,     // senv a, senv h, senv d, senv steps, pitch-senv
-        1.607, 0, 0.686, 32, 0.47,  // senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
+        1.607, 0, 0.686, 32, 0.77,  // senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
         6.66, 0, 1 },               // lfo rate, pitch-lfo, midi channel [UNUSED]
     { 1, 2000, 0,                 // oct, freq, res
         0, 0.315, 0.9, 0.522,       // a, d, s, r
