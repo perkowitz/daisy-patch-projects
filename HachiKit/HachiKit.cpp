@@ -2,9 +2,10 @@
 #include "sounds/Bd8.h"
 #include "sounds/Clap.h"
 #include "sounds/DigiClap.h"
+#include "sounds/FmTom.h"
 #include "sounds/Sd8.h"
 #include "sounds/SdNoise.h"
-#include "sounds/FmTom.h"
+#include "sounds/Tom8.h"
 
 using namespace daisy;
 using namespace daisysp;
@@ -27,7 +28,8 @@ SdNoise rs;
 Sd8 sd;
 Clap cp;
 DigiClap sd2;
-FmTom lt, mt, ht;
+// FmTom lt, mt, ht;
+Tom8 lt, mt, ht;
 
 
 void InitKit(float samplerate) {

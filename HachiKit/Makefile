@@ -28,7 +28,8 @@ sounds/HhSource68.cpp \
 sounds/Oh.cpp \
 sounds/Sd8.cpp \
 sounds/SdNoise.cpp \
-sounds/Tom.cpp 
+sounds/Tom.cpp \
+sounds/Tom8.cpp 
 
 
 # uncomment one of these to put code in SRAM or QSPI; use 'make program-boot' to update
