@@ -6,15 +6,39 @@ using namespace daisysp;
 
 
 float Tom8::presets[][Tom8::PARAM_COUNT] = {
-    // freq, decay
-    {80, 1.100},
-    {197, 1.297},
-    {298, 0.593},
-    {495, 0.579},
-    {77, 1.926},
-    {506, 1.812},
-    {171, 0.682},
-    {954, 0.449}
+    // freq, freq1, decay, osc2 level, ringmod level
+    {80, 80, 1.100, 1.0, 0.5},
+    {171, 171, 0.682, 0.5, 1},
+    {94, 94, 0.593, 1, 5},
+    {110, 110, 0.579, 0.9, 10},
+    {77, 77, 1.926, 0.3, 0.005},
+    {200, 200, 1.812, 0.7, 0},
+    {197, 197, 1.297, 0.1, 0},
+    {79, 161, 0.952, 0.9, 0.9}
+};
+
+float Tom8::mtPresets[][Tom8::PARAM_COUNT] = {
+    // freq, freq1, decay, osc2 level, ringmod level
+    {96, 112, 1.100, 0.1, 0.5},
+    {210, 214, 0.682, 1, 0},
+    {156, 299, 0.593, 0.6, 0.5},
+    {155, 155, 0.579, 0.0, 0.9},
+    {99, 119, 1.926, 0.3, 0.3},
+    {280, 280, 1.812, 0, 0},
+    {301, 288, 1.297, 0.9, 0.4},
+    {153, 225, 0.867, 0.9, 0.9}
+};
+
+float Tom8::htPresets[][Tom8::PARAM_COUNT] = {
+    // freq, freq1, decay, osc2 level, ringmod level
+    {131, 137, 1.100, 1.0, 0.2},
+    {255, 345, 0.682, 0.2, 0.6},
+    {199, 504, 0.593, 0.9, 0.9},
+    {199, 700, 0.579, 0.3, 0.3},
+    {111, 119, 1.926, 0.9, 0.2},
+    {400, 405, 1.812, 0.9, 0.1},
+    {483, 545, 1.297, 0.5, 0.9},
+    {222, 459, 0.536, 0.9, 0.9}
 };
 
 
@@ -31,6 +55,11 @@ void Tom8::Init(std::string slot, float sample_rate, float frequency) {
     oscFilter.Init(sample_rate);
     oscFilter.SetRes(0.5);
     SetParam(PARAM_FREQUENCY, frequency);  // sets oscillator and bpf frequency
+
+    osc2.Init(sample_rate);
+    osc2.SetWaveform(Oscillator::WAVE_SIN);
+    SetParam(PARAM_FREQUENCY2, frequency);
+    SetParam(PARAM_RINGMOD_LEVEL, 0.5);
 
     ampEnv.Init(sample_rate);
     ampEnv.SetMax(5);
@@ -59,18 +88,21 @@ void Tom8::Init(std::string slot, float sample_rate, float frequency) {
 
 float Tom8::Process() {
 
-    // sine osc freq is modulated by pitch env, amp by amp env
     float pitchEnvSignal = pitchEnv.Process();
     float ampEnvSignal = ampEnv.Process();
+
     osc.SetFreq(parameters[PARAM_FREQUENCY].GetScaledValue() + 180 * pitchEnvSignal);
-    float oscSignal = osc.Process() * ampEnvSignal;
+    osc2.SetFreq(parameters[PARAM_FREQUENCY2].GetScaledValue() + 180 * pitchEnvSignal);
+    float oscSignal = osc.Process();
+    float osc2Signal = osc2.Process();
+    oscSignal += parameters[PARAM_OSC2_LEVEL].GetScaledValue() * osc2Signal;
+    oscSignal += parameters[PARAM_RINGMOD_LEVEL].GetScaledValue() * oscSignal * osc2Signal * 7;
     oscFilter.SetFreq(parameters[PARAM_FREQUENCY].GetScaledValue());
     oscFilter.Process(oscSignal);
-    oscSignal = oscFilter.Band() * 2;
+    oscSignal = oscFilter.Band() * ampEnvSignal * 2;
 
     float noiseEnvSignal = noiseEnv.Process();
-    float noiseSignal = noise.Process();   
-    noiseSignal = noiseFilter.Process(noiseSignal);   
+    float noiseSignal = noiseFilter.Process(noise.Process());   
     noiseSignal = noiseSignal * noiseEnvSignal * 0.5;   
 
     active = ampEnv.IsRunning() || noiseEnv.IsRunning();
@@ -89,24 +121,20 @@ void Tom8::Trigger(float velocity) {
 }
 
 float Tom8::GetParam(uint8_t param) {
-    if (param < PARAM_COUNT) {
-        switch (param) {
-            case PARAM_FREQUENCY: 
-            case PARAM_AMP_DECAY: 
-                return parameters[param].GetScaledValue();
-        }
-    }
-
-    return 0.0f;
+    return param < PARAM_COUNT ? parameters[param].GetScaledValue() : 0.0f;
 }
 
 std::string Tom8::GetParamString(uint8_t param) {
     if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
+            case PARAM_FREQUENCY2: 
                 return std::to_string((int)GetParam(param));
             case PARAM_AMP_DECAY: 
                 return std::to_string((int)(GetParam(param) * 1000));// + "ms";
+            case PARAM_OSC2_LEVEL: 
+            case PARAM_RINGMOD_LEVEL: 
+                return std::to_string((int)(GetParam(param) * 100));
         }
     }
    return "";
@@ -117,12 +145,17 @@ float Tom8::UpdateParam(uint8_t param, float raw) {
     if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
+            case PARAM_FREQUENCY2: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 20, 2000, Parameter::EXPONENTIAL));
                 break;
             case PARAM_AMP_DECAY: 
                 scaled = parameters[param].Update(raw, Utility::ScaleFloat(raw, 0.01, 5, Parameter::EXPONENTIAL));
                 ampEnv.SetTime(ADENV_SEG_DECAY, scaled);
                 noiseEnv.SetTime(ADENV_SEG_DECAY, scaled * 1.5);
+                break;
+            case PARAM_OSC2_LEVEL: 
+            case PARAM_RINGMOD_LEVEL: 
+                scaled = parameters[param].Update(raw, Utility::LimitFloat(raw, 0, 1));
                 break;
         }
     }
@@ -140,6 +173,9 @@ void Tom8::SetParam(uint8_t param, float scaled) {
     if (param < PARAM_COUNT) {
         switch (param) {
             case PARAM_FREQUENCY: 
+            case PARAM_FREQUENCY2: 
+            case PARAM_OSC2_LEVEL: 
+            case PARAM_RINGMOD_LEVEL: 
                 parameters[param].SetScaledValue(scaled);
                 break;
             case PARAM_AMP_DECAY: 
@@ -152,28 +188,15 @@ void Tom8::SetParam(uint8_t param, float scaled) {
 }
 
 void Tom8::LoadPreset(u8 preset) {
-    float ratio = 1.0;
     if (preset < IDRUM_PRESET_COUNT) {
         for (u8 param = 0; param < PARAM_COUNT; param++) {
-            if (param == PARAM_FREQUENCY) {
-                if (Slot() == "MT") {
-                    ratio = 6.0 / 5.0;
-                    if (param % 2 == 1) {
-                        ratio = 5.0 / 4.0;
-                    }
-                    SetParam(param, presets[preset][param] * ratio);
-                } else if (Slot() == "HT") {
-                    ratio = 3.0 / 2.0;
-                    if (param % 2 == 1) {
-                        ratio = 4.0 / 3.0;
-                    }
-                    SetParam(param, presets[preset][param] * ratio);
-                } else { // if LT
-                    SetParam(param, presets[preset][param]);
-                }
+            if (Slot() == "MT") {
+                SetParam(param, mtPresets[preset][param]);
+            } else if (Slot() == "HT") {
+                SetParam(param, htPresets[preset][param]);
             } else {
                 SetParam(param, presets[preset][param]);
             }
         }
-    } 
+    }
 }
