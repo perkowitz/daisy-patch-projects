@@ -118,6 +118,12 @@ class Utility {
             }
 
         }
+
+        static float Squeeze(float signal, float intensity) {
+            float scale = 1 + intensity;
+            return Utility::LimitFloat(signal * scale, -1, 1);
+        }
+
 };
 
 
