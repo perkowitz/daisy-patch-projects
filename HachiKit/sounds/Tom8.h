@@ -15,7 +15,7 @@ class Tom8: public IDrum {
 
     public:
         // Number of settable parameters for this model.
-        static const uint8_t PARAM_COUNT = 6;
+        static const uint8_t PARAM_COUNT = 8;
         // This is the order params will appear in the UI.
         static const uint8_t PARAM_FREQUENCY = 0;
         static const uint8_t PARAM_FREQUENCY2 = 1;
@@ -23,6 +23,8 @@ class Tom8: public IDrum {
         static const uint8_t PARAM_OSC2_LEVEL = 3;
         static const uint8_t PARAM_RINGMOD_LEVEL = 4;
         static const uint8_t PARAM_SQUEEZE = 5;
+        static const uint8_t PARAM_REVERB_LEVEL = 6;
+        static const uint8_t PARAM_BEND = 7;
         u8 ParamCount() { return PARAM_COUNT; }
 
         void Init(std::string slot, float sample_rate);
@@ -44,7 +46,7 @@ class Tom8: public IDrum {
         void LoadPreset(u8 preset);
 
     private:
-        std::string paramNames[PARAM_COUNT] = { "Frq1", "Frq2", "Dcy", "Lvl2", "rMod", "Sqz" };
+        std::string paramNames[PARAM_COUNT] = { "Frq1", "Frq2", "Dcy", "Lvl2", "rMod", "Sqz", "Rvb", "Bend" };
         std::string slot;
         bool active = false;
         Param parameters[PARAM_COUNT];
