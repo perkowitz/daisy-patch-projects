@@ -145,6 +145,9 @@ void Runner::ProcessKnobs() {
             changed = currentSynth->GetParamPage(currentSynthPage)->UpdateParam(knob, sig);
         } else {
             changed = presetPage.UpdateParam(knob, sig);
+            if (changed && knob == 1) {
+                shouldPanic = true;
+            }
         }
         if (changed) {
             lastKnobValue[knob] = sig;
@@ -206,6 +209,13 @@ void Runner::AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffe
         }
     }
     meter.OnBlockEnd();
+}
+
+void Runner::Panic() {
+    synth1->Panic();
+    if (synth2 != nullptr) {
+        synth2->Panic();
+    }
 }
 
 void Runner::MidiSend(MidiEvent m) {
@@ -414,6 +424,11 @@ void Runner::Run(ISynth *synth1, ISynth *synth2) {
             DrawScreen(true);
             hw.display.Update();        
             redraw = false;
+        }
+
+        if (shouldPanic) {
+            Panic();
+            shouldPanic = false;
         }
 
         hw.midi.Listen();

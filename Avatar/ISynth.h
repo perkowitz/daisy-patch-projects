@@ -37,6 +37,7 @@ class ISynth {
         virtual void ResetParams(u8 page) = 0;
         virtual void ProcessChanges() = 0;
         virtual void MidiController(u8 cc, u8 value) = 0; // assumes Runner does channel filtering
+        virtual void Panic() = 0;
 
         virtual void SetMidiChannel(u8 channel) = 0;    // zero-indexed
         virtual u8 GetMidiChannel() = 0;                // zero-indexed

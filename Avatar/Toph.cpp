@@ -258,6 +258,11 @@ void Toph::Clock(u8 measure, u8 step, u8 tick) {
     syncEnv2.Clock(measure, step, tick);
 }
 
+void Toph::Panic() {
+    ampEnv.GateOff();
+    filtEnv.GateOff();
+}
+
 ParamPage *Toph::GetParamPage(u8 page) {
     if (page < PAGE_COUNT) {
         return &pages[page];

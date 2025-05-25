@@ -414,6 +414,10 @@ void Korra::Clock(u8 measure, u8 step, u8 tick) {
     syncEnv.Clock(measure, step, tick);
 }
 
+void Korra::Panic() {
+    AllVoicesOff();
+}
+
 ParamPage *Korra::GetParamPage(u8 page) {
     if (page < PAGE_COUNT) {
         return &pages[page];
