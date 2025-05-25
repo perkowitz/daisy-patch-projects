@@ -99,13 +99,13 @@ class Korra: public ISynth {
         void NoteOff(u8 note);
         void AllNotesOff();
         void Clock(u8 measure, u8 step, u8 tick);
+        void MidiController(u8 cc, u8 value);
+        void Panic();
 
         ParamPage *GetParamPage(u8 page);
         Param *GetParam(u8 index);
         void ResetParams(u8 page);
         void ProcessChanges();
-
-        void MidiController(u8 cc, u8 value);
 
         void SetMidiChannel(u8 channel) { params[PARAM_MIDI_CHANNEL].SetScaledValue(channel + 1); }
         virtual u8 GetMidiChannel() { return (int)params[PARAM_MIDI_CHANNEL].Value() - 1; }

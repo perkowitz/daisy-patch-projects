@@ -59,7 +59,8 @@ class Runner {
             screen.setDisplay(&hw.display);
 
             presetParam.Init("Preset", 0, 0, 7, Parameter::LINEAR, 1);
-            presetPage.Init("", "Sv/Ld", &presetParam, nullptr, nullptr, nullptr);
+            panicParam.Init("Panic", 0, 0, 1, Parameter::LINEAR, 10);
+            presetPage.Init("", "Sv/Ld", &presetParam, &panicParam, nullptr, nullptr);
         }
 
         void Run(ISynth *synth1, ISynth *synth2);
@@ -85,6 +86,7 @@ class Runner {
         void HandleMidiRealtime(MidiEvent m);
         void HandleMidiNote(ISynth *synth, u8 note, u8 velocity);
         void HandleMidiMessage(MidiEvent m);
+        void Panic();
 
         float samplerate = 0;
 
@@ -129,7 +131,9 @@ class Runner {
         float mainGain = 1;
 
         Param presetParam;
+        Param panicParam;
         ParamPage presetPage;
+        bool shouldPanic = false;
 
         s8 synth1LoadFrom = -1;
         s8 synth2LoadFrom = -1;
