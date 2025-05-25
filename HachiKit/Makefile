@@ -60,6 +60,7 @@ kitbefore:
 	cp $(KIT_NAME).cpp HachiKit.cpp
 
 kitafter:
+	mkdir -p $(BIN_DIR)
 	cp $(BUILD_DIR)/$(TARGET_BIN) $(BIN_DIR)/$(KIT_NAME).bin
 
 kit: kitbefore all kitafter

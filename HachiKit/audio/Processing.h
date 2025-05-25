@@ -3,7 +3,7 @@
 
 #include "daisy_patch.h"
 #include "daisysp.h"
-#include "../utility.h"
+#include "../Utility.h"
 
 namespace Processing {
 
