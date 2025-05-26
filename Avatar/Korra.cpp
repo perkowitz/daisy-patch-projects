@@ -8,17 +8,17 @@ u8 Korra::ctrlParams[MIDI_CC_COUNT] = { PARAM_SAW, PARAM_PULSE, PARAM_SUB, PARAM
 
 float Korra::presets[][Korra::PARAM_COUNT] = {        // params are in order of PARAM constant in .h
     {
-        1, 1000, 0.00,                      // oct, freq, res
+        1, 900, 0.00,                      // oct, freq, res
         0.000, 0.200, 0.80, 0.300,          // a, d, s, r
-        0.000, 0.200, 0.00, 0.300,          // fa, fd, fs, fr
-        0.55,                               // fenv
+        0.000, 0.165, 0.00, 0.300,          // fa, fd, fs, fr
+        0.50,                               // fenv
         0.80, 0.00, 0.00, 0.10,             // saw, pulse, sub, saw2
         0.50, 0.0,                          // pw, hpf
-        0.500, 0.000, 0.800, 16,            // senv a, senv del, senv dcy, senv steps
-        0.00,                               // senv-freq
+        0.819, 0.000, 3.127, 32,            // senv a, senv del, senv dcy, senv steps
+        0.72,                               // senv-freq
         0.90, 0.00, 0.00,                   // out12, out3, out4
         0,                                  // klok
-        0.25, 0.20, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
+        0.20, 0.46, 8, 8,                   // drift-freq, drift-res, drift rate, drift loop
         0, 3, 0.00, 0.00,                   // wrap, squeeze, senv-wrap, drift-wrap
         1,                                  // midi channel [unused]
     },

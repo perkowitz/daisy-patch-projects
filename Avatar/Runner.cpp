@@ -260,6 +260,7 @@ void Runner::MidiSend(MidiEvent m) {
                 case Stop: {
                     data1[0] = MIDI_BYTE_STOP;
                     hw.midi.SendMessage(data1, 1);
+                    Panic();
                     break;
                 }
                 case TimingClock: {
