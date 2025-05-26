@@ -211,6 +211,8 @@ void Runner::ProcessEncoder() {
             }
         }
     }
+    UpdateFromEncoder();
+
 }
 
 // Process the current knob values and update model params accordingly.
@@ -630,7 +632,7 @@ void Runner::Run(Kit *kit) {
             hw.display.Update();
         }
 
-        UpdateFromEncoder();
+        // UpdateFromEncoder();
 
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();
