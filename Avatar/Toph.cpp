@@ -6,14 +6,14 @@ using namespace daisysp;
 u8 Toph::ctrlParams[MIDI_CC_COUNT] = { PARAM_SAW, PARAM_PULSE, PARAM_SUB, PARAM_SAW2, PARAM_FREQ, PARAM_RES, PARAM_FENV, PARAM_FD };
 
 float Toph::presets[][Toph::PARAM_COUNT] = {        // params are in order of PARAM constant in .h
-    { 0, 404, 0,                  // oct, freq, res
+    { 0, 0, 0.26,                  // oct, freq, res
         0, 0.02, 0.8, 0.300,        // a, d, s, r
         0, 0.212, 0, 0.200,         // fa, fd, fs, fr
-        0.30,                       // fenv
+        0.00,                       // fenv
         0.12, 0.86, 0, 0.30,        // saw, pulse, sub, saw2
         0.5, 0, 0.8, 0,             // pw, out12, out3, out4
         0.500, 0, 0.500, 16, 0,     // senv a, senv h, senv d, senv steps, pitch-senv
-        0.860, 0, 0.200, 16, 0.58,  // senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
+        0.542, 0, 1.336, 16, 0.98,  // senv2 a, senv2 h, senv2 d, senv2 steps, filt-senv2
         6.66, 0, 1 },               // lfo rate, pitch-lfo, midi channel [UNUSED]
     { 0, 616, 0.09,               // oct, freq, res
         0, 0.382, 0.84, 0.159,      // a, d, s, r

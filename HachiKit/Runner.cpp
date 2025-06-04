@@ -51,62 +51,6 @@ void Runner::DisplayParamMenu() {
 
 }
 
-// // Display the available parameter names.
-// void Runner::DisplayParamMenu2() {
-
-//     screen.DrawRect(0, 9, 127, 36, false, true);
-
-//     u8 knobRow = currentKnobRow;
-//     u8 displayRow = 0;
-//     std::string sc = "";
-//     bool selected = false;
-//     for (int knob = 0; knob < KNOB_COUNT; knob++) {
-//         for (u8 row = 0; row < MENU_ROWS; row++) {
-//             sc = "";
-//             selected = false;
-//             if (currentMenu == MENU_SOUNDS && kit->drums[currentDrum] != nullptr) {
-//                 if (knobRow * KNOB_COUNT >= kit->drums[currentDrum]->ParamCount()) {
-//                     knobRow = 0;
-//                 }
-//                 // if (knob == currentKnob) {
-//                     u8 param = row * KNOB_COUNT + knob;
-//                     // sc = kit->drums[currentDrum]->GetParamName(param);
-//                     // selected = row == knobRow;
-//                     if (row == knobRow) {   // only draw selected row
-//                         sc = kit->drums[currentDrum]->GetParamName(param);
-//                     }
-//                 // }
-//                 displayRow = row;
-//             } else if (currentMenu == MENU_MIXER) {
-//                 if (knobRow > 1) {  // mixer only has 2 rows of params
-//                     knobRow = 0;
-//                 }
-//                 u8 channel = currentMixerSection * 4 + knob;
-//                 if (channel < kit->drumCount && kit->drums[channel] != nullptr) {
-//                     if (row == 0) {
-//                         selected = false;
-//                         sc = kit->drums[channel]->Slot();  // show channel names on first row
-//                     } else if (row == 1) {
-//                         // sc = mixer.GetChannelParamName(channel, knob);
-//                         // selected = knobRow == knob;   // for mixer, we show the selections on the 2nd row
-//                         if (knobRow == knob) {
-//                             sc = mixer.GetChannelParamName(channel, knob);
-//                         }
-//                     }
-//                 }
-//                 displayRow = row;
-//             } else if (currentMenu == MENU_PATCH) {
-//                 if (row == 0) {
-//                     sc = patchStorage.GetParamSet()->GetParamName(knob);
-//                     // selected = knob == 0;
-//                 }
-//             }
-//             Rectangle rect2(knob * 32, (displayRow + 1) * 12, 32, 12);
-//             screen.DrawButton(rect2, sc, selected, selected, !selected);
-//         }
-//     }
-// }
-
 // Display the current values and parameter names of model params for 4 knobs.
 // Knob number == param number, since model params are listed in UI order.
 void Runner::DisplayKnobValues() {
@@ -267,6 +211,8 @@ void Runner::ProcessEncoder() {
             }
         }
     }
+    UpdateFromEncoder();
+
 }
 
 // Process the current knob values and update model params accordingly.
@@ -686,7 +632,7 @@ void Runner::Run(Kit *kit) {
             hw.display.Update();
         }
 
-        UpdateFromEncoder();
+        // UpdateFromEncoder();
 
         if (SHOW_CPU) {
             float avgCpu = meter.GetAvgCpuLoad();

@@ -6,7 +6,7 @@ using namespace daisysp;
 
 float Bd8::presets[][Bd8::PARAM_COUNT] = {
     // freq, mod, adcy, pdcy, aatk, patk, curv 
-    {68, 231, 2.174, 0.02, 0, 0, 4},
+    {68, 600, 1.774, 0.012, 0, 0, 4},
     {58, 1932, 3.473, 0.01, 0, 0, 4},
     {72, 340, 1.355, 0.073, 0, 0, 3},
     {75, 577, 3.120, 0.032, 0, 0, 5},
