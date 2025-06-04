@@ -58,6 +58,12 @@ class Param {
             active = lower = higher = false;
         }
 
+        int Modified() {
+            if (active) return 0;
+            if (lower) return -1;
+            return 1;
+        }
+
         /**
          * SetScaledValue stores the value directly and overrides the jitter and jump checking.
         */
@@ -78,8 +84,8 @@ class Param {
 
             float scaled = Utility::ScaleFloat(raw, scaleLo - margin, scaleHi + 2 * margin, scaleLo, scaleHi, scaleCurve);
             if (!active && !forceUpdate) {
-                if (scaled <= this->scaled || raw <= 0.01) lower = true;
-                if (scaled >= this->scaled || raw >= 0.99) higher = true;
+                if (scaled <= this->scaled + delta || raw <= 0.01) lower = true;
+                if (scaled >= this->scaled - delta || raw >= 0.99) higher = true;
                 active = (lower && higher);
             } 
             if (active || forceUpdate) {
@@ -96,7 +102,6 @@ class Param {
         bool Update(float raw) {
             return Update(raw, false);
         }
-
 
         std::string Display() {
             return std::to_string((int)(scaled * displayScale));

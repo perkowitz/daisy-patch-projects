@@ -46,11 +46,19 @@ void Runner::DisplayKnobValues() {
     }
     for (int knob = 0; knob < KNOB_COUNT; knob++) {
         std::string sc = "";
-        Rectangle rect(knob * 32, 0, 32, 8);
+        Rectangle rect(knob * 32, 2, 32, 10);
         if (currentMenu == MENU_SYNTH && currentSynthPage < currentSynth->PageCount()) {
             sc = paramPage->GetParamDisplay(knob);
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
+        int modified = paramPage->GetParamModified(knob);
+        if (modified == 0) {
+            hw.display.DrawLine(knob * 32 + 15, 0, knob * 32 + 16, 0, true);
+        } else if (modified < 0) {
+            hw.display.DrawLine(knob * 32 + 7, 0, knob * 32 + 8, 0, true);
+        } else {
+            hw.display.DrawLine(knob * 32 + 23, 0, knob * 32 + 24, 0, true);
+        }
     }
 }
 
