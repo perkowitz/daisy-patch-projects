@@ -248,6 +248,7 @@ void Korra::ProcessChanges() {
 
 float Korra::Process() {
 
+    // determine if we should skip processing because of klok setting
     klokCount = (klokCount + 1) % KORRA_KLOK_COUNT_LIMIT;
     u8 k = 0;
     switch (currentKlok) {
@@ -264,14 +265,23 @@ float Korra::Process() {
             k = klokCount % 8;
             break;
     }
+
+    // process the envelopes before we exit for klok, so their timing isn't affected
+    float syncEnvSignal = syncEnv.Process();
+    float filtEnvSignal = filtEnv.Process();
+
+    // if it's not klok time, exit
     if (k != 0) {
+        // process the voice envelopes here for timing
+        for (u8 voice = 0; voice < voiceLimit; voice++) {
+            voices[voice].ampEnv.Process();
+        }
         return 0;
     }
 
     float left = 0;
     float right = 0;
 
-    float syncEnvSignal = syncEnv.Process();
 
     float signal = 0;
     for (u8 voice = 0; voice < voiceLimit; voice++) {
@@ -293,7 +303,7 @@ float Korra::Process() {
 
     // filter
     float freq = params[PARAM_FREQ].Value();
-    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_FENV].Value() * params[PARAM_F_FENV].Value() * filtEnv.Process();
+    freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_FENV].Value() * params[PARAM_F_FENV].Value() * filtEnvSignal;
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_SENV].Value() * params[PARAM_F_SENV].Value() * syncEnvSignal;
     freq += (MAX_FILTER_FREQUENCY - MIN_FILTER_FREQUENCY) * params[PARAM_F_DRIFT].Value() * drift.Signal();
     vcf.SetFreq(freq);

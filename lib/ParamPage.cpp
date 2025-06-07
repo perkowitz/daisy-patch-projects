@@ -28,6 +28,10 @@ float ParamPage::GetParamValue(u8 param) {
     return param < paramCount ? params[param]->Value() : 0.0f;
 }
 
+int ParamPage::GetParamModified(u8 param) {
+    return param < paramCount ? params[param]->Modified() : 0;
+}
+
 std::string ParamPage::GetParamDisplay(u8 param) {
     return param < paramCount ? params[param]->Display() : "";    
 }

@@ -38,6 +38,7 @@ class ParamPage {
         void SetParam(u8 param, float scaled);
         void ResetParams();
         float GetParamValue(u8 param);
+        int GetParamModified(u8 param);
         std::string GetParamDisplay(u8 param);
         std::string GetParamName(u8 param);
 
@@ -46,7 +47,6 @@ class ParamPage {
         std::string moduleName = "";
         std::string pageTitle = "";
         Param *params[4];
-        // ParamSet paramSet;
 
 };
 
