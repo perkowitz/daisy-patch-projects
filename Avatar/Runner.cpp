@@ -51,13 +51,15 @@ void Runner::DisplayKnobValues() {
             sc = paramPage->GetParamDisplay(knob);
         }
         screen.WriteStringAligned(sc.c_str(), Font_6x8, rect, Alignment::centered, true);
-        int modified = paramPage->GetParamModified(knob);
-        if (modified == 0) {
-            screen.DrawLine(knob * 32 + 15, 0, knob * 32 + 16, 0, true);
-        } else if (modified < 0) {
-            screen.DrawLine(knob * 32 + 7, 0, knob * 32 + 8, 0, true);
-        } else {
-            screen.DrawLine(knob * 32 + 23, 0, knob * 32 + 24, 0, true);
+        if (sc != "") {
+            int modified = paramPage->GetParamModified(knob);
+            if (modified == 0) {
+                screen.DrawLine(knob * 32 + 15, 0, knob * 32 + 16, 0, true);
+            } else if (modified < 0) {
+                screen.DrawLine(knob * 32 + 7, 0, knob * 32 + 8, 0, true);
+            } else {
+                screen.DrawLine(knob * 32 + 23, 0, knob * 32 + 24, 0, true);
+            }
         }
     }
 }
