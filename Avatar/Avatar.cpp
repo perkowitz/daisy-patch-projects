@@ -2,6 +2,7 @@
 #include "Asami.h"
 #include "Katara.h"
 #include "Korra.h"
+#include "Momo.h"
 #include "Toph.h"
 
 using namespace daisy;
@@ -10,8 +11,9 @@ using namespace daisysp;
 
 // Asami asami;
 // Katara katara;
-Korra korra;
+// Korra korra;
 Toph toph;
+Momo momo;
 
 SaiHandle::Config::SampleRate audioSampleRate = SaiHandle::Config::SampleRate::SAI_48KHZ;
 
@@ -26,11 +28,12 @@ int main(void) {
     // katara.GetParam(Katara::PARAM_OUT_3)->SetScaledValue(0);
     // katara.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
 
-    korra.Init(sampleRate, 8);
-    korra.SetMidiChannel(6); // zero-indexed
-    korra.GetParam(Katara::PARAM_OUT_12)->SetScaledValue(0.8);
-    korra.GetParam(Katara::PARAM_OUT_3)->SetScaledValue(0);
-    korra.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
+
+    momo.Init(sampleRate, 8);
+    momo.SetMidiChannel(6); // zero-indexed
+    momo.GetParam(Katara::PARAM_OUT_12)->SetScaledValue(0.8);
+    momo.GetParam(Katara::PARAM_OUT_3)->SetScaledValue(0);
+    momo.GetParam(Katara::PARAM_OUT_4)->SetScaledValue(0);
 
     // asami.Init(sampleRate, 4);
     // asami.SetMidiChannel(4); // zero-indexed
@@ -45,7 +48,8 @@ int main(void) {
     toph.GetParam(Toph::PARAM_OUT_4)->SetScaledValue(0);
 
     // runner.Run(&korra, nullptr);
-    runner.Run(&korra, &toph);
+    // runner.Run(&korra, &toph);
+    runner.Run(&momo, &toph);
     // runner.Run(&katara, nullptr);
     // runner.Run(&eska, nullptr);
     // runner.Run(&asami, nullptr);

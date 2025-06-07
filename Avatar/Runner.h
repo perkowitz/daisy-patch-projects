@@ -24,7 +24,7 @@ using namespace daisysp;
 #define MENU_PATCH 3
 #define MIDIMAP_SIZE 16
 #define AUDIO_PASSTHRU false
-#define SHOW_CPU false
+#define SHOW_CPU true
 
 #define CURRENT_VERSION 0
 #define PATCH_SIZE 7
